@@ -1,0 +1,3185 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FullInspector-Core</name>
+    </assembly>
+    <members>
+        <member name="T:FullInspector.InspectorButtonAttribute">
+            <summary>
+            Display the given method as a button in the inspector. You  can customize the order of
+            that the button is displayed in w.r.t. fields or properties by using [InspectorOrder].
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorButtonAttribute.DisplayName">
+            <summary>
+            The name of the button. If this is null or the empty string, then a default name
+            generated off of the method name that this attribute targets should be used instead.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorButtonAttribute.#ctor">
+            <summary>
+            Creates a button with a default name generated based off of the method name.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorButtonAttribute.#ctor(System.String)">
+            <summary>
+            Set the name of the button.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorDisplayIfAttribute">
+            <summary>
+            This allows a member to be conditionally hidden in the inspector depending upon the
+            state of other variables in object. This does *not* change serialization behavior,
+            only display behavior.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorDisplayIfAttribute.ConditionalMemberName">
+            <summary>
+            The name of the member to use as a condition. The conditional needs to
+            either be a boolean field, a boolean property with a getter, or a no-argument
+            method that returns a boolean.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorDisplayIfAttribute.#ctor(System.String)">
+            <summary>
+            This allows a member to be conditionally hidden in the inspector depending upon the
+            state of other variables in object. This does *not* change serialization behavior,
+            only display behavior.
+            </summary>
+            <param name="conditionalMemberName">The name of the member to use as a condition.
+            The conditional needs to either be a boolean field, a boolean property with a
+            getter, or a no-argument method that returns a boolean.
+            </param>
+        </member>
+        <member name="T:FullInspector.InspectorDropdownNameAttribute">
+            <summary>
+            Annotating a type with this attribute allows you to specify what name it will appear with
+            inside of the abstract type selection dropdown.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorDropdownNameAttribute.DisplayName">
+            <summary>
+            The name that the type will use in the abstract type dropdown selection
+            wizard. The default value is the C# formatted type name for the type. You
+            can create "folders" within the dropdown popup by using '/'; for example,
+            "folder/my type" will appear inside "folder" as "my type".
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorDropdownNameAttribute.#ctor(System.String)">
+            <summary>
+            Sets the name of the type to use in the abstract type dropdown.
+            </summary>
+            <param name="displayName">
+            The name that the type will use in the abstract type dropdown selection
+            wizard. The default value is the C# formatted type name for the type. You
+            can create "folders" within the dropdown popup by using '/'; for example,
+            "folder/my type" will appear inside "folder" as "my type".
+            </param>
+        </member>
+        <member name="T:FullInspector.InspectorIndentAttribute">
+            <summary>
+            Indents the given editor. This can be useful combined with [InspectorHeader] to draw
+            an indented region in the inspector.
+            </summary>
+        </member>
+        <member name="T:FullInspector.IInspectorAttributeOrder">
+            <summary>
+            Attributes can opt-in to this interface and request support for custom ordering in the
+            inspector. Attributes are ordered in reverse for display; that is, a low attribute number
+            will display before a high attribute number.
+            </summary>
+        </member>
+        <member name="P:FullInspector.IInspectorAttributeOrder.Order">
+            <summary>
+            The ordering of this item in the set of attributes. A low number will display before
+            (above) a higher number.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorIndentAttribute.Order">
+            <summary>
+            The ordering of this item in the set of attributes. A low number will display before
+            (above) a higher number.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorNameAttribute">
+            <summary>
+            Override the default name that is used for display in the inspector and use a
+            custom name instead.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorNameAttribute.DisplayName">
+            <summary>
+            The name of the field, property, or button. If this is null or the empty string, then a
+            default name generated off of the reflected name will be used instead.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorNameAttribute.#ctor(System.String)">
+            <summary>
+            Set the name of the member.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorNotDefaultConstructedAttribute">
+            <summary>
+            This will prevent Full Inspector from constructing an object instance in the
+            inspector by default.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorOrderAttribute">
+            <summary>
+            Set the display order of an field or property of an object. A field or property without an
+            [InspectorOrder] attribute defaults to order double.MaxValue (which will appear after any
+            ordered properties). The lower the order value, the higher the field or property will
+            appear in the inspector. Each inheritance level receives its own order group.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorOrderAttribute.Order">
+            <summary>
+            The ordering of this member relative to other ordered fields/properties.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorOrderAttribute.#ctor(System.Double)">
+            <summary>
+            Set the order.
+            </summary>
+            <param name="order">The order in which to display this field or property. A field or
+            property without an [InspectorOrder] attribute defaults to order double.MaxValue.</param>
+        </member>
+        <member name="M:FullInspector.InspectorOrderAttribute.GetInspectorOrder(System.Reflection.MemberInfo)">
+            <summary>
+            Helper method to determine the inspector order for the given member. If the
+            member does not have an [InspectorOrder] attribute, then the default order is returned.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorShowIfAttribute">
+            <summary>
+            This allows a member to be conditionally hidden in the inspector depending upon the
+            state of other variables in object. This does *not* change serialization behavior,
+            only display behavior.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorShowIfAttribute.ConditionalMemberName">
+            <summary>
+            The name of the member to use as a condition. The conditional needs to
+            either be a boolean field, a boolean property with a getter, or a no-argument
+            method that returns a boolean.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorShowIfAttribute.#ctor(System.String)">
+            <summary>
+            This allows a member to be conditionally hidden in the inspector depending upon the
+            state of other variables in object. This does *not* change serialization behavior,
+            only display behavior.
+            </summary>
+            <param name="conditionalMemberName">The name of the member to use as a condition.
+            The conditional needs to either be a boolean field, a boolean property with a
+            getter, or a no-argument method that returns a boolean.
+            </param>
+        </member>
+        <member name="T:FullInspector.InspectorTooltipAttribute">
+            <summary>
+            Adds a tooltip to an field or property that is viewable in the inspector.
+            </summary>
+        </member>
+        <member name="T:FullInspector.NotSerializedAttribute">
+            <summary>
+            Identical to a [NonSerialized] attribute except that it is also usable on properties
+            </summary>
+        </member>
+        <member name="T:FullInspector.OrderAttribute">
+            <summary>
+            Set the display order of an field or property of an object. A field or property without an
+            order defaults to order double.MaxValue. Each inheritance level receives its own order
+            group.
+            </summary>
+        </member>
+        <member name="F:FullInspector.OrderAttribute.Order">
+            <summary>
+            The ordering of this member relative to other ordered fields/properties.
+            </summary>
+        </member>
+        <member name="M:FullInspector.OrderAttribute.#ctor(System.Double)">
+            <summary>
+            Set the order.
+            </summary>
+            <param name="order">The order in which to display this field or property. A field or
+            property without an OrderAttribute defaults to order 0.</param>
+        </member>
+        <member name="T:FullInspector.ShowInInspectorAttribute">
+            <summary>
+            The ShowInInspectorAttribute causes the given field or property to be shown in the
+            inspector, even if it is not public. This is the inverse of Unity's [HideInInspector]
+            attribute.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.CommonBaseBehavior">
+            <summary>
+            A common class that derives from MonoBehavior so that we can provide a custom editor for
+            BaseBehavior{TSerializer}
+            </summary>
+        </member>
+        <member name="T:FullInspector.BaseBehavior`1">
+            <summary>
+            Provides a better inspector and serialization experience in Unity.
+            </summary>
+            <remarks>
+            We don't serialize anything in this type through Json.NET, as we recover the Json.NET
+            serialized data via Unity serialization
+            </remarks>
+            <typeparam name="TSerializer">The type of serializer that the behavior should
+            use.</typeparam>
+        </member>
+        <member name="T:FullInspector.ISerializedObject">
+            <summary>
+            The API that the editor code needs to interact with UnityObjects.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializedObject.RestoreState">
+            <summary>
+            Restore the last saved state.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializedObject.SaveState">
+            <summary>
+            Save the current state.
+            </summary>
+        </member>
+        <member name="P:FullInspector.ISerializedObject.SerializedObjectReferences">
+            <summary>
+            This list contains a set of object references that were encountered during the
+            serialization process in this object graph. These need to persist through a Unity
+            serialization cycle.
+            </summary>
+        </member>
+        <member name="P:FullInspector.ISerializedObject.SerializedStateKeys">
+            <summary>
+            The serialized state for this UnityObject - the key values. The actual value is in
+            SerializedStateValues at the same index.
+            </summary>
+        </member>
+        <member name="P:FullInspector.ISerializedObject.SerializedStateValues">
+            <summary>
+            The serialized state for this UnityObject - the actual values. The key for this value is
+            in SerializedStateKeys at the same index.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseBehavior`1.Awake">
+            <summary>
+            This awake base method calls RestoreState() by default. If you override this method, it
+            is *critically* important that this be the first call made in your Awake method. If it
+            is not, then your component may not be deserialized when you go to access values.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseBehavior`1.SaveState">
+            <summary>
+            Save the state of component so that it can go through Unity serialization correctly.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseBehavior`1.RestoreState">
+            <summary>
+            Restore the state of the component after it has gone through Unity serialization. If the
+            component has already been restored, it will be reset to its last saved state.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BaseBehavior`1._objectReferences">
+            <summary>
+            Serializing references derived from UnityObject is tricky for a number of reasons, so we
+            just let Unity handle it. The object can be modified in the inspector and be deleted, or
+            it can become a prefab. Further, there is no good way to uniquely identify components
+            and game objects that handle prefabs and instantiation well. We therefore just let Unity
+            serialize our references for us.
+            </summary>
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="F:FullInspector.BaseBehavior`1._serializedStateKeys">
+            <summary>
+            The key fields that are serialized. These map to the properties/fields that Full
+            Inspector has discovered in the behavior type that need to be serialized. This value
+            needs to be serialized by Unity and therefore cannot be auto-implemented by a property.
+            </summary>
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="F:FullInspector.BaseBehavior`1._serializedStateValues">
+            <summary>
+            The value fields that are serialized. These correspond to the key fields that Full
+            Inspector has discovered in the behavior type that need to be serialized. This value
+            needs to be serialized by Unity and therefore cannot be auto-implemented by a property.
+            </summary>
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="T:FullInspector.Internal.CommonBaseScriptableObject">
+            <summary>
+            A common class that derives from ScriptableObject so that we can provide a custom editor for
+            BaseScriptableObject{TSerializer}
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseScriptableObject`1.OnEnable">
+            <summary>
+            This awake base method calls RestoreState() by default. If you override this method, it
+            is *critically* important that this be the first call made in your Awake method. If it
+            is not, then your component may not be deserialized when you go to access values.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseScriptableObject`1.SaveState">
+            <summary>
+            Save the state of component so that it can go through Unity serialization correctly.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseScriptableObject`1.RestoreState">
+            <summary>
+            Restore the state of the component after it has gone through Unity serialization. If the
+            component has already been restored, it will be reset to its last saved state.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BaseScriptableObject`1._objectReferences">
+            <summary>
+            Serializing references derived from UnityObject is tricky for a number of reasons, so we
+            just let Unity handle it. The object can be modified in the inspector and be deleted, or
+            it can become a prefab. Further, there is no good way to uniquely identify components
+            and game objects that handle prefabs and instantiation well. We therefore just let Unity
+            serialize our references for us.
+            </summary>
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="F:FullInspector.BaseScriptableObject`1._serializedStateKeys">
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="F:FullInspector.BaseScriptableObject`1._serializedStateValues">
+            <remarks>
+            We add a NotSerialized annotation to this item so that FI will not serialize it
+            </remarks>
+        </member>
+        <member name="T:FullInspector.BaseSerializer">
+            <summary>
+            The core API that is used for serializing and deserializing objects.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BaseSerializer.Serialize(System.Reflection.MemberInfo,System.Object,FullInspector.ISerializationOperator)">
+            <summary>
+            Serialize the given object into a string.
+            </summary>
+            <param name="storageType">The type of field/property that is storing this value. For
+            example, an object field may be storing an int instance. In that case, storageType will
+            be typeof(object), while value.GetType() will result in typeof(int).</param>
+            <param name="value">The object to serialize.</param>
+            <param name="serializationOperator">Contains implementations for common serialization
+            operations, such as storing a UnityObject reference.</param>
+            <returns>The serialized state of the object that can be used to restore it.</returns>
+        </member>
+        <member name="M:FullInspector.BaseSerializer.Deserialize(System.Reflection.MemberInfo,System.String,FullInspector.ISerializationOperator)">
+            <summary>
+            Deserialize the given serialized content.
+            </summary>
+            <param name="storageType">The type of field/property that is storing this value. For
+            example, an object field may be storing an int instance. In that case, storageType will
+            be typeof(object), while value.GetType() will result in typeof(int).</param>
+            <param name="serializedState">The serialized state of the object, created by calling
+            Serialize(target).</param>
+            <param name="serializationOperator">Contains implementations for common serialization
+            operations, such as storing a UnityObject reference.</param>
+        </member>
+        <member name="M:FullInspector.BaseSerializer.GetStorageType(System.Reflection.MemberInfo)">
+            <summary>
+            Helper function that returns the type of object stored within the given member.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.BehaviorSerializationHelpers">
+            <summary>
+            Implements the core serialization API that can be used for wrapping Unity serialization.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.BehaviorSerializationHelpers.SaveState``1(FullInspector.ISerializedObject)">
+            <summary>
+            Serializes the current state of the given object.
+            </summary>
+            <typeparam name="TSerializer">The type of serializer to use for the serialization
+            process.</typeparam>
+            <param name="obj">The object that should be serialized.</param>
+            <returns>True if serialization was entirely successful, false if something bad happened along the way.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.BehaviorSerializationHelpers.RestoreState``1(FullInspector.ISerializedObject)">
+            <summary>
+            Deserializes an object that has been serialized.
+            </summary>
+            <typeparam name="TSerializer">The type of serializer that was used to serialize the
+            object.</typeparam>
+            <param name="obj">The object that will be restored from its serialized state.</param>
+            <returns>True if restoration was completely successful, false if something bad happened
+            at some point (the object may be in a partially deserialized state).</returns>
+        </member>
+        <member name="M:FullInspector.Internal.BehaviorSerializationHelpers.InstantiateReferences(System.Object,FullInspector.InspectedType)">
+            <summary>
+            Instantiates all of the references in the given object.
+            </summary>
+            <param name="obj">The object to instantiate references in.</param>
+            <param name="metadata">The (cached) metadata for the object.</param>
+        </member>
+        <member name="T:FullInspector.Internal.BehaviorTypeToSerializerTypeMap">
+            <summary>
+            Returns the serializer that is used for a given behavior type.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.BehaviorTypeToSerializerTypeMap.Register(System.Type,System.Type)">
+            <summary>
+            Register a mapping for a particular behavior type to a given serializer type.
+            </summary>
+            <param name="behaviorType"></param>
+            <param name="serializerType"></param>
+        </member>
+        <member name="M:FullInspector.Internal.BehaviorTypeToSerializerTypeMap.GetSerializerType(System.Type)">
+            <summary>
+            Returns the serializer type that the given behavior type uses.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.DisplayNameMapper">
+            <summary>
+            Helpers for mapping a property name to a display name that should be shown in the inspector.
+            </summary>
+            <remarks>This is essentially a reimplementation for
+            UnityEditor.ObjectNames.NicifyVariableName, but DisplayNameMapper allocates less
+            frequently.</remarks>
+        </member>
+        <member name="F:FullInspector.Internal.DisplayNameMapper._mappedNames">
+            <summary>
+            A cache of mapped names, so we don't have to constantly reallocate string names.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.DisplayNameMapper.Map(System.String)">
+            <summary>
+            Convert the given property name into a name that will be used for the Unity inspector.
+            For example, Unity by default converts "fieldValue" into "Field Value".
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.DisplayNameMapper.MapInternal(System.String)">
+            <summary>
+            Computes the actual mapped name. We try to not call this function as it allocates a
+            fair amount.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.ISerializationAlwaysDirtyTag">
+            <summary>
+            If a type extends this interface, then it will always be serialized when Unity sends a
+            serialization request.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiEditorSerializationManager">
+            <summary>
+            Manages the serialization of ISerializedObject instances. Unity provides a nice
+            serialization callback, ISerializationCallbackReceiver, however, it often executes the
+            callback methods on auxiliary threads. Some of the serializers have issues with this
+            because they invoke unityObj == null, which is only available on the primary thread. To
+            deal with this, this class defers deserialization so that it always executes on the
+            primary thread.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiEditorSerializationManager.DisableAutomaticSerialization">
+            <summary>
+            Should serialization be disabled? This is used by the serialization migration system
+            where after migration serialization should not happen automatically.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiEditorSerializationManager._toDeserialize">
+            <summary>
+            Items to deserialize. We use a queue because deserialization of one item may
+            technically cause another item to be added to the queue.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiEditorSerializationManager._deserialized">
+            <summary>
+            A set of objects that we have deserialized. This determines if we can reserialize
+            an object at scene save / etc.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiEditorSerializationManager._dirty">
+            <summary>
+            Items that have been modified and should be saved again. Unity will happily send
+            lots and lots of serialization requests, but most of them are unnecessary.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiEditorSerializationManager.SubmitSerializeRequest(FullInspector.ISerializedObject)">
+            <summary>
+            Attempts to serialize the given object. Serialization will only occur if the object is
+            dirty. After being serialized, the object is no longer dirty.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiEditorSerializationManager.GetGameObjectOrScriptableObjectFrom(FullInspector.ISerializedObject)">
+            <summary>
+            Fetches the associated GameObject/ScriptableObject from the given serialized object.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiEditorSerializationManager.SubmitDeserializeRequest(FullInspector.ISerializedObject)">
+            <summary>
+            Attempt to deserialize the given object. The deserialization will occur on the next
+            call to RunDeserializations(). This does nothing if we are not an editor.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiEither`2">
+            <summary>
+            A object that can contain one value between two different types.
+            </summary>
+            <typeparam name="TA">A candidate type for the value stored.</typeparam>
+            <typeparam name="TB">A candidate type for the value stored.</typeparam>
+        </member>
+        <member name="M:FullInspector.Internal.fiEither`2.#ctor(`0)">
+            <summary>
+            Construct an either containing an A value.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiEither`2.#ctor(`1)">
+            <summary>
+            Construct an either containing a B value.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiEither`2.ValueA">
+            <summary>
+            Returns the A value. Throws an exception if IsA returns false.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiEither`2.ValueB">
+            <summary>
+            Returns the B value. Throws an exception if IsB returns false.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiEither`2.IsA">
+            <summary>
+            Does this either contain an A value?
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiEither`2.IsB">
+            <summary>
+            Does this either contain a B value?
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiFactory`1">
+            <summary>
+            Manages pooling instances of a given type.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiFactory`1._reusable">
+            <summary>
+            The reusable instances that are available.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiFactory`1._reset">
+            <summary>
+            Function called to reset an instance to it's default state.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiFactory`1.#ctor(System.Action{`0})">
+            <summary>
+            Create a new factory with the given reset function.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiFactory`1.GetInstance">
+            <summary>
+            Returns an instance of the given type. Recycles an old type if possible.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiFactory`1.ReuseInstance(`0)">
+            <summary>
+            Reuse the given object instance at a later date.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiGraphMetadataChild">
+            <summary>
+            A simple wrapper tye for fiGraphMetadata so that we can have a different API signature
+            when calling IPropertyEditor.Edit/GetHeight so that it is obvious that you need to call
+            metadata.Enter(identifier) instead of passing in metadata.
+            </summary>
+        </member>
+        <member name="T:FullInspector.IGraphMetadataItem">
+            <summary>
+            An item that can be used as metadata inside of the graph metadata engine.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiGraphMetadata">
+            <summary>
+            The graph metadata system allows for metadata storage based on the location of an item in
+            the inspector, regardless of the actual object instance. The graph metadata system requires
+            minor user support -- you simply have to pass an associated key when entering into
+            child metadata items.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.GetGlobal(UnityEngine.Object)">
+            <summary>
+            Returns the graph metadata for the given UnityObject target.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.BeginCullZone">
+            <summary>
+            In order to avoid accumulating large amounts of metadata that is no longer useful or
+            used, the graph metadata system supports automatic culling of unused metadata. If you
+            wrap a set of code in a Begin/EndCullZone function calls, then any metadata that is
+            not used between the Begin/End calls will be automatically released. This includes
+            child metadata items.
+            </summary>
+            <remarks>
+            Note that BeginCullZone() and EndCullZone() do *not* stack. Calling BeginCullZone()
+            multiple times is like calling it only once. Calling EndCullZone() without having first
+            called BeginCullZone() will do nothing.
+            </remarks>
+            <remarks>
+            You almost certainly will not need to use this function. The IPropertyEditorExtensions
+            engine handles it automatically.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.EndCullZone">
+            <summary>
+            This ends a culling zone. See docs on BeginCullZone.
+            </summary>
+            <remarks>
+            You should not need to use this function -- it is for internal purposes. The
+            IPropertyEditorExtensions engine handles it automatically.
+            </remarks>
+        </member>
+        <member name="F:FullInspector.fiGraphMetadata._childrenInt">
+            <summary>
+            The child metadata objects (at construction time).
+            </summary>
+            <remarks>
+            This can go out of date if the metadata graph is adjusted by property editors! It's
+            useful for debugging purposes, but don't rely on it for the actual edit graph.
+            </remarks>
+            <remarks>
+            We use two dictionaries instead of just one (that takes an object key) to avoid boxing
+            ints.
+            </remarks>
+        </member>
+        <member name="F:FullInspector.fiGraphMetadata._metadata">
+            <summary>
+            The actual metadata objects.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.SetChild(System.Int32,FullInspector.fiGraphMetadata)">
+            <summary>
+            Forcibly change the metadata that the given identifier points to to the specified
+            instance. This is extremely useful if the inspector graph has been modified and the
+            editor needs to make an adjustment to the metadata so that the metadata graph remains
+            consistent with the actual inspector graph.
+            </summary>
+            <remarks>
+            You do not need to worry about removing child metadata -- they will be automatically
+            removed.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.SetChild(System.String,FullInspector.fiGraphMetadata)">
+            <summary>
+            Forcibly change the metadata that the given identifier points to to the specified
+            instance. This is extremely useful if the inspector graph has been modified and the
+            editor needs to make an adjustment to the metadata so that the metadata graph remains
+            consistent with the actual inspector graph.
+            </summary>
+            <remarks>
+            You do not need to worry about removing child metadata -- they will be automatically
+            removed.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.MigrateMetadata``1(FullInspector.fiGraphMetadata,``0[],``0[])">
+            <summary>
+            Helper method that automates metadata migration for array based graph reorders.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.MigrateMetadata``1(FullInspector.fiGraphMetadata,``0[],``0[],System.Collections.Generic.List{FullInspector.fiGraphMetadata.MetadataMigration}@)">
+            <summary>
+            Helper method that automates metadata migration for array based graph reorders.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.Enter(System.Int32)">
+            <summary>
+            Get a child metadata instance for the given identifier. This is useful for collections
+            where each item maps to a unique index.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.Enter(System.String)">
+            <summary>
+            Get a child metadata instance for the given identifier. This is useful for general
+            classes and structs where an object has a set of discrete named fields or properties.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.GetMetadata``1">
+            <summary>
+            Get a metadata instance for an object.
+            </summary>
+            <typeparam name="T">The type of metadata instance.</typeparam>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.TryGetMetadata``1(``0@)">
+            <summary>
+            Attempts to fetch a pre-existing metadata instance for an object.
+            </summary>
+            <typeparam name="T">The type of metadata instance.</typeparam>
+            <param name="metadata">The found metadata instance, or null.</param>
+            <returns>True if a metadata instance was found, false otherwise.</returns>
+        </member>
+        <member name="T:FullInspector.fiGraphMetadata.CullableDictionary`3">
+            <summary>
+            A cullable dictionary is like a normal dictionary except that items inside of it can
+            be removed if they are not used after a cull cycle.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiGraphMetadata.CullableDictionary`3._primary">
+            <summary>
+            Items that have been used and will therefore *not* be culled.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiGraphMetadata.CullableDictionary`3._culled">
+            <summary>
+            The items that we will cull if EndCullZone is called.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiGraphMetadata.CullableDictionary`3._isCulling">
+            <summary>
+            Are we currently culling data?
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.CullableDictionary`3.Add(`0,`1)">
+            <summary>
+            Add an item to the dictionary.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.CullableDictionary`3.TryGetValue(`0,`1@)">
+            <summary>
+            Attempts to fetch a value for the given key. If a value is found, then it will
+            not be culled on the next cull-cycle.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.CullableDictionary`3.BeginCullZone">
+            <summary>
+            Begin a call zone. This is fine to call multiple times.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiGraphMetadata.CullableDictionary`3.EndCullZone">
+            <summary>
+            Clears out all unused items. This method is harmless if called outside of
+            BeginCullZone().
+            </summary>
+        </member>
+        <member name="T:FullInspector.IntDictionary`1">
+            <summary>
+            A (partial) dictionary implementation that has been optimized for fast >= 0 int access.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiGraphMetadataPersistentStorage">
+            <summary>
+            Stores graph metadata so that it will persist through play-mode, assembly reloads, and
+            through editor sessions.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.IEditorOnlyTag">
+            <summary>
+            Any UnityObject type tagged with this interface will *not* be included in a published
+            build. This is useful if there are components that should be editor-only.
+            </summary>
+            <remarks>The EditorOnlyMonoBehaviorRemover processor does the actual MonoBehaviour removal</remarks>
+        </member>
+        <member name="T:FullInspector.ISerializationCallbacks">
+            <summary>
+            Extend this interface on any BaseBehavior or BaseScriptableObject type to receive callbacks
+            for when Full Inspector runs serialization. All callbacks will occur on the main Unity
+            thread, so API calls are fine.
+            </summary>
+            <remarks>
+            These functions will *not* get invoked if the type does not extend BaseScriptableObject
+            or BaseBehavior! Use the serializer-specific callbacks for that.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.ISerializationCallbacks.OnBeforeSerialize">
+            <summary>
+            Called right before FI runs serialization.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializationCallbacks.OnAfterSerialize">
+            <summary>
+            Called right after FI runs serialization.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializationCallbacks.OnBeforeDeserialize">
+            <summary>
+            Called right before FI runs deserialization.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializationCallbacks.OnAfterDeserialize">
+            <summary>
+            Called right after FI runs deserialization.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiLateBindings">
+            <summary>
+            Full Inspector has to support running in both DLL and source code mode. This sometimes introduces
+            issues when non-editor code has to access editor-related code. This is achieved via a late-binding
+            mechanism; the editor code will automatically inject the relevant pointers into this data
+            structure. If the binding does not exist yet, then a warning will be emitted.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiLateBindings.PrefabUtility.IsPrefab(UnityEngine.Object)">
+            <summary>
+            Returns true if UnityEditor.PrefabUtility.GetPrefabType(unityObj) == UnityEditor.PrefabType.Prefab
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiOption">
+            <summary>
+            Static class that contains helpers for fiOption.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiOption.Just``1(``0)">
+            <summary>
+            Create an option containing the value. Generic arguments can be omitted.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiOption`1">
+            <summary>
+            A simple monad that can either contain or not contain a value.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiOption`1._hasValue">
+            <summary>
+            If true, then the option contains a value.
+            </summary>
+            <remarks>
+            We ensure that the zero state of fiOption ensures that it is empty.
+            </remarks>
+        </member>
+        <member name="F:FullInspector.Internal.fiOption`1._value">
+            <summary>
+            The stored value. Only contains data is _hasValue is true.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiOption`1.#ctor(`0)">
+            <summary>
+            Create a new option instance containing the given value. An option constructed using
+            this method will *never* be empty. If you want an empty option, make sure to use
+            fiOption{T}.Empty.
+            </summary>
+            <param name="value">The value to store.</param>
+        </member>
+        <member name="F:FullInspector.Internal.fiOption`1.Empty">
+            <summary>
+            An empty option instance.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiOption`1.HasValue">
+            <summary>
+            True if the option contains a value.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiOption`1.IsEmpty">
+            <summary>
+            True if the option is empty.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiOption`1.Value">
+            <summary>
+            Fetch the value stored in the option. This will throw an exception if the option is
+            empty.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiRuntimeReflectionUtility">
+            <summary>
+            Some reflection utilities that can be AOT compiled (and are therefore available at runtime).
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.InvokeStaticMethod(System.Type,System.String,System.Object[])">
+            <summary>
+            Invokes the given static method on the given type.
+            </summary>
+            <param name="type">The type to search for the method.</param>
+            <param name="methodName">The name of the method.</param>
+            <param name="parameters">The parameters to invoke the method with.</param>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.InvokeMethod(System.Type,System.String,System.Object,System.Object[])">
+            <summary>
+            Invokes the given method on the given type.
+            </summary>
+            <param name="type">The type to find the method to invoke from.</param>
+            <param name="methodName">The name of the method to invoke.</param>
+            <param name="thisInstance">The "this" object in the method.</param>
+            <param name="parameters">The parameters to invoke with.</param>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.GetAssemblyInstances``1">
+            <summary>
+            Returns a list of object instances from types in the assembly that implement the given
+            type. This only constructs objects which have default constructors.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.GetUnityObjectTypes">
+            <summary>
+            Returns all types that derive from UnityEngine.Object that are usable during runtime.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.GetName(System.Reflection.Assembly)">
+            <summary>
+            Returns the equivalent of assembly.GetName().Name, which does not work on WebPlayer.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.GetRuntimeAssemblies">
+            <summary>
+            Return a guess of all assemblies that can be used at runtime.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.IsScriptOrCoreRuntimeAssembly(System.String)">
+            <summary>
+            Returns true if the given assembly is likely to contain user-scripts or it is a core
+            runtime assembly (ie, UnityEngine).
+            </summary>
+            <param name="name">The unqualified name of the assembly.</param>
+        </member>
+        <member name="M:FullInspector.Internal.fiRuntimeReflectionUtility.AllSimpleTypesDerivingFrom(System.Type)">
+            <summary>
+            Returns all types in the current AppDomain that derive from the given baseType and are a
+            class that is not an open generic type.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiSettingsProcessor">
+            <summary>
+            Extend this interface with any class if you wish to modify any of the settings. *Do not* make the modifications
+            directly inside of this file, as that is brittle to DLL based deploys as well as Full Inspector upgrades.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiSettingsProcessor.Process">
+            <summary>
+            This is invoked before any code uses fiSettings. Use it to customize fiSettings as you see fit.
+            This function may be invoked off of the main thread, which means that Unity API functions are
+            *not* available.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiSettings">
+            <summary>
+            This class contains some settings that can be used to customize the behavior of the Full
+            Inspector.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.EnableAnimation">
+            <summary>
+            Should Full Inspector use animation when toggling and foldout and in other situations?
+            This option is purely cosmetic.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.ForceSaveAllAssetsOnSceneSave">
+            <summary>
+            A scene has just been saved. Should all IScriptableObjects be checked to see if they
+            need to be saved? This is disabled by default because it causes a performance hit when
+            saving and unless you have an extremely strange user scenario where you are not using
+            the inspector to edit a BaseBehavior, everything will save correctly.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.ForceSaveAllAssetsOnRecompilation">
+            <summary>
+            A recompilation has been detected. Should all IScriptableObjects be checked to see if
+            they need to be saved? This is disabled by default because it causes a performance hit
+            when saving and unless you have an extremely strange user scenario where you are not
+            using the inspector to edit a BaseBehavior, everything will save correctly.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.ForceRestoreAllAssetsOnRecompilation">
+            <summary>
+            A recompilation has been detected. Should all IScriptableObjects be checked to see if
+            they need to be restored? This is disabled by default because it causes a performance
+            hit.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.AutomaticReferenceInstantation">
+            <summary>
+            If this is set to true, then Full Inspector will attempt to automatically instantiate
+            all reference fields/properties in an object. This will negatively impact the
+            performance for creating objects (lots of reflection is used).
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.InspectorAutomaticReferenceInstantation">
+            <summary>
+            If this is set to true, then when the reflected inspector encounters a property that is
+            null it will attempt to create an instance of that property. This is most similar to how
+            Unity operates. Please note that this will not instantiate fields/properties that are
+            hidden from the inspector. Additionally, this will not instantiate fields which do not
+            have a default constructor.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.InspectorRequireShowInInspector">
+            <summary>
+            Should public properties/fields automatically be shown in the inspector? If this is
+            true, then only properties annotated with [ShowInInspector] will be shown.
+            [HideInInspector] will never be necessary.
+            
+            *PLEASE NOTE* this does not impact how data is serialized! Public properties/fields
+            will *still* be serialized!
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.EmitWarnings">
+            <summary>
+            Should Full Inspector emit warnings when it detects a possible data loss (such as a
+            renamed or removed variable) or general serialization issue?
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.EmitGraphMetadataCulls">
+            <summary>
+            Should Full Inspector emit logs about graph metadata that it has culled? This may be
+            useful if you have written a custom property editor but changes to your graph metadata
+            are not being persisted for some reason.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.MinimumFoldoutHeight">
+            <summary>
+            The minimum height a child property editor has to be before a foldout is displayed
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.EnableOpenScriptButton">
+            <summary>
+            Display an "open script" button that Unity will typically display.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.LabelWidthPercentage">
+            <summary>
+            What percentage of an editor's width will be used for labels?
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.EnableMetadataPersistence">
+            <summary>
+            Should Full Inspector persist graph metadata across play-mode and
+            across Unity sessions? If this is true, then reload time will be slightly increased.
+            </summary>
+            <remarks>Metadata persistence is currently an experimental feature. It works well right now, but
+            it *may* cause a 5-60s lock-up if the inspector goes into an infinite recursion.</remarks>
+        </member>
+        <member name="F:FullInspector.fiSettings.DefaultPageMinimumCollectionLength">
+            <summary>
+            The default length of a collection before the paging interface is shown, which will let
+            you view a subset of the collection, making it easier to manage and inspect. If you do
+            not want the pager to *ever* activate by default, set this to a negative value (such as -1).
+            If you want the pager to *always* activate, set this to 0. Otherwise, set this to a
+            reasonably large value such as 20.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.RootDirectory">
+            <summary>
+            The root directory that Full Inspector resides in. Please update this value if you change
+            the root directory -- if you don't a potentially expensive scan will be performed to locate
+            the root directory. This has a trailing slash.
+            </summary>
+        </member>
+        <member name="F:FullInspector.fiSettings.RootGeneratedDirectory">
+            <summary>
+            This is automatically configured based on RootDirectory. This has a trailing slash.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiSettings.EnsureRootDirectory">
+            <summary>
+            Ensures that fiSettings.RootDirectory points to a folder named "FullInspector2". If it doesn't, then
+            this will perform a scan over all of the content inside of the Assets folder looking for that directory
+            and will notify the user of the results.
+            </summary>
+        </member>
+        <member name="M:FullInspector.fiSettings.FindDirectoryPathByName(System.String,System.String)">
+            <summary>
+            Locates a directory of the given name or returns null if the directory is not contained within
+            the specificed initial currentDirectory.
+            </summary>
+            <param name="currentDirectory">The directory to begin the recursive search in.</param>
+            <param name="targetDirectory">The name of the directory that we want to locate.</param>
+            <returns>The full directory path for the given directory name, or null.</returns>
+        </member>
+        <member name="T:FullInspector.Internal.fiSingletons">
+            <summary>
+            Provides access to an arbitrary set of singleton objects such that the objects can be
+            accessed in generic functions.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.fiSingletons._instances">
+            <summary>
+            The singleton instances.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiSingletons.Get``1">
+            <summary>
+            Retrieve a singleton of the given type. This method creates the object if it has not
+            already been created.
+            </summary>
+            <typeparam name="T">The type of object to fetch an instance of.</typeparam>
+            <returns>An object of the given type.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.fiSingletons.Get(System.Type)">
+            <summary>
+            Retrieve a singleton of the given type. This method creates the object if it has not
+            already been created.
+            </summary>
+            <param name="type">The type of the object to fetch.</param>
+            <returns>An object of the given type.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.fiUtility.DestroyObject(UnityEngine.Object)">
+            <summary>
+            Destroys the given object using the proper destroy function. If the game is in edit
+            mode, then DestroyImmedate is used. Otherwise, Destroy is used.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiUtility.StripLeadingWhitespace(System.String)">
+            <summary>
+            Removes leading whitespace after newlines from a string. This is extremely useful when
+            using the C# multiline @ string.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.fiUtility.CreateDictionary``2(System.Collections.Generic.IList{``0},System.Collections.Generic.IList{``1})">
+            <summary>
+            Creates a dictionary from the given keys and given values.
+            </summary>
+            <typeparam name="TKey">The key type of the dictionary.</typeparam>
+            <typeparam name="TValue">The value type of the dictionary.</typeparam>
+            <param name="keys">The keys in the dictionary. A null key will be skipped.</param>
+            <param name="values">The values in the dictionary.</param>
+            <returns>A dictionary that contains the given key to value mappings.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.fiUtility.Swap``1(``0@,``0@)">
+            <summary>
+            Swaps two items.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiUtility.IsEditor">
+            <summary>
+            This is equivalent to Application.isEditor except that it can be called off of
+            the main thread.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Serializers.FullSerializer.UnityObjectConverter">
+            <summary>
+            Converts all types that derive from UnityObject.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsConverter">
+            <summary>
+            The serialization converter allows for customization of the serialization process.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsConverter.Serializer">
+            <summary>
+            The serializer that was owns this converter.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsConverter.CanProcess(System.Type)">
+            <summary>
+            Can this converter serialize and deserialize the given object type?
+            </summary>
+            <param name="type">The given object type.</param>
+            <returns>True if the converter can serialize it, false otherwise.</returns>
+        </member>
+        <member name="M:FullSerializer.fsConverter.RequestCycleSupport(System.Type)">
+            <summary>
+            If true, then the serializer will support cyclic references with the given converted
+            type.
+            </summary>
+            <param name="storageType">The field/property type that is currently storing the object
+            that is being serialized.</param>
+        </member>
+        <member name="M:FullSerializer.fsConverter.RequestInheritanceSupport(System.Type)">
+            <summary>
+            If true, then the serializer will include inheritance data for the given converter.
+            </summary>
+            <param name="storageType">The field/property type that is currently storing the object
+            that is being serialized.</param>
+        </member>
+        <member name="M:FullSerializer.fsConverter.TrySerialize(System.Object,FullSerializer.fsData@,System.Type)">
+            <summary>
+            Serialize the actual object into the given data storage.
+            </summary>
+            <param name="instance">The object instance to serialize. This will never be null.</param>
+            <param name="serialized">The serialized state.</param>
+            <param name="storageType">The field/property type that is storing this instance.</param>
+            <returns>If serialization was successful.</returns>
+        </member>
+        <member name="M:FullSerializer.fsConverter.TryDeserialize(FullSerializer.fsData,System.Object@,System.Type)">
+            <summary>
+            Deserialize data into the object instance.
+            </summary>
+            <param name="data">Serialization data to deserialize from.</param>
+            <param name="instance">The object instance to deserialize into.</param>
+            <param name="storageType">The field/property type that is storing the instance.</param>
+            <returns>True if serialization was successful, false otherwise.</returns>
+        </member>
+        <member name="M:FullSerializer.fsConverter.CreateInstance(FullSerializer.fsData,System.Type)">
+            <summary>
+            Construct an object instance that will be passed to TryDeserialize. This should **not**
+            deserialize the object.
+            </summary>
+            <param name="data">The data the object was serialized with.</param>
+            <param name="storageType">The field/property type that is storing the instance.</param>
+            <returns>An object instance</returns>
+        </member>
+        <member name="T:FullInspector.fiISerializerMetadata">
+            <summary>
+            An interface that a serializer provides that gives Full Inspector some important metadata.
+            </summary>
+        </member>
+        <member name="P:FullInspector.fiISerializerMetadata.SerializerGuid">
+            <summary>
+            A unique guid that identifies this serializer.
+            </summary>
+        </member>
+        <member name="P:FullInspector.fiISerializerMetadata.SerializerType">
+            <summary>
+            The type that derives from BaseSerializer in this package, used for serialization needs.
+            </summary>
+        </member>
+        <member name="P:FullInspector.fiISerializerMetadata.SerializationOptInAnnotationTypes">
+            <summary>
+            Annotation types that mark a field or property as "opt-in" for serialization.
+            </summary>
+        </member>
+        <member name="P:FullInspector.fiISerializerMetadata.SerializationOptOutAnnotationTypes">
+            <summary>
+            Annotation types that specify a field or property should be ignored by serialization.
+            </summary>
+        </member>
+        <member name="T:FullInspector.FullSerializerSerializer">
+            <summary>
+            Implements Full Inspector integration with Full Serializer, a .NET serializer that just
+            works. Use Unity style annotations (such as [SerializeField]) to serialize your types.
+            </summary>
+        </member>
+        <member name="M:FullInspector.FullSerializerSerializer.AddConverter(FullSerializer.fsConverter)">
+            <summary>
+            Register the given converter for usage in the serializer.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsDateConverter">
+            <summary>
+            Supports serialization for DateTime, DateTimeOffset, and TimeSpan.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsEnumConverter">
+            <summary>
+            Serializes and deserializes enums by their current name.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsEnumConverter.ArrayContains``1(``0[],``0)">
+            <summary>
+            Returns true if the given value is contained within the specified array.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsGuidConverter">
+            <summary>
+            Serializes and deserializes guids.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsIEnumerableSerializationAdapter.IsValid(System.Type)">
+            <summary>
+            Can this adapter be used for this object type?
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsIEnumerableSerializationAdapter.Iterate(System.Object)">
+            <summary>
+            Return an iterator to go over every item inside of the collection.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsIEnumerableSerializationAdapter.HintSize(System.Object)">
+            <summary>
+            Attempt to fetch a hint size for the collection so we can allocate objects
+            move efficiently. If no hint size can be computed, then this should return 0.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsIEnumerableSerializationAdapter.Add(System.Object,System.Object)">
+            <summary>
+            Adds the given item to the collection.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsIEnumerableSerializationAdapter.GetElementType(System.Type)">
+            <summary>
+            Fetches the element type for objects inside of the collection.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsNullableConverter">
+            <summary>
+            The reflected converter will properly serialize nullable types. However, we do it here
+            instead as we can emit less serialization data.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsConfig">
+            <summary>
+            Enables some top-level customization of Full Serializer.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsConfig.SerializeAttributes">
+            <summary>
+            The attributes that will force a field or property to be serialized.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsConfig.IgnoreSerializeAttributes">
+            <summary>
+            The attributes that will force a field or property to *not* be serialized.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsConfig.DefaultMemberSerialization">
+            <summary>
+            The default member serialization.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsContext">
+            <summary>
+            fsContext stores global metadata that can be used to customize how fsConverters operate
+            during serialization.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsContext._contextObjects">
+            <summary>
+            All of the context objects.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsContext.Reset">
+            <summary>
+            Removes all context objects from the context.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsContext.Set``1(``0)">
+            <summary>
+            Sets the context object for the given type with the given value.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsContext.Has``1">
+            <summary>
+            Returns true if there is a context object for the given type.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsContext.Get``1">
+            <summary>
+            Fetches the context object for the given type.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsDataType">
+            <summary>
+            The actual type that a JsonData instance can store.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsData">
+            <summary>
+            A union type that stores a serialized value. The stored type can be one of six different
+            types: null, boolean, double, Int64, string, Dictionary, or List.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsData._value">
+            <summary>
+            The raw value that this serialized data stores. It can be one of six different types; a
+            boolean, a double, Int64, a string, a Dictionary, or a List.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor">
+            <summary>
+            Creates a fsData instance that holds null.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.Boolean)">
+            <summary>
+            Creates a fsData instance that holds a boolean.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.Double)">
+            <summary>
+            Creates a fsData instance that holds a double.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.Int64)">
+            <summary>
+            Creates a new fsData instance that holds an integer.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.String)">
+            <summary>
+            Creates a fsData instance that holds a string.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.Collections.Generic.Dictionary{System.String,FullSerializer.fsData})">
+            <summary>
+            Creates a fsData instance that holds a dictionary of values.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.#ctor(System.Collections.Generic.List{FullSerializer.fsData})">
+            <summary>
+            Creates a fsData instance that holds a list of values.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.CreateDictionary">
+            <summary>
+            Helper method to create a fsData instance that holds a dictionary.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.CreateList">
+            <summary>
+            Helper method to create a fsData instance that holds a list.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.CreateList(System.Int32)">
+            <summary>
+            Helper method to create a fsData instance that holds a list with the initial capacity.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.Cast``1">
+            <summary>
+            Internal helper method to cast the underlying storage to the given type or throw a
+            pretty printed exception on failure.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.Equals(System.Object)">
+            <summary>
+            Determines whether the specified object is equal to the current object.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.Equals(FullSerializer.fsData)">
+            <summary>
+            Determines whether the specified object is equal to the current object.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.op_Equality(FullSerializer.fsData,FullSerializer.fsData)">
+            <summary>
+            Returns true iff a == b.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.op_Inequality(FullSerializer.fsData,FullSerializer.fsData)">
+            <summary>
+            Returns true iff a != b.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsData.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>A hash code for this instance, suitable for use in hashing algorithms and data
+            structures like a hash table.</returns>
+        </member>
+        <member name="P:FullSerializer.fsData.IsNull">
+            <summary>
+            Returns true if this fsData instance maps back to null.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsDouble">
+            <summary>
+            Returns true if this fsData instance maps back to a double.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsInt64">
+            <summary>
+            Returns true if this fsData instance maps back to an Int64.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsBool">
+            <summary>
+            Returns true if this fsData instance maps back to a boolean.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsString">
+            <summary>
+            Returns true if this fsData instance maps back to a string.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsDictionary">
+            <summary>
+            Returns true if this fsData instance maps back to a Dictionary.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.IsList">
+            <summary>
+            Returns true if this fsData instance maps back to a List.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsDouble">
+            <summary>
+            Casts this fsData to a double. Throws an exception if it is not a double.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsInt64">
+            <summary>
+            Casts this fsData to an Int64. Throws an exception if it is not an Int64.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsBool">
+            <summary>
+            Casts this fsData to a boolean. Throws an exception if it is not a boolean.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsString">
+            <summary>
+            Casts this fsData to a string. Throws an exception if it is not a string.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsDictionary">
+            <summary>
+            Casts this fsData to a Dictionary. Throws an exception if it is not a
+            Dictionary.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsData.AsList">
+            <summary>
+            Casts this fsData to a List. Throws an exception if it is not a List.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsIgnoreAttribute">
+            <summary>
+            The given property or field annotated with [JsonIgnore] will not be serialized.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsJsonParser">
+            <summary>
+            A simple recursive descent parser for JSON.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonParser.SkipSpace">
+            <summary>
+            Skips input such that Character() will return a non-whitespace character
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonParser.TryParseNumber(FullSerializer.fsData@)">
+            <summary>
+            Parses numbers that follow the regular expression [-+](\d+|\d*\.\d*)
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonParser.TryParseString(System.String@)">
+            <summary>
+            Parses a string
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonParser.TryParseArray(FullSerializer.fsData@)">
+            <summary>
+            Parses an array
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonParser.Parse(System.String,FullSerializer.fsData@)">
+            <summary>
+            Parses the specified input. Returns a failure state if parsing failed.
+            </summary>
+            <param name="input">The input to parse.</param>
+            <param name="data">The parsed data. This is undefined if parsing fails.</param>
+            <returns>The parsed input.</returns>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.InsertSpacing(System.IO.TextWriter,System.Int32)">
+            <summary>
+            Inserts the given number of indents into the builder.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.EscapeString(System.String)">
+            <summary>
+            Escapes a string.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.BuildPrettyString(FullSerializer.fsData,System.IO.TextWriter,System.Int32)">
+            <summary>
+            Formats this data into the given builder.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.PrettyJson(FullSerializer.fsData,System.IO.TextWriter)">
+            <summary>
+            Writes the pretty JSON output data to the given stream.
+            </summary>
+            <param name="data">The data to print.</param>
+            <param name="outputStream">Where to write the printed data.</param>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.PrettyJson(FullSerializer.fsData)">
+            <summary>
+            Returns the data in a pretty printed JSON format.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.CompressedJson(FullSerializer.fsData,System.IO.StreamWriter)">
+            <summary>
+            Writes the compressed JSON output data to the given stream.
+            </summary>
+            <param name="data">The data to print.</param>
+            <param name="outputStream">Where to write the printed data.</param>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.CompressedJson(FullSerializer.fsData)">
+            <summary>
+            Returns the data in a relatively compressed JSON format.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsJsonPrinter.ConvertDoubleToString(System.Double)">
+            <summary>
+            Utility method that converts a double to a string.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsMemberSerialization">
+            <summary>
+            Controls how the reflected converter handles member serialization.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsMemberSerialization.OptIn">
+            <summary>
+            Only members with [SerializeField] or [fsProperty] attributes are serialized.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsMemberSerialization.OptOut">
+            <summary>
+            Only members with [NotSerialized] or [fsIgnore] will not be serialized.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsMemberSerialization.Default">
+            <summary>
+            The default member serialization behavior is applied.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsObjectAttribute">
+            <summary>
+            This attribute controls some serialization behavior for a type. See the comments
+            on each of the fields for more information.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsObjectAttribute.PreviousModels">
+            <summary>
+            The previous model that should be used if an old version of this
+            object is encountered. Using this attribute also requires that the
+            type have a public constructor that takes only one parameter, an object
+            instance of the given type. Use of this parameter *requires* that
+            the VersionString parameter is also set.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsObjectAttribute.VersionString">
+            <summary>
+            The version string to use for this model. This should be unique among all
+            prior versions of this model that is supported for importation. If PreviousModel
+            is set, then this attribute must also be set. A good valid example for this
+            is "v1", "v2", "v3", ...
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsObjectAttribute.MemberSerialization">
+            <summary>
+            This controls the behavior for member serialization.
+            The default behavior is fsMemberSerialization.Default.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsObjectAttribute.Converter">
+            <summary>
+            Specify a custom converter to use for serialization. The converter type needs
+            to derive from fsConverter and the call to CanProcess can be skipped. This
+            defaults to null.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsPropertyAttribute">
+            <summary>
+            Explicitly mark a property to be serialized. This can also be used to give the name that the
+            property should use during serialization.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsPropertyAttribute.Name">
+            <summary>
+            The name of that the property will use in JSON serialization.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Key_ObjectReference">
+            <summary>
+            This is an object reference in part of a cyclic graph.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Key_ObjectDefinition">
+            <summary>
+            This is an object definition, as part of a cyclic graph.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Key_InstanceType">
+            <summary>
+            This specifies the actual type of an object (the instance type was different from
+            the field type).
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Key_Version">
+            <summary>
+            The version string for the serialized data.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Key_Content">
+            <summary>
+            If we have to add metadata but the original serialized state was not a dictionary,
+            then this will contain the original data.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.ConvertLegacyData(FullSerializer.fsData@)">
+            <summary>
+            This function converts legacy serialization data into the new format, so that
+            the import process can be unified and ignore the old format.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.EnsureDictionary(FullSerializer.fsData@)">
+            <summary>
+            Ensures that the data is a dictionary. If it is not, then it is wrapped inside of one.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer._cachedConverters">
+            <summary>
+            A cache from type to it's converter.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer._converters">
+            <summary>
+            Converters that are available.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer._references">
+            <summary>
+            Reference manager for cycle detection.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.fsSerializer.Context">
+            <summary>
+            A context object that fsConverters can use to customize how they operate.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.AddConverter(FullSerializer.fsConverter)">
+            <summary>
+            Adds a new converter that can be used to customize how an object is serialized and
+            deserialized.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.GetConverter(System.Type)">
+            <summary>
+            Fetches a converter that can serialize/deserialize the given type.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.TrySerialize``1(``0,FullSerializer.fsData@)">
+            <summary>
+            Helper method that simply forwards the call to TrySerialize(typeof(T), instance, out data);
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.TryDeserialize``1(FullSerializer.fsData,``0@)">
+            <summary>
+            Generic wrapper around TryDeserialize that simply forwards the call.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.TrySerialize(System.Type,System.Object,FullSerializer.fsData@)">
+            <summary>
+            Serialize the given value.
+            </summary>
+            <param name="storageType">The type of field/property that stores the object instance. This is
+            important particularly for inheritance, as a field storing an IInterface instance
+            should have type information included.</param>
+            <param name="instance">The actual object instance to serialize.</param>
+            <param name="data">The serialized state of the object.</param>
+            <returns>If serialization was successful.</returns>
+        </member>
+        <member name="M:FullSerializer.fsSerializer.TryDeserialize(FullSerializer.fsData,System.Type,System.Object@)">
+            <summary>
+            Attempts to deserialize a value from a serialized state.
+            </summary>
+            <param name="data"></param>
+            <param name="storageType"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="T:FullSerializer.fsSerializer.fsLazyCycleDefinitionWriter">
+            <summary>
+            This manages instance writing so that we do not write unnecessary $id fields. We
+            only need to write out an $id field when there is a corresponding $ref field.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsOption`1">
+            <summary>
+            Simple option type. This is akin to nullable types.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsPortableReflection">
+            <summary>
+            This wraps reflection types so that it is portable across different Unity runtimes.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.Internal.fsVersionedType.Ancestors">
+            <summary>
+            The direct ancestors that this type can import.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.Internal.fsVersionedType.VersionString">
+            <summary>
+            The identifying string that is unique among all ancestors.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.Internal.fsVersionedType.ModelType">
+            <summary>
+            The modeling type that this versioned type maps back to.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsVersionedType.Migrate(System.Object)">
+            <summary>
+            Migrate from an instance of an ancestor.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsVersionManager.VerifyConstructors(FullSerializer.Internal.fsVersionedType)">
+            <summary>
+            Verifies that the given type has constructors to migrate from all ancestor types.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsVersionManager.VerifyUniqueVersionStrings(FullSerializer.Internal.fsVersionedType)">
+            <summary>
+            Verifies that the given version graph contains only unique versions.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.Internal.fsMetaProperty">
+            <summary>
+            A property or field on a MetaType.
+            </summary>
+        </member>
+        <member name="F:FullSerializer.Internal.fsMetaProperty._memberInfo">
+            <summary>
+            Internal handle to the reflected member.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsMetaProperty.Write(System.Object,System.Object)">
+            <summary>
+            Writes a value to the property that this MetaProperty represents, using given object
+            instance as the context.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsMetaProperty.Read(System.Object)">
+            <summary>
+            Reads a value from the property that this MetaProperty represents, using the given
+            object instance as the context.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsMetaProperty.GetName(System.Reflection.MemberInfo)">
+            <summary>
+            Returns the name the given member wants to use for JSON serialization.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.Internal.fsMetaProperty.StorageType">
+            <summary>
+            The type of value that is stored inside of the property. For example, for an int field,
+            StorageType will be typeof(int).
+            </summary>
+        </member>
+        <member name="P:FullSerializer.Internal.fsMetaProperty.Name">
+            <summary>
+            The serialized name of the property, as it should appear in JSON.
+            </summary>
+        </member>
+        <member name="T:FullSerializer.fsMetaType">
+            <summary>
+            MetaType contains metadata about a type. This is used by the reflection serializer.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsMetaType.ClearCache">
+            <summary>
+            Clears out the cached type results. Useful if some prior assumptions become invalid, ie, the default member
+            serialization mode.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsMetaType.SetProperties(System.String[])">
+            <summary>
+            Override the default property names and use the given ones instead of serialization.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.fsMetaType.CreateInstance">
+            <summary>
+            Creates a new instance of the type that this metadata points back to. If this type has a
+            default constructor, then Activator.CreateInstance will be used to construct the type
+            (or Array.CreateInstance if it an array). Otherwise, an uninitialized object created via
+            FormatterServices.GetSafeUninitializedObject is used to construct the instance.
+            </summary>
+        </member>
+        <member name="P:FullSerializer.fsMetaType.HasDefaultConstructor">
+            <summary>
+            Returns true if the type represented by this metadata contains a default constructor.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsReflectionUtility.GetInterface(System.Type,System.Type)">
+            <summary>
+            Searches for a particular implementation of the given interface type inside of the type.
+            This is particularly useful if the interface type is an open type, ie, typeof(IFace{}),
+            because this method will then return IFace{} but with appropriate type parameters
+            inserted.
+            </summary>
+            <param name="type">The base type to search for interface</param>
+            <param name="interfaceType">The interface type to search for. Can be an open generic
+            type.</param>
+            <returns>The actual interface type that the type contains, or null if there is no
+            implementation of the given interfaceType on type.</returns>
+        </member>
+        <member name="T:FullSerializer.Internal.fsTypeLookup">
+            <summary>
+            Provides APIs for looking up types based on their name.
+            </summary>
+        </member>
+        <member name="M:FullSerializer.Internal.fsTypeLookup.GetType(System.String)">
+            <summary>
+            Attempts to lookup the given type. Returns null if the type lookup fails.
+            </summary>
+        </member>
+        <member name="T:FullInspector.ISerializationOperator">
+            <summary>
+            An ISerializationOperator provides a set of common serialization routines for serializers.
+            </summary>
+        </member>
+        <member name="M:FullInspector.ISerializationOperator.RetrieveObjectReference(System.Int32)">
+            <summary>
+            Retrieve an object that has been stored with StoreObjectReference.
+            </summary>
+            <param name="storageId">The id that was returned from the store operation.</param>
+            <returns>The object that was previously stored. The object may have been destroyed (for
+            example, when an object becomes a prefab it loses links to non-prefab objects), so make
+            sure that you handle a null return value correctly.</returns>
+        </member>
+        <member name="M:FullInspector.ISerializationOperator.StoreObjectReference(UnityEngine.Object)">
+            <summary>
+            Returns an integer that can be used to fetch the given object after Unity has gone
+            through a serialization cycle.
+            </summary>
+            <param name="obj">The object to get an identifier for.</param>
+            <returns>An integer that uniquely identifies the given obj. obj can be recovered with
+            RetrieveObject</returns>
+        </member>
+        <member name="T:FullInspector.Internal.ListSerializationOperator">
+            <summary>
+            An ISerializationOperator that uses a list for reference storage.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.ListSerializationOperator.SerializedObjects">
+            <summary>
+            A list of objects that have been serialized.
+            </summary>
+        </member>
+        <member name="T:FullInspector.NotSupportedSerializationOperator">
+            <summary>
+            An ISerializationOperator that just throws NotSupportedExceptions, useful when serializing
+            an object to disk where UnityObject references cannot be handled.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.ObjectModificationDetector">
+            <summary>
+            A helper class that identifies when an ISerializedObject has been modified for some reason.
+            </summary>
+            <remarks>
+            To determine if the object state has changed, this hashes the serialized state of the
+            object. If the hash of the serialized state has changed, then the object has been modified.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.Internal.ObjectModificationDetector.WasModified(FullInspector.ISerializedObject,System.Boolean@)">
+            <summary>
+            Returns true if the given object has been modified since its last update.
+            </summary>
+            <param name="hadPriorData">Only useful if the return value is true. If this is false, then this is the first time that the
+            modification detector has detected data; ie, there was no prior data for it. hasPriorData, for example, will always be
+            false when adding a new component to a GameObject</param>
+        </member>
+        <member name="M:FullInspector.Internal.ObjectModificationDetector.Update(FullInspector.ISerializedObject)">
+            <summary>
+            Update the stored serialized state of the given object.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.ObjectModificationDetector.SavedObject">
+            <summary>
+            The saved state of an object.
+            </summary>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.DeserializeFromContent``2(System.String)">
+            <summary>
+            Deserialize a value from the given content.
+            </summary>
+            <typeparam name="T">The type of value to deserialize.</typeparam>
+            <typeparam name="TSerializer">The serializer to use.</typeparam>
+            <param name="content">The serialized content to deserialize.</param>
+            <returns>The deserialized object.</returns>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.DeserializeFromContent``1(System.Type,System.String)">
+            <summary>
+            Deserialize a value from the given content.
+            </summary>
+            <typeparam name="TSerializer">The serializer to use.</typeparam>
+            <param name="storageType">The member type that holds the deserialized content.</param>
+            <param name="content">The serialized content to deserialize.</param>
+            <returns>The deserialized object.</returns>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.SerializeToContent``2(``0)">
+            <summary>
+            Serialize the given value to a string. The given value cannot contain any references
+            that derive from UnityEngine.Object.
+            </summary>
+            <typeparam name="T">The type of value to serialize.</typeparam>
+            <typeparam name="TSerializer">The serializer to use.</typeparam>
+            <param name="value">The actual value to serialize.</param>
+            <returns>The serialized value state.</returns>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.SerializeToContent``1(System.Type,System.Object)">
+            <summary>
+            Serialize the given value to a string. The given value cannot contain any references
+            that derive from UnityEngine.Object.
+            </summary>
+            <typeparam name="TSerializer">The serializer to use.</typeparam>
+            <param name="storageType">The member type that holds the serialized content. This is *not*
+            value.GetType(), as using value.GetType() will possibly break inheritance support.</param>
+            <param name="value">The actual value to serialize.</param>
+            <returns>The serialized value state.</returns>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.Clone``2(``0)">
+            <summary>
+            Clones the given object using the selected serializer. In essence, this just runs the
+            object through the serialization process and then deserializes it.
+            </summary>
+            <typeparam name="T">The type of object to clone.</typeparam>
+            <typeparam name="TSerializer">The serializer to do the cloning with.</typeparam>
+            <param name="obj">The object to clone.</param>
+            <returns>A duplicate of the given object.</returns>
+        </member>
+        <member name="M:FullInspector.SerializationHelpers.Clone``1(System.Type,System.Object)">
+            <summary>
+            Clones the given object using the selected serializer. In essence, this just runs the
+            object through the serialization process and then deserializes it.
+            </summary>
+            <typeparam name="TSerializer">The serializer to do the cloning with.</typeparam>
+            <param name="storageType">The member type that holds the cloned content.</param>
+            <param name="obj">The object to clone.</param>
+            <returns>A duplicate of the given object.</returns>
+        </member>
+        <member name="T:FullInspector.Internal.fiInstalledSerializerManager">
+            <summary>
+            Manages communication with the installed serialization engines.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiInstalledSerializerManager.HasDefault">
+            <summary>
+            Is there a default serializer?
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiInstalledSerializerManager.SerializationOptInAnnotations">
+            <summary>
+            Annotations that signify a field or property inside a type should *definitely* be
+            serialized.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Internal.fiInstalledSerializerManager.SerializationOptOutAnnotations">
+            <summary>
+            Annotations that signify a field or property inside a type should definitely *not* be
+            serialized.
+            </summary>
+        </member>
+        <member name="T:FullInspector.NullSerializer">
+            <summary>
+            The NullSerializer simply serializes everything directly to null. This means that FI will
+            *not* serialize anything.
+            </summary>
+        </member>
+        <member name="T:FullInspector.IInspectedMemberFilter">
+            <summary>
+            The inspected member filter allows you to specify which items on the inspected type you
+            are interested in. Items that the filter is not interested in are not returned. There are
+            some common filters that you may be interested in at InspectedMemberFilters.
+            </summary>
+            <remarks>
+            Filters are an important performance abstraction. The results are cached and then reused
+            reused hundreds of times over.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.IInspectedMemberFilter.IsInterested(FullInspector.InspectedProperty)">
+            <summary>
+            Are we interested in this property?
+            </summary>
+        </member>
+        <member name="M:FullInspector.IInspectedMemberFilter.IsInterested(FullInspector.InspectedMethod)">
+            <summary>
+            Are we interested in this method?
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectedMember">
+            <summary>
+            An InspectedMember is either an InspectedMethod or an InspectedProperty. This also contains
+            some common API functions between the two types.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedMember.#ctor(FullInspector.InspectedProperty)">
+            <summary>
+            Construct an either containing an A value.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedMember.#ctor(FullInspector.InspectedMethod)">
+            <summary>
+            Construct an either containing a B value.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.Property">
+            <summary>
+            Returns the property value. Throws an exception if this is not a property.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.Method">
+            <summary>
+            Returns the method value. Throws an exception if this is not a method.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.IsMethod">
+            <summary>
+            Does this either contain an A value?
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.IsProperty">
+            <summary>
+            Does this either contain a B value?
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.Name">
+            <summary>
+            The actual (*not* display) name of the property.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMember.MemberInfo">
+            <summary>
+            Returns the MemberInfo of the member.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedMemberFilters.ShouldDisplayProperty(FullInspector.InspectedProperty)">
+            <summary>
+            Returns true if the given property should be displayed in the inspector. This method
+            assumes that the property type is inspectable.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedMemberFilters.IsPropertyTypeInspectable(FullInspector.InspectedProperty)">
+            <summary>
+            Returns true if the property type itself is inspectable. This does not necessarily
+            mean that the property should be displayed in the inspector -- just that the FI editing
+            engine can handle it.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectedMethod">
+            <summary>
+            A method that is being inspected, typically for the purpose of a button.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedMethod.Invoke(System.Object)">
+            <summary>
+            Invoke the method. This function will never fail.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMethod.Method">
+            <summary>
+            The wrapped method.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMethod.DisplayName">
+            <summary>
+            The name that should be used when displaying the method. This value defaults to
+            Method.Name but can be overridden with a InspectorButtonAttribute.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedMethod.HasArguments">
+            <summary>
+            True if the method has arguments (besides an implicit this).
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectedProperty">
+            <summary>
+            A PropertyMetadata describes a discovered property or field in a TypeMetadata.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectedProperty.Name">
+            <summary>
+            The cached name of the property/field.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectedProperty.DisplayName">
+            <summary>
+            The cached display name of the property/field. This may be overriden
+            by the user.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.Write(System.Object,System.Object)">
+            <summary>
+            Writes a value to the property that this property metadata represents, using given
+            object instance as the context.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.Read(System.Object)">
+            <summary>
+            Reads a value from the property that this property metadata represents, using the given
+            object instance as the context.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectedProperty.StorageType">
+            <summary>
+            The type of value that is stored inside of the property. For example, for an int field,
+            StorageType will be typeof(int).
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.#ctor(System.Reflection.PropertyInfo)">
+            <summary>
+            Initializes a new instance of the PropertyMetadata class from a property member.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.#ctor(System.Reflection.FieldInfo)">
+            <summary>
+            Initializes a new instance of the PropertyMetadata class from a field member.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.Equals(System.Object)">
+            <summary>
+            Determines whether the specified object is equal to this one.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.Equals(FullInspector.InspectedProperty)">
+            <summary>
+            Determines whether the specified object is equal to this one.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedProperty.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>A hash code for this instance, suitable for use in hashing algorithms and data
+            structures like a hash table.</returns>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.MemberInfo">
+            <summary>
+            The member info that we read to and write from.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.IsPublic">
+            <summary>
+            Returns true if this property has a public component to it.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.IsAutoProperty">
+            <summary>
+            Returns true if this InspectedProperty is both a *property* and an *auto-property*. Otherwise
+            this will return false.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.IsStatic">
+            <summary>
+            Is this property static?
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.CanWrite">
+            <summary>
+            Returns true if it looks like the property can be written to. This does *not* guarantee
+            that a write will actually be successful (for example, a property can throw a
+            NotImplementedException()).
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedProperty.DefaultValue">
+            <summary>
+            The default value for the storage type. The default value is not always null as structs need special support.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectedType">
+            <summary>
+            Provides a view of an arbitrary type that unifies a number of discrete concepts in the CLR.
+            Arrays and Collection types have special support, but their APIs are unified by the
+            InspectedType so that they can be treated as if they were a regular type.
+            </summary>
+            <summary>
+            This partial implementation contains methods which are used to determine if a MemberInfo can
+            be serialized by Unity or if it can be serialized by Full Inspector.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectedType._cachedMetadata">
+            <summary>
+            Cache from Type to the respective InspectedType.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.Get(System.Type)">
+            <summary>
+            Finds the associated InspectedType for the given type.
+            </summary>
+            <param name="type">The type to find the type metadata for.</param>
+            <returns>A TypeMetadata that models the given type.</returns>
+        </member>
+        <member name="M:FullInspector.InspectedType.CreateInstance">
+            <summary>
+            Creates a new instance of the type that this metadata points back to. If this type has a
+            default constructor, then Activator.CreateInstance will be used to construct the type
+            (or Array.CreateInstance if it an array). Otherwise, an uninitialized object created via
+            FormatterServices.GetSafeUninitializedObject is used to construct the instance.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.GetMembers(FullInspector.IInspectedMemberFilter)">
+            <summary>
+            Returns all fields/properties/methods on the type that pass the given filter.
+            </summary>
+            <param name="filter">The filter to use. You may be interested in some predefined
+            filters available in the InspectedMemberFilters type.</param>
+        </member>
+        <member name="M:FullInspector.InspectedType.GetProperties(FullInspector.IInspectedMemberFilter)">
+            <summary>
+            Returns all fields/properties on the type that pass the given filter.
+            </summary>
+            <param name="filter">The filter to use. You may be interested in some predefined
+            filters available in the InspectedMemberFilters type.</param>
+        </member>
+        <member name="M:FullInspector.InspectedType.GetMethods(FullInspector.IInspectedMemberFilter)">
+            <summary>
+            Returns all methods on the type that pass the filter.
+            </summary>
+            <param name="filter">The filter to use. You may be interested in some predefined
+            filters available in the InspectedMemberFilters type.</param>
+        </member>
+        <member name="M:FullInspector.InspectedType.VerifyNotCollection">
+            <summary>
+            Verifies that the current type is not a collection.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.#ctor(System.Type)">
+            <summary>
+            Initializes a new instance of the TypeMetadata class from a type. Use TypeCache to get
+            instances of TypeMetadata; do not use this constructor directly.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.StableSort``1(System.Collections.Generic.IList{``0},System.Func{``0,``0,System.Int32})">
+            <summary>
+            Performs a stable sort on the list.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectedType._isArray">
+            <summary>
+            True if the base type is an array. If true, accessing Properties will throw an
+            exception. IsCollection is also true if _isArray is true.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.GetPropertyByName(System.String)">
+            <summary>
+            Looks up the given property by name. Returns null if not found.
+            </summary>
+            <param name="name">The name of the property to lookup.</param>
+            <returns>The property with the given name.</returns>
+        </member>
+        <member name="M:FullInspector.InspectedType.RemoveProperty``1(System.String)">
+            <summary>
+            Attempts to remove the property with the given name.
+            </summary>
+            <param name="propertyName">The name of the property to remove.</param>
+        </member>
+        <member name="M:FullInspector.InspectedType.IsSimpleTypeThatUnityCanSerialize(System.Type)">
+            <summary>
+            A simple type is a type that is either primitive, a string, or a non-generic
+            non-abstract class composed of other simple types.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.IsPrimitiveSkippedByUnity(System.Type)">
+            <summary>
+            Returns true if the primitive is *not* serialized by Unity
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.IsSerializedByUnity(FullInspector.InspectedProperty)">
+            <summary>
+            Returns true if the given type can be serialized by Unity. This function is conservative
+            and may not return true if the type can be serialized by unity. However, it will *not*
+            return true if the type cannot be serialized by unity.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectedType.IsSerializedByFullInspector(FullInspector.InspectedProperty)">
+            <summary>
+            Returns true if the given property should be serialized.
+            </summary>
+            <remarks>This assumes that the property is r/w!</remarks>
+        </member>
+        <member name="P:FullInspector.InspectedType.HasDefaultConstructor">
+            <summary>
+            Returns true if the type represented by this metadata contains a default constructor.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedType.ReflectedType">
+            <summary>
+            The type that this metadata is modeling, ie, the type that the metadata was constructed
+            off of.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectedType.IsCollection">
+            <summary>
+            True if the base type is a collection. If true, accessing Properties will throw an
+            exception.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.StringExtensions">
+            <summary>
+            Extensions to the string type.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.StringExtensions.F(System.String,System.Object[])">
+            <summary>
+            Replaces the format item in a specified System.String with the text equivalent of the
+            value of a corresponding System.Object instance in a specified array.
+            </summary>
+            <param name="format">A composite format string.</param>
+            <param name="args">An System.Object array containing zero or more objects to
+            format.</param>
+            <returns>A copy of format in which the format items have been replaced by the
+            System.String equivalent of the corresponding instances of System.Object in
+            args.</returns>
+            <exception cref="T:System.ArgumentNullException">format or args is null.</exception>
+            <exception cref="T:System.FormatException">format is invalid. -or- The number indicating
+            an argument to format is less than zero, or greater than or equal to the length of the
+            args array.</exception>
+        </member>
+        <member name="T:FullInspector.Internal.TypeCache">
+            <summary>
+            Caches type name to type lookups. Type lookups occur in all loaded assemblies.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.TypeCache._cachedTypes">
+            <summary>
+            Cache from fully qualified type name to type instances.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.TypeCache._assembliesByName">
+            <summary>
+            Assemblies indexed by their name.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Internal.TypeCache._assembliesByIndex">
+            <summary>
+            A list of assemblies, by index.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeCache.TryDirectTypeLookup(System.String,System.String,System.Type@)">
+            <summary>
+            Does a direct lookup for the given type, ie, goes directly to the assembly identified by
+            assembly name and finds it there.
+            </summary>
+            <param name="assemblyName">The assembly to find the type in.</param>
+            <param name="typeName">The name of the type.</param>
+            <param name="type">The found type.</param>
+            <returns>True if the type was found, false otherwise.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeCache.TryIndirectTypeLookup(System.String,System.Type@)">
+            <summary>
+            Tries to do an indirect type lookup by scanning through every loaded assembly until the
+            type is found in one of them.
+            </summary>
+            <param name="typeName">The name of the type.</param>
+            <param name="type">The found type.</param>
+            <returns>True if the type was found, false otherwise.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeCache.Reset">
+            <summary>
+            Removes any cached type lookup results.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeCache.FindType(System.String)">
+            <summary>
+            Find a type with the given name. An exception is thrown if no type with the given name
+            can be found. This method searches all currently loaded assemblies for the given type. If the type cannot
+            be found, then null will be returned.
+            </summary>
+            <param name="name">The fully qualified name of the type.</param>
+        </member>
+        <member name="M:FullInspector.Internal.TypeCache.FindType(System.String,System.String)">
+            <summary>
+            Find a type with the given name. An exception is thrown if no type with the given name
+            can be found. This method searches all currently loaded assemblies for the given type. If the type cannot
+            be found, then null will be returned.
+            </summary>
+            <param name="name">The fully qualified name of the type.</param>
+            <param name="assemblyHint">A hint for the assembly to start the search with. Use null if unknown.</param>
+        </member>
+        <member name="T:FullInspector.Internal.TypeExtensions">
+            <summary>
+            Extensions to the Type API.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.CSharpName(System.Type)">
+            <summary>
+            Returns a pretty name for the type in the style of one that you'd see in C#.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.IsNullableType(System.Type)">
+            <summary>
+            Returns true if the given type is nullable.
+            </summary>
+            <remarks>
+            This *should* always return false if the type was fetched via GetType() according to the
+            .NET docs at http://msdn.microsoft.com/en-us/library/ms366789.aspx.
+            </remarks>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.HasParent(System.Type,System.Type)">
+            <summary>
+            Searches for a particular implementation of the given type inside of the type. This is
+            particularly useful if the interface type is an open type, ie, typeof(IFace{}), because
+            this method will then return IFace{} but with appropriate type parameters inserted.
+            </summary>
+            <param name="type">The base type to search for interface</param>
+            <param name="parentType">The interface type to search for. Can be an open generic
+            type.</param>
+            <returns>The actual interface type that the type contains, or null if there is no
+            implementation of the given interfaceType on type.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.GetInterface(System.Type,System.Type)">
+            <summary>
+            Searches for a particular implementation of the given interface type inside of the type.
+            This is particularly useful if the interface type is an open type, ie, typeof(IFace{}),
+            because this method will then return IFace{} but with appropriate type parameters
+            inserted.
+            </summary>
+            <param name="type">The base type to search for interface</param>
+            <param name="interfaceType">The interface type to search for. Can be an open generic
+            type.</param>
+            <returns>The actual interface type that the type contains, or null if there is no
+            implementation of the given interfaceType on type.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.IsImplementationOf(System.Type,System.Type)">
+            <summary>
+            Returns true if the baseType is an implementation of the given interface type. The
+            interface type can be generic.
+            </summary>
+            <param name="type">The type to search for an implementation of the given
+            interface</param>
+            <param name="interfaceType">The interface type to search for</param>
+            <returns></returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.HasAttribute(System.Reflection.MemberInfo,System.Type)">
+            <summary>
+            Returns true if the given attribute is defined on the given element.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.HasAttribute``1(System.Reflection.MemberInfo)">
+            <summary>
+            Returns true if the given attribute is defined on the given element.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.GetAttribute(System.Reflection.MemberInfo,System.Type)">
+            <summary>
+            Fetches the given attribute from the given MemberInfo. This method applies caching
+            and is allocation free (after caching has been performed).
+            </summary>
+            <param name="element">The MemberInfo the get the attribute from.</param>
+            <param name="attributeType">The type of attribute to fetch.</param>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="M:FullInspector.Internal.TypeExtensions.GetAttribute``1(System.Reflection.MemberInfo)">
+            <summary>
+            Fetches the given attribute from the given MemberInfo.
+            </summary>
+            <typeparam name="TAttribute">The type of attribute to fetch.</typeparam>
+            <param name="element">The MemberInfo to get the attribute from.</param>
+            <returns>The attribute or null.</returns>
+        </member>
+        <member name="T:FullInspector.CommentAttribute">
+            <summary>
+            A comment attribute adds a comment to an object that is viewable in the inspector.
+            </summary>
+        </member>
+        <member name="T:FullInspector.CommentType">
+            <summary>
+            A comment can have an associated message box info header associated with it. This enum
+            describes the header options.
+            </summary>
+        </member>
+        <member name="F:FullInspector.CommentType.None">
+            <summary>
+            No header. This is the default comment style.
+            </summary>
+        </member>
+        <member name="F:FullInspector.CommentType.Info">
+            <summary>
+            Display an "info" image next to the comment text.
+            </summary>
+        </member>
+        <member name="F:FullInspector.CommentType.Warning">
+            <summary>
+            Display a "warning" image next to the comment text.
+            </summary>
+        </member>
+        <member name="F:FullInspector.CommentType.Error">
+            <summary>
+            Display an "error" image next to the comment text.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorCommentAttribute">
+            <summary>
+            Add a comment above the given field or property.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorDisabledAttribute">
+            <summary>
+            Draws the regular property editor but with a disabled GUI. With the current implementation
+            this is not compatible with other attribute editors.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorDividerAttribute">
+            <summary>
+            Draws a divider (horizontal line) above the given field or property.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorHeaderAttribute">
+            <summary>
+            Draws a header above a property, with some nice text to go along with it. This is an
+            analog to Unity's [Header] attribute.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorHeaderAttribute.Order">
+            <summary>
+            The ordering of this item in the set of attributes. A low number will display before
+            (above) a higher number.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorHeaderAttribute.Header">
+            <summary>
+            The displayed header.
+            </summary>
+        </member>
+        <member name="M:FullInspector.InspectorHeaderAttribute.#ctor(System.String)">
+            <summary>
+            Draws a header above the given field or property/
+            </summary>
+            <param name="header">The header to display.</param>
+        </member>
+        <member name="T:FullInspector.InspectorHidePrimaryAttribute">
+            <summary>
+            Do not display the primary inspector. Only attribute property editors will be shown for
+            the given field or property.
+            </summary>
+        </member>
+        <member name="T:FullInspector.MarginAttribute">
+            <summary>
+            Adds a margin of whitespace above the given field or property.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorMarginAttribute">
+            <summary>
+            Adds whitespace above the given field or property.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorSkipInheritanceAttribute">
+            <summary>
+            Prevent the drop-down type selection editor from being shown. This is especially useful
+            for fields of type object.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorTextAreaAttribute">
+            <summary>
+            Show a text-area instead of a text-field for a string.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorTextAreaAttribute.Height">
+            <summary>
+            The height of the text area.
+            </summary>
+        </member>
+        <member name="T:FullInspector.VerifyPrefabTypeAttribute">
+            <summary>
+            A simple verification attribute that ensures the UnityObject derived target is a prefab.
+            </summary>
+        </member>
+        <member name="T:FullInspector.VerifyPrefabTypeFlags">
+            <summary>
+            The different prefab possibilities an object could be.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiEnableRestore">
+            <summary>
+            Marks if a property should be restored when restoring a backup. This is shared as a
+            reference across fiSerializedProperty and fiDeserializedProperty, so modifying it in
+            one location also modifies it in the other.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiDeserializedObject">
+            <summary>
+            A serialized object that has been deserialized. This is used to show the user the current
+            deserialized value.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiDeserializedObject.Members">
+            <summary>
+            The deserialized values.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiDeserializedMember">
+            <summary>
+            A deserialized item.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiPersistentObject">
+            <summary>
+            A reference to a Component that tries really hard to not go away, even if it's stored
+            inside of a ScriptableObject.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiPersistentObject._target">
+            <summary>
+            Our referenced object. Sometimes set to null by Unity -- if that happens, we use the
+            instance id to refetch the non-null instance.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BackupService.fiPersistentObject.RestoreFromInstanceId">
+            <summary>
+            Restores the object (if fake null) to an actual object instance via its instance id.
+            </summary>
+        </member>
+        <member name="P:FullInspector.BackupService.fiPersistentObject.Target">
+            <summary>
+            The actual component reference.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiSerializationOperator">
+            <summary>
+            An ISerializationOperator that uses a list for reference storage and targets
+            fiPersistentObjects instead of regular UnityObject references.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializationOperator.SerializedObjects">
+            <summary>
+            A list of objects that have been serialized.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiSerializedObject">
+            <summary>
+            A serialized object, ie, a backup.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.Target">
+            <summary>
+            The object that the backup is applied to.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.SavedAt">
+            <summary>
+            When the backup was made (computed from DateTime.Now).
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.ShowDeserialized">
+            <summary>
+            Only used in the editor -- if true, then the deserialized state should be shown.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.DeserializedState">
+            <summary>
+            The deserialized state. Potentially null.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.Members">
+            <summary>
+            The serialized members.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedObject.ObjectReferences">
+            <summary>
+            The serialized object references.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiSerializedMember">
+            <summary>
+            An item that has been serialized.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedMember.Name">
+            <summary>
+            The property or field name.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedMember.Value">
+            <summary>
+            The serialized state.
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiSerializedMember.ShouldRestore">
+            <summary>
+            A shared object instance (with fiDeserializedMember) that tells the deserialization
+            engine if this property should be restored upon backup restore.
+            </summary>
+        </member>
+        <member name="T:FullInspector.BackupService.fiStorageComponent">
+            <summary>
+            The backup solution stores the backups inside of this storage component. There should
+            always be two instances of the component -- one in the scene (managed by fiSceneManager),
+            and one in a prefab (managed by fiPrefabManager). The prefab storage is used when Unity is
+            in play mode (so that the data will persist) and when the data being backed up is targeting
+            something that is not a scene (say, another prefab).
+            </summary>
+        </member>
+        <member name="F:FullInspector.BackupService.fiStorageComponent.Objects">
+            <summary>
+            Our backups.
+            </summary>
+        </member>
+        <member name="M:FullInspector.BackupService.fiStorageComponent.RemoveInvalidBackups">
+            <summary>
+            Removes all backups that no longer have a target.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorCollectionPagerAttribute">
+            <summary>
+            Enables customization of how the pager interface on collections is activated. The pager
+            is used to show a subset of the current collection.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorCollectionPagerAttribute.PageMinimumCollectionLength">
+            <summary>
+            The minimum collection length before the pager is displayed. A value of 0 means that the pager
+            will always be displayed, and a negative value means that the pager will never be displayed. Use
+            AlwaysHide or AlwaysShow as utility methods for setting PageMinimumCollectionLength to those
+            special values.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectorCollectionPagerAttribute.AlwaysHide">
+            <summary>
+            If true, then the pager will always be hidden. This is a proxy for setting PageMinimumCollectionLength to -1.
+            </summary>
+        </member>
+        <member name="P:FullInspector.InspectorCollectionPagerAttribute.AlwaysShow">
+            <summary>
+            If true, then the pager will always be shown. This is a proxy for setting PageMinimumCollectionLength to 0.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorCollectionShowIndicesAttribute">
+            <summary>
+            This attribute forces indices to be shown next to the items inside of the edited
+            collection. This is only applicable to collection types (lists, arrays, dictionaries, etc).
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorCollectionShowItemDropdownAttribute">
+            <summary>
+            Use this if you wish for each item inside of a collection to have a dropdown arrow. This is
+            disabled by default as it can cause multiple dropdown arrows to be shown next to each-other
+            in certain scenarios.
+            </summary>
+        </member>
+        <member name="T:FullInspector.SingleItemListEditorAttribute">
+            <summary>
+            Changes the default editor for IList{T} types to be one that only edits a single item in the
+            collection at a single time. This can be extremely useful, if, for example, you're editing
+            an extremely large list or just want to reduce information overload.
+            </summary>
+        </member>
+        <member name="T:FullInspector.InspectorDatabaseEditorAttribute">
+            <summary>
+            Changes the default editor for IList{T} types to be one that only edits a single item in the
+            collection at a single time. This can be extremely useful, if, for example, you're editing
+            an extremely large list or just want to reduce information overload.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Rotorz.ReorderableList.ReorderableListFlags">
+            <summary>
+            Additional flags which can be passed into reorderable list field.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.DisableReordering">
+            <summary>
+            Hide grab handles and disable reordering of list items.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.HideAddButton">
+            <summary>
+            Hide add button at base of control.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.HideRemoveButtons">
+            <summary>
+            Hide remove buttons from list items.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.DisableContextMenu">
+            <summary>
+            Do not display context menu upon right-clicking grab handle.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.DisableDuplicateCommand">
+            <summary>
+            Hide "Duplicate" option from context menu.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.DisableAutoFocus">
+            <summary>
+            Do not automatically focus first control of newly added items.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.ShowIndices">
+            <summary>
+            Show zero-based index of array elements.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Rotorz.ReorderableList.ReorderableListFlags.DisableClipping">
+            <summary>
+            Do not attempt to clip items which are out of view.
+            </summary>
+            <remarks>
+            <para>Clipping helps to boost performance, though may lead to issues on some
+            interfaces.</para>
+            </remarks>
+        </member>
+        <member name="T:FullInspector.Facade`1">
+             <para>
+             A Facade is a really unique abstraction behind an object. It allows for an inspector to be
+             shown an editor for an object of any type _without_ an instance of that type (though
+             instances of the edited types are required -- though usually that's not an issue). See the
+             example below for a primary use case for the Facade.
+             </para>
+             <para>
+             Here's an example. Let's say that you have a behavior, MyBehavior, as defined below:
+            
+                 public class MyBehavior : BaseBehavior {
+                     public int X, Y, Z;
+                 }
+             
+             You want to create another behavior that can construct preinitialized instances of
+             MyBehavior, but don't want to use the prefab system. While this *is* doable, it requires
+             lots of trickery and abstraction that just makes everything really messy. With Facade, it
+             becomes extremely simple.
+             
+                 public class ReferencingBehavior : BaseBehavior {
+                     public Facade{MyBehavior} BehaviorDefinition;
+                     public Facade{Rect} RectDefinition; // We would never need to facade a rect, but it
+                                                         // demos the behavior.
+                     
+                     private MyBehavior _constructedBehavior;
+                     private Rect _constructedRect;
+                     
+                     public void OnEnable() {
+                         // You can use PopulateInstance when custom object construction is necessary.
+                         _constructedBehavior = gameObject.AddComponent{MyBehavior}();
+                         BehaviorDefinition.PopulateInstance(MyBehavior);
+                         
+                         // Or just ConstructInstance when the default ctor will work.
+                         _constructedRect = RectDefinition.ConstructInstance();
+                     }
+                 }
+                 
+             Then, an inline editor is shown for BehaviorDefinition (identical to the editor typically
+             shown for MyBehavior), where the state can be customized locally.
+             
+             The Facade is not always necessary, but there are certain situations where it is an
+             absolute life-saver.
+             </para>
+             <remarks>
+             The Facade will use the default serializer. At the moment, this cannot be customized.
+             Please also note that only the top-level element is not instantiated; edited properties
+             are frequently created and recycled.
+             </remarks>
+             <typeparam name="T">The type of object that we are a facade / proxy for.</typeparam>
+        </member>
+        <member name="M:FullInspector.Facade`1.PopulateInstance(`0@)">
+            <summary>
+            Populate an pre-constructed instance with the data stored inside of the facade.
+            </summary>
+            <param name="instance">The object instance to populate.</param>
+        </member>
+        <member name="M:FullInspector.Facade`1.ConstructInstance">
+            <summary>
+            Constructs a new instance (using the default constructor) of the given facade object.
+            </summary>
+            <returns>The populated instance.</returns>
+        </member>
+        <member name="M:FullInspector.Facade`1.ConstructInstance(UnityEngine.GameObject)">
+            <summary>
+            Constructs a new instance (using either the default constructor or AddComponent) of the given
+            facade object.
+            </summary>
+            <param name="context">The GameObect to add the Component derived type to, if applicable.</param>
+            <remarks>This override is extremely useful if T is an interface type and you want to support MonoBehaviour derived
+            components but do not want to deal with the hassle of actually constructing said instance types.</remarks>
+            <returns>The populated instance.</returns>
+        </member>
+        <member name="F:FullInspector.Facade`1.InstanceType">
+            <summary>
+            The actual type of the facade.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Facade`1.FacadeMembers">
+            <summary>
+            The raw members of the facade, in serialized format. Modifying this by hand is not
+            recommended.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Facade`1.ObjectReferences">
+            <summary>
+            UnityObject references that were encountered during serialization of the facade.
+            Modifying this by hand is not recommended.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiIValueProxyAPI">
+            <summary>
+            Used by the fiValue property drawer to get a common editing API for all of
+            the fiValue values.
+            </summary>
+        </member>
+        <member name="T:FullInspector.Internal.fiValueProxyEditor">
+            <summary>
+            A proxy type so that we can get the PropertyDrawer to activate on all
+            fiValue derived types.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiValueNullSerializer`1">
+            <summary>
+            An fiValue type that does not do any serialization. Use this if you're just
+            interested in getting the inspector.
+            </summary>
+        </member>
+        <member name="T:FullInspector.fiValue`1">
+            <summary>
+            fiValue allows you to use the Full Inspector inspecting and serialization engine on a MonoBehaviour derived type,
+            which allows for seamless compability with other assets. Usage of this type is easy; simply derive a serializable
+            custom class with the generic parameter instantiated.
+            </summary>
+            <remarks>
+            Because fiValue is deserialized using ISerializationCallbackReceiver which operates off the main thread, only
+            Full Serializer can be used as the active serialization engine -- none of the other ones are thread-safe w.r.t.
+            Unity's requirements (for example, you cannot call operator== off the main thread).
+            </remarks>
+            <typeparam name="T">The type of value to serialize.</typeparam>
+        </member>
+        <member name="F:FullInspector.fiValue`1.Value">
+            <summary>
+            The value that can be manipulated.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorRangeAttribute.Min">
+            <summary>
+            The minimum value.
+            </summary>
+        </member>
+        <member name="F:FullInspector.InspectorRangeAttribute.Max">
+            <summary>
+            The maximum value.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiExpandMode">
+            <summary>
+            Specifies how a layout item in the horizontal layout will be expanded.
+            </summary>
+        </member>
+        <member name="F:FullInspector.LayoutToolkit.fiExpandMode.Expand">
+            <summary>
+            The item does not have a fixed with and should expand to fill extra space.
+            </summary>
+        </member>
+        <member name="F:FullInspector.LayoutToolkit.fiExpandMode.Fixed">
+            <summary>
+            The item *has* a fixed with and should *not* be expanded.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiHorizontalLayout">
+            <summary>
+            Does a horizontal layout similar to GUILayout.Horizontal.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiLayout">
+            <summary>
+            A rule in the layout toolkit. A rule defines how some layout operation will occur. The
+            primary rules are the horizontal and vertical rules, which function similar to Unity's
+            GUILayout.BeginHorizontal and BeginVertical. However, rules are much more flexible;
+            there is also a rule for centering items vertically, among other things.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiLayout.RespondsTo(System.String)">
+            <summary>
+            Does this layout rule respond to the given section identifier?
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiLayout.GetSectionRect(System.String,UnityEngine.Rect)">
+            <summary>
+            Return the rect for the given section identifier.
+            </summary>
+        </member>
+        <member name="P:FullInspector.LayoutToolkit.fiLayout.Height">
+            <summary>
+            Return the height of this layout.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(FullInspector.LayoutToolkit.fiLayout)">
+            <summary>
+            Create an rule with auto width.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.Single)">
+            <summary>
+            Create a divider.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.String)">
+            <summary>
+            Create a label with auto width and the default height.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.String,System.Single)">
+            <summary>
+            Create a label with a specific width.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.String,FullInspector.LayoutToolkit.fiLayout)">
+            <summary>
+            Create a labeled rule that has auto width.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.Single,FullInspector.LayoutToolkit.fiLayout)">
+            <summary>
+            Create a rule with the specific width.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiHorizontalLayout.Add(System.String,System.Single,FullInspector.LayoutToolkit.fiLayout)">
+            <summary>
+            Create a rule with the specified width and label.
+            </summary>
+        </member>
+        <member name="P:FullInspector.LayoutToolkit.fiHorizontalLayout.ExpandCount">
+            <summary>
+            Finds the number of items in the layout which want to expand.
+            </summary>
+        </member>
+        <member name="P:FullInspector.LayoutToolkit.fiHorizontalLayout.MinimumWidth">
+            <summary>
+            Finds the minimum width required by the layout.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiLayoutHeight">
+            <summary>
+            Forces the laid out rectangle to have a specific height.
+            </summary>
+        </member>
+        <member name="M:FullInspector.LayoutToolkit.fiLayoutUtility.Margin(System.Single,FullInspector.LayoutToolkit.fiLayout)">
+            <summary>
+            Returns a layout that surrounds the given layout with a margin on all sides of the
+            given size.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiCenterVertical">
+            <summary>
+            Centers the layout rule within it vertically.
+            </summary>
+        </member>
+        <member name="T:FullInspector.LayoutToolkit.fiVerticalLayout">
+            <summary>
+            Lays out items vertically, similar to GUILayout.BeginVertical.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.MethodContainer">
+            <summary>
+            The container that will be used as a context when invoking the method.
+            </summary>
+        </member>
+        <member name="F:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.MethodName">
+            <summary>
+            The name of the method that will be invoked on the container.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.#ctor">
+            <summary>
+            Construct a new, empty delegate. The delegate cannot be invoked.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.#ctor(UnityEngine.Object,System.String)">
+            <summary>
+            Construct a delegate that will target the given container with the specified method.
+            </summary>
+        </member>
+        <member name="M:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.DoInvoke(System.Object[])">
+            <summary>
+            Internal helper method to invoke the delegate with the given parameters.
+            </summary>
+        </member>
+        <member name="P:FullInspector.Modules.SerializableDelegates.BaseSerializationDelegate.CanInvoke">
+            <summary>
+            Returns true if the delegate can currently be invoked.
+            </summary>
+        </member>
+        <member name="T:FullInspector.SharedInstance`2">
+            <summary>
+            A SharedInstance{T} contains an instance of type T whose instance is shared across multiple MonoBehaviour instances.
+            </summary>
+            <typeparam name="TInstance">The object type to store.</typeparam>
+            <typeparam name="TSerializer">The type of serializer to use.</typeparam>
+        </member>
+        <member name="F:FullInspector.SharedInstance`2.Instance">
+            <summary>
+            The shared object instance.
+            </summary>
+        </member>
+        <member name="T:FullInspector.TypeSpecifier`1">
+            <summary>
+            Provides a dropdown in the Unity editor for selecting a type that is a derived type from TBaseType.
+            </summary>
+            <typeparam name="TBaseType">The base type that Type must be assignable to.</typeparam>
+        </member>
+        <member name="F:FullInspector.TypeSpecifier`1.Type">
+            <summary>
+            A type that is assignable from TBaseType.
+            </summary>
+        </member>
+    </members>
+</doc>

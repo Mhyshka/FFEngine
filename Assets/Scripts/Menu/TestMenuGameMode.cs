@@ -4,7 +4,7 @@ using System.Collections;
 internal class TestMenuGameMode : MenuGameMode
 {
 
-	// Use this for initialization
+	/*// Use this for initialization
 	void Start () {
 	
 	}
@@ -12,5 +12,5 @@ internal class TestMenuGameMode : MenuGameMode
 	// Update is called once per frame
 	void Update () {
 	
-	}
+	}*/
 }
