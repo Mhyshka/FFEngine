@@ -17,10 +17,18 @@ internal class LoadingScreen : FFPanel
 	
 	}
 
-	protected override void PlayShowTransition()
+	/*protected override void PlayShowTransition()
 	{
 		tweens.SampleForward ();
 		state = EState.Showing;
 		OnTransitionComplete ();
-	}
+	}*/
+	
+	/*internal bool ShouldStayAlive
+	{
+		get
+		{
+			return true;
+		}
+	}*/
 }

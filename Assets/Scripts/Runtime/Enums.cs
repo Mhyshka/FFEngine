@@ -43,7 +43,8 @@ internal enum EInputEventKey
 	Spell1,
 	Spell2,
 	Spell3,
-	Spell4
+	Spell4,
+	Quit
 }
 
 internal enum EInputSwitchKey

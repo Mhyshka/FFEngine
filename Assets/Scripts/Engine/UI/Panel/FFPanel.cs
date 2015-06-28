@@ -47,6 +47,13 @@ internal class FFPanel : MonoBehaviour
 		FFEngine.UI.Unregister (gameObject.name);
 	}
 	
+	/*internal bool ShouldStayAlive
+	{
+		get
+		{
+			return false;
+		}
+	}*/
 	#region Show
 	internal virtual void Show()
 	{
@@ -59,6 +66,7 @@ internal class FFPanel : MonoBehaviour
 	
 	protected virtual void PlayShowTransition ()
 	{
+		//Debug.Log("Showing : " + gameObject.name);
 		if (state == EState.Hidden)
 		{
 			state = EState.Showing;
@@ -83,6 +91,7 @@ internal class FFPanel : MonoBehaviour
 
 	protected virtual void PlayHideTransition ()
 	{
+
 		if (state == EState.Shown)
 		{
 			state = EState.Hidding;
@@ -111,11 +120,13 @@ internal class FFPanel : MonoBehaviour
 
 	internal virtual void OnShown()
 	{
+		//Debug.Log("On Shown : " + gameObject.name);
 		state = EState.Shown;
 	}
 
 	internal virtual void OnHidden()
 	{
+		//Debug.Log("On Hidden : " + gameObject.name);
 		state = EState.Hidden;
 		gameObject.SetActive (false);
 	}

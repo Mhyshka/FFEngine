@@ -15,7 +15,7 @@ internal class TweenerGroup
 	{
 		foreach(UITweener each in inTweeners)
 		{
-			//each.ResetToBeginning();
+			each.ResetToBeginning();
 			each.PlayForward();
 		}
 
@@ -31,7 +31,7 @@ internal class TweenerGroup
 	{
 		foreach(UITweener each in outTweeners)
 		{
-			//each.ResetToBeginning();
+			each.ResetToBeginning();
 			each.PlayForward();
 		}
 		

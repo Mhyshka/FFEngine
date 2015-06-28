@@ -77,25 +77,7 @@ internal class GameManager
 	#region Loading
 	internal virtual void RequestGameMode(string a_sceneName)
 	{
-		//_currentGameMode.ForceExit();
-	}
-	#endregion
-	
-	internal void NextLevel()
-	{
-		levelIndex++;
-		Debug.LogWarning("levelIndex " + levelIndex);
-		Debug.LogWarning("levels.Count  " + levels.Count );
-
-		if (levels.Count > levelIndex) 
-		{
-			RequestLevel(levels[levelIndex].sceneName);
-		}
-	}
-
-	internal void RequestLevel(string a_sceneName)
-	{
-		FFEngine.UI.DisplayLoading();
 		Application.LoadLevelAsync (a_sceneName);
 	}
+	#endregion
 }

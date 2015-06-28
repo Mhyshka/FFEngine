@@ -9,6 +9,7 @@ public class ExitState : AGameState
 	#endregion
 
 	#region Properties
+	private bool _finalized;
 	#endregion
 
 	#region States Methods
@@ -23,17 +24,28 @@ public class ExitState : AGameState
 	internal override void Enter ()
 	{
 		base.Enter ();
-		FFEngine.Game.RequestGameMode(gameModeToLoad);
+		_finalized = false;
+		FFEngine.UI.DisplayLoading();
 	}
 
 	internal override int Manage ()
 	{
+		if(FFEngine.UI.LoadingScreenState == FFPanel.EState.Shown && !_finalized)
+		{
+			FinalizeGameMode();
+		}
 		return base.Manage ();
 	}
 
 	internal override void Exit ()
 	{
 		base.Exit ();
+	}
+	
+	internal void FinalizeGameMode()
+	{
+		_finalized = true;
+		FFEngine.Game.RequestGameMode(gameModeToLoad);
 	}
 	#endregion
 

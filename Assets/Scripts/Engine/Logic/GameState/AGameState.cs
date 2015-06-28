@@ -79,4 +79,9 @@ public abstract class AGameState : MonoBehaviour
 		_gameMode = a_gameMode;
 	}
 	
+	internal void RequestGameMode(string a_gameMode)
+	{
+		_gameMode.exit.gameModeToLoad = a_gameMode;
+		_gameMode.ForceQuit();
+	}
 }

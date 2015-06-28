@@ -20,6 +20,17 @@ public abstract class AGameMode : MonoBehaviour
 	protected bool _isGameModeLoaded = false;
 	protected bool _isUILoaded = false;
 	internal virtual bool IsLoadingComplete{get{return _isGameModeLoaded && _isUILoaded;}}
+	
+	internal AGameState CurrentState
+	{
+		get
+		{
+			AGameState state = null;
+			if(_currentID != -1)
+				state = states[_currentID];
+			return state;
+		}
+	}
 	#endregion
 	
 	#region Awake & Destroy
@@ -81,6 +92,7 @@ public abstract class AGameMode : MonoBehaviour
 	protected virtual void Exit()
 	{
 		UnregisterForEvent();
+		FFEngine.UI.ClearPanels();
 		FFEngine.Game.ReleaseGameMode();
 	}
 	#endregion
@@ -107,6 +119,11 @@ public abstract class AGameMode : MonoBehaviour
 				states[_currentID].Enter();
 			}
 		}
+	}
+	
+	internal void ForceQuit()
+	{
+		CurrentStateID = exit.ID;
 	}
 	#endregion
 	

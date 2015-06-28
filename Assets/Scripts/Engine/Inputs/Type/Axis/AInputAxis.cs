@@ -4,7 +4,7 @@ using System.Collections;
 internal abstract class AInputAxis
 {
 	#region Properties
-	internal string bindingName;
+	internal string eventName;
 	internal abstract float Value{get;}
 	#endregion
 	
@@ -16,11 +16,11 @@ internal abstract class AInputAxis
 	internal AInputAxis(string a_eventKeyName,
 	                    bool a_isInverted = false)
 	{
-		bindingName = a_eventKeyName;
-		if(!FFEngine.Inputs.axis.ContainsKey(bindingName))
-			FFEngine.Inputs.axis.Add(bindingName,this);
+		eventName = a_eventKeyName;
+		if(!FFEngine.Inputs.axis.ContainsKey(eventName))
+			FFEngine.Inputs.axis.Add(eventName,this);
 		else
-			FFEngine.Inputs.axis[bindingName] = this;
+			FFEngine.Inputs.axis[eventName] = this;
 	}
 	
 	internal bool IsTriggering()

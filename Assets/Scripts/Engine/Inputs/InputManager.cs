@@ -26,10 +26,7 @@ internal class InputManager
 	protected bool _isPollingAxis = false;
 	#endregion
 
-	#region Methods
-	#endregion
-
-	
+	#region Engine
 	internal InputManager()
 	{
 		keys = new Dictionary<string, AInputEvent>();
@@ -71,7 +68,6 @@ internal class InputManager
 				_isPollingAxis = false;
 			}
 		}
-		
 	}
 	
 	internal void StartKeyPoll()
@@ -83,4 +79,44 @@ internal class InputManager
 	{
 		_isPollingAxis = true;
 	}
+	
+	internal void Register(AInputEvent a_input)
+	{
+		keys.Add(a_input.eventName, a_input);
+	}
+	
+	internal void Register(AInputAxis a_input)
+	{
+		axis.Add(a_input.eventName, a_input);
+	}
+	#endregion
+
+	
+	#region EventListening
+	internal void RegisterOnEventKey(EInputEventKey a_key, AInputEvent.InputAction a_delegate)
+	{
+		RegisterOnEventKey(a_key.ToString(), a_delegate);
+	}
+	
+	internal void RegisterOnEventKey(string a_keyName, AInputEvent.InputAction a_delegate)
+	{
+		if(keys.ContainsKey(a_keyName))
+		{
+			keys[a_keyName].onActivation += a_delegate;
+		}
+	}
+	
+	internal void UnregisterOnEventKey(EInputEventKey a_key, AInputEvent.InputAction a_delegate)
+	{
+		UnregisterOnEventKey(a_key.ToString(), a_delegate);
+	}
+	
+	internal void UnregisterOnEventKey(string a_keyName, AInputEvent.InputAction a_delegate)
+	{
+		if(keys.ContainsKey(a_keyName))
+		{
+			keys[a_keyName].onActivation -= a_delegate;
+		}
+	}
+	#endregion
 }

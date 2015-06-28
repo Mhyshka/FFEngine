@@ -1042,7 +1042,7 @@ public class UICamera : MonoBehaviour
 
 	static int GetDirection (string axis)
 	{
-		float time = RealTime.time;
+//		float time = RealTime.time;
 
 		/*if (mNextEvent < time && !string.IsNullOrEmpty(axis))
 		{

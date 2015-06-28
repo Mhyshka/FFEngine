@@ -33,27 +33,27 @@ public class IntUnitAttribute : IntValue
 				switch(attribute)
 				{
 					case EUnitAttribute.Strength :
-					result = unit.stats.attributes.strength.Value;
+					//result = unit.stats.attributes.strength.Value;
 					break;
 					
 					case EUnitAttribute.Agility :
-					result = unit.stats.attributes.agility.Value;
+					//result = unit.stats.attributes.agility.Value;
 					break;
 					
 					case EUnitAttribute.Charisma :
-					result = unit.stats.attributes.charisma.Value;
+					//result = unit.stats.attributes.charisma.Value;
 					break;
 					
 					case EUnitAttribute.Intelligence :
-					result = unit.stats.attributes.intelligence.Value;
+					//result = unit.stats.attributes.intelligence.Value;
 					break;
 					
 					case EUnitAttribute.Willpower : 
-					result = unit.stats.attributes.willpower.Value;
+					//result = unit.stats.attributes.willpower.Value;
 					break;
 					
 					case EUnitAttribute.Perception :
-					result = unit.stats.attributes.perception.Value;
+					//result = unit.stats.attributes.perception.Value;
 					break;
 				}
 			}

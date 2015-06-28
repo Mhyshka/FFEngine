@@ -57,7 +57,17 @@ internal class UIManager
 		Application.LoadLevelAdditiveAsync(a_sceneName);
 		_panelsToLoadCount++;
 	}
-
+	
+	internal void ClearPanels()
+	{
+		foreach(FFPanel each in _panelsByName.Values)
+		{
+			GameObject.Destroy (each.gameObject);
+		}
+	}
+	#endregion
+	
+	#region LoadingScreen
 	internal void RegisterLoadingScreen(LoadingScreen a_loading)
 	{
 		_loadingScreen = a_loading;
@@ -71,6 +81,14 @@ internal class UIManager
 	internal void HideLoading()
 	{
 		_loadingScreen.Hide();
+	}
+	
+	internal FFPanel.EState LoadingScreenState
+	{
+		get
+		{
+			return _loadingScreen.state;
+		}
 	}
 	#endregion
 	
