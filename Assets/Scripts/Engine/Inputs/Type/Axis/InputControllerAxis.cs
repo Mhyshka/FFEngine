@@ -4,7 +4,14 @@ using System.Collections;
 internal class InputControllerAxis : AInputAxis
 {
 	#region Properties
-	internal InputControllerAxisBinding binding = null;
+	protected InputControllerAxisBinding _binding = null;
+	internal InputControllerAxisBinding Binding
+	{
+		get
+		{
+			return _binding;
+		}
+	}
 	internal float deadZone = 0.05f;
 	
 	internal bool isInverted;
@@ -23,7 +30,7 @@ internal class InputControllerAxis : AInputAxis
 	                             bool a_isInverted = false,
 	                             float a_deadZone = 0.05f) : base(a_eventKeyName)
 	{
-		binding = a_binding;
+		_binding = a_binding;
 		isInverted = a_isInverted;
 		deadZone = Mathf.Clamp01(a_deadZone);
 	}
@@ -32,7 +39,7 @@ internal class InputControllerAxis : AInputAxis
 	{
 		get
 		{
-			float lvalue = binding.Value;
+			float lvalue = _binding.Value;
 				
 			lvalue = FFUtils.Rerange(lvalue, new Vector2(-1f + cropBorder, 1f - cropBorder), new Vector2(-1f  , 1f));
 			
@@ -50,4 +57,8 @@ internal class InputControllerAxis : AInputAxis
 		base.DoUpdate ();
 	}
 	
+	internal void UpdateBinding(InputControllerAxisBinding a_newBinding)
+	{
+		_binding = a_newBinding;
+	}
 }

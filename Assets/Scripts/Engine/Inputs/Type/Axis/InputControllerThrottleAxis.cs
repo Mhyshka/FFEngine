@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 internal class InputControllerThrottleAxis : InputControllerAxis
@@ -18,7 +18,7 @@ internal class InputControllerThrottleAxis : InputControllerAxis
 			                             bool a_isInverted = false,
 	                                     float a_deadZone = 0.05f) : base(a_eventKeyName, a_binding, a_isInverted, a_deadZone)
 	{
-		binding = a_binding;
+		_binding = a_binding;
 		isInverted = a_isInverted;
 		deadZone = Mathf.Clamp01(a_deadZone);
 	}
@@ -27,7 +27,7 @@ internal class InputControllerThrottleAxis : InputControllerAxis
 	{
 		get
 		{
-			float lvalue = binding.Value;
+			float lvalue = _binding.Value;
 			lvalue = FFUtils.Rerange(lvalue,
 									new Vector2(-1f + cropBorder, 1f - cropBorder),
 									new Vector2(0f  , 1f));

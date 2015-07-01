@@ -11,21 +11,12 @@ Shader "Flaming Fist/Silhouette" {
     }
     SubShader
     {
-	    Tags
-	    {
-	    	"RenderType"="Opaque"
-	    }
-
-		Pass
+    
+	    Pass
         {
         	Name "Silhouette"
         	ZWrite Off
-        	Cull Back
-        	Tags
-	        {
-	            "RenderType"="Opaque"
-	            "Queue" = "Geometry-100"
-	        }
+        	Cull Front
        
 	        CGPROGRAM
 	        #pragma vertex vert
@@ -39,6 +30,7 @@ Shader "Flaming Fist/Silhouette" {
 	        {
 	            float4 vertex : POSITION;
 	            float3 normal : NORMAL;
+	            float4 tangent : TANGENT;
 	        };
 	        
 	        struct VertexOutput
@@ -57,9 +49,10 @@ Shader "Flaming Fist/Silhouette" {
 	            
 	            
 	            float outlineSize = (sqrt(distance(_WorldSpaceCameraPos,objPos.rgb))*_OutlineWidth);
-	            //outlineSize = clamp(outlineSize, outlineSize, outlineSize * 3);
-	            v.vertex.rgb += (v.normal * outlineSize).rgb;
-	            o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+	            
+	            v.vertex.rgb += v.normal * outlineSize;
+				
+				o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
 	            return o;
 	        }
 	        
@@ -76,6 +69,12 @@ Shader "Flaming Fist/Silhouette" {
 	        }
 	        ENDCG
         }
+        
+        
+	    Tags
+	    {
+	    	"RenderType"="Opaque"
+	    }
 
         CGPROGRAM
         #include "UnityCG.cginc"
@@ -133,6 +132,12 @@ Shader "Flaming Fist/Silhouette" {
 			o.Alpha = c.a;
 		}
 	    ENDCG
+
     }
     FallBack "Diffuse"
 }
+
+
+//o.normalDir = mul(_Object2World, float4(v.normal,0)).xyz;
+//outlineSize = clamp(outlineSize, outlineSize, outlineSize * 3);
+//outlineSize

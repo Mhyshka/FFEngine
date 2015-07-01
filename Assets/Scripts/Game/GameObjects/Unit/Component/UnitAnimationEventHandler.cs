@@ -17,8 +17,7 @@ public class UnitAnimationEventHandler : AUnitComponent
 	/// </summary>
 	internal void OnAttackStrike()
 	{
-		//AttackWrapper wrapper = _unit.stats.attack.basicAttack.Compute(_unit);
-		//_unit.OnAttackDelivered(wrapper);
+		_unit.OnAttackThrown(_unit.attack.basicAttack);
 	}
 	#endregion
 }

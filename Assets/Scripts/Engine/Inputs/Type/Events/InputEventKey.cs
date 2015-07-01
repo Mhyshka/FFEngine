@@ -27,5 +27,10 @@ internal class InputEventKey : AInputEvent
 				onActivation.Invoke();
 		}
 	}
+	
+	internal void UpdateBinding(InputKeyBinding a_newBinding)
+	{
+		_binding = a_newBinding;
+	}
 	#endregion
 }

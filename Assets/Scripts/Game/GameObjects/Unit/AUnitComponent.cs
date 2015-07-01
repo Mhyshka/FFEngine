@@ -75,7 +75,12 @@ internal interface IDamagesCallbacks
 	/// <summary>
 	/// Called just before when this unit sends an attack.
 	/// </summary>
-	void OnAttackDelivered(AttackWrapper a_attack);
+	void OnAttackDelivered(Unit a_target, AttackWrapper a_attack);
+	
+	/// <summary>
+	/// Called when an attack is thrown
+	/// </summary>
+	void OnAttackThrown(AttackConf a_attack);
 	#endregion
 	
 }
@@ -137,5 +142,15 @@ internal interface IOrderCallbacks
 	/// Called when this GO's order is complete or becomes invalid.
 	/// </summary>
 	void OnOrderCompleted(AOrder a_order);
+	#endregion
+}
+
+internal interface IStatsModificationCallbacks
+{
+	#region Orders Callbacks
+	/// <summary>
+	/// Called whenver this unit stats are modified
+	/// </summary>
+	void OnStatsModification();
 	#endregion
 }

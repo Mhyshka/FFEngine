@@ -48,7 +48,7 @@ internal class PlayerSelectionScript : MonoBehaviour
 	#region Selection
 	internal void OnTrySelection()
 	{
-		if(_selectedObject != null && _hoveredObjet == null)
+		if(_selectedObject != null && _hoveredObjet != _selectedObject)
 			StopSelection();
 		
 		_selectedObject = _hoveredObjet;
@@ -80,7 +80,8 @@ internal class PlayerSelectionScript : MonoBehaviour
 		                   150f,
 		                   1 << LayerMask.NameToLayer("Interaction")))
 		{
-			AInteractable hovered = hit.collider.GetComponent<AInteractable>();
+			InteractionTarget target = hit.collider.GetComponent<InteractionTarget>();
+			AInteractable hovered = target.interactable;
 			if(hovered != null)
 			{
 				//Hovered success

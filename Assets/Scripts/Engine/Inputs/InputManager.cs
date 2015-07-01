@@ -59,13 +59,20 @@ internal class InputManager
 		
 		if(_isPollingAxis)
 		{
-			InputControllerAxisBinding binding = InputControllerAxisBinding.Current;
-			if(binding != null)
+			if(InputKeyBinding.IsEscapePressed())
 			{
-				FFEventParameter args = new FFEventParameter();
-				args.data = binding;
-				FFEngine.Events.FireEvent("InputAxisDetected", args);
-				_isPollingAxis = false;
+				FFEngine.Events.FireEvent("InputAxisDetected", null);
+			}
+			else
+			{
+				InputControllerAxisBinding binding = InputControllerAxisBinding.Current;
+				if(binding != null)
+				{
+					FFEventParameter args = new FFEventParameter();
+					args.data = binding;
+					FFEngine.Events.FireEvent("InputAxisDetected", args);
+					_isPollingAxis = false;
+				}
 			}
 		}
 	}

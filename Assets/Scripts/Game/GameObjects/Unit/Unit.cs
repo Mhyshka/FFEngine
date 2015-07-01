@@ -2,10 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovementCallbacks, IDamagesCallbacks, IStatusCallbacks
+public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovementCallbacks, IDamagesCallbacks, IStatusCallbacks, IStatsModificationCallbacks
 {
 	#region Inspector Properties
-	//public UnitStats stats = null;
+	public UnitStats 		stats = null;
+	public UnitAttack 		attack = null;
+	public UnitDefense		defense = null;
+	public UnitLife 		life = null;
+	public new UnitAnimation    animation = null;
 	#endregion
 
 	#region Properties
@@ -17,6 +21,7 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 	List<AUnitComponent> _movementCallbacks		= new List<AUnitComponent>();
 	List<AUnitComponent> _damageCallbacks		= new List<AUnitComponent>();
 	List<AUnitComponent> _statusCallbacks		= new List<AUnitComponent>();
+	List<AUnitComponent> _statsCallbacks		= new List<AUnitComponent>();
 	#endregion
 
 	#region Starts Methods
@@ -43,6 +48,8 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 				_damageCallbacks.Add(unitComp);
 			if(each is IStatusCallbacks)
 				_statusCallbacks.Add(unitComp);
+			if(each is IStatsModificationCallbacks)
+				_statsCallbacks.Add (unitComp);
 		}
 	}
  	#endregion
@@ -52,9 +59,12 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 	{
   		if(Input.GetKeyDown(KeyCode.Space))
 		{
-			//GetComponent<Animation>().State = UnitAnimation.EState.Attack;
+			animation.State = UnitAnimation.EState.Attack;
 		}
 	}
+	#endregion
+	
+	#region API
 	#endregion
 	
 	#region Target Callbacks
@@ -216,7 +226,10 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 			{
 				((IDamagesCallbacks)each).OnDamageTaken(a_report);
 			}
-		}	
+		}
+		
+		Debug.Log(a_report.ToString());
+		life.Damage(a_report.final);
 	}
 
 	public void OnDamageDealt (Unit a_unit, DamageReport a_report)
@@ -229,7 +242,9 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 			}
 		}	
 	}
+	#endregion
 	
+	#region Attack Callbacks
 	public void OnAttackReceived(AttackWrapper a_attack)
 	{
 		foreach(AUnitComponent each in _damageCallbacks)
@@ -239,18 +254,34 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 				((IDamagesCallbacks)each).OnAttackReceived(a_attack);
 			}
 		}	
-		//stats.hitpoints.Damage(stats.defense.ApplyDamage(a_attack).final);
+		
+		defense.ApplyDamage(a_attack);
 	}
 	
-	public void OnAttackDelivered(AttackWrapper a_attack)
+	public void OnAttackDelivered(Unit a_target, AttackWrapper a_attack)
 	{
 		foreach(AUnitComponent each in _damageCallbacks)
 		{
 			if(each.enabled)
 			{
-				((IDamagesCallbacks)each).OnAttackDelivered(a_attack);
+				((IDamagesCallbacks)each).OnAttackDelivered(a_target, a_attack);
 			}
-		}	
+		}
+
+		a_target.OnAttackReceived(a_attack);
+	}
+	
+	public void OnAttackThrown(AttackConf a_attack)
+	{
+		foreach(AUnitComponent each in _damageCallbacks)
+		{
+			if(each.enabled)
+			{
+				((IDamagesCallbacks)each).OnAttackThrown(a_attack);
+			}
+		}
+		
+		attack.ThrowAttack(a_attack);
 	}
 	#endregion
 	
@@ -266,26 +297,17 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 		}	
 	}
 	#endregion
-
-	#region Callbacks
-	/*internal void OnAttackComplete(AttackConf a_attack)
+	
+	#region Stats Modification Callbacks
+	public void OnStatsModification ()
 	{
-		Vector3 pos = transform.position + transform.forward * 0.5f;
-		
-		Collider[] targets = Physics.OverlapSphere(pos, 0.7f);
-		
-		
-		foreach(Collider each in targets)
+		foreach(AUnitComponent each in _statusCallbacks)
 		{
-			Unit victim = each.GetComponent<Unit>();
-			if(victim != this)
+			if(each.enabled)
 			{
-				if(victim != null)
-				{
-					victim.Damage(a_attack.Compute(this));
-				}
+				((IStatsModificationCallbacks)each).OnStatsModification();
 			}
-		}
-	}*/
+		}	
+	}
 	#endregion
 }

@@ -1,31 +1,32 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
-[System.Serializable]
 public class UnitStats : AUnitComponent
-{
-	#region Inspector Properties
-	public AttributeStats attributes = null;
-	public OffensiveStats attack = null;
-	public DefensiveStats defense = null;
-	public HitPointStats hitpoints = null;
-	#endregion
-
-	#region Properties
+{	
+	#region Attributes
+	public IntModified strength = null;
+	public IntModified agility = null;
+	
+	public IntModified intelligence = null;
+	public IntModified spirit = null;
+	
+	public IntModified charisma = null;
 	#endregion
 	
-
-
-	#region Methods
+	#region Others
+	public int level = 1;
+	#endregion
+	
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
-		attack.Init(_unit);
-		defense.Init(_unit);
-		hitpoints.Init(_unit);
+		
+		strength.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		agility.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		
+		intelligence.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		spirit.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		
+		charisma.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
 	}
-	#endregion
-
-	
-
 }

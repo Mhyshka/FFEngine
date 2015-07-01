@@ -54,7 +54,7 @@ public static class EnumerationExtensions {
 		Type type = value.GetType();
 		
 		//determine the values
-		object result = value;
+		//object result = value;
 		_Value parsed = new _Value(check, type);
 		if (parsed.Signed is long) {
 			return (Convert.ToInt64(value) & 

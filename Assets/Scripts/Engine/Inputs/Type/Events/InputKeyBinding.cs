@@ -138,5 +138,10 @@ internal class InputKeyBinding
 			return modifier;
 		}
 	}
+	
+	internal static bool IsEscapePressed()
+	{
+		return Current != null && Current.key == KeyCode.Escape;
+	}
 	#endregion
 }
