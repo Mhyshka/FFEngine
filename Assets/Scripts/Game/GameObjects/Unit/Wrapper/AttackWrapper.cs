@@ -16,6 +16,7 @@ public class AttackWrapper
 	#endregion
 
 	#region Properties
+	internal string name = "";
 	internal Vector3 targetPosition = Vector3.zero;
 	internal Unit source = null; 
 	internal EAttackStrikeType strikeType;

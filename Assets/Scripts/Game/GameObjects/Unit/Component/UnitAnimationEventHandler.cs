@@ -17,7 +17,7 @@ public class UnitAnimationEventHandler : AUnitComponent
 	/// </summary>
 	internal void OnAttackStrike()
 	{
-		_unit.OnAttackThrown(_unit.attack.basicAttack);
+		_unit.ThrowNormalAttack();
 	}
 	#endregion
 }

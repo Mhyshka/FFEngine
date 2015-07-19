@@ -48,6 +48,7 @@ public class DamageWrapper
 
 public class DamageReport
 {
+	internal string attackName;
 	internal int applied;
 	internal int reducedByArmor;
 	internal int final;
@@ -59,6 +60,7 @@ public class DamageReport
 	public static DamageReport operator + (DamageReport x, DamageReport y)
 	{
 		DamageReport report = new DamageReport();
+		report.attackName = x.attackName;
 		report.applied = x.applied + y.applied;
 		report.reducedByArmor = x.reducedByArmor + y.reducedByArmor;
 		report.final = x.final + y.final;
@@ -70,6 +72,6 @@ public class DamageReport
 	
 	public override string ToString ()
 	{
-		return applied.ToString() + " - " + reducedByArmor.ToString() + " = " + final.ToString();
+		return attackName + " : " + applied.ToString() + " - " + reducedByArmor.ToString() + " = " + final.ToString();
 	}
 }

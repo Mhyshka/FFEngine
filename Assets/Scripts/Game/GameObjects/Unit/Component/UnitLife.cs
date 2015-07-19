@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class UnitLife : AUnitComponent, IStatsModificationCallbacks
+public class UnitLife : AUnitComponent
 {	
 	#region Inspector Properties
 	public IntModified life = new IntModified();
@@ -67,7 +67,8 @@ public class UnitLife : AUnitComponent, IStatsModificationCallbacks
 			_current -= a_amount;
 			if(_current <= 0)
 			{
-				_unit.OnDeath();
+				if(_unit.onDeath != null)
+					_unit.onDeath();
 			}
 		}
 		else if(a_amount == 0)
@@ -81,8 +82,20 @@ public class UnitLife : AUnitComponent, IStatsModificationCallbacks
 	}
 	#endregion
 	
-	#region Stats Callbacks
-	public void OnStatsModification()
+	#region Events
+	internal override void RegisterForEvents ()
+	{
+		base.RegisterForEvents ();
+		_unit.onStatsModification += OnStatsModification;
+	}
+	
+	protected override void UnregisterForEvents ()
+	{
+		base.UnregisterForEvents ();
+		_unit.onStatsModification -= OnStatsModification;
+	}
+	
+	protected void OnStatsModification()
 	{
 		life.modifier.flat = BonusMaxHP;
 	}

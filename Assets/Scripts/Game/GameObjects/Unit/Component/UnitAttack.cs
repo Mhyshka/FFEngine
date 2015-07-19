@@ -199,12 +199,12 @@ public class UnitAttack : AUnitComponent
 		
 		foreach(Collider each in targets)
 		{
-			Unit victim = each.GetComponent<Unit>();
+			Unit victim = each.GetComponent<UnitTarget>().Unit;
 			if(victim != _unit)
 			{
 				if(victim != null)
 				{
-					_unit.OnAttackDelivered(victim, wrapper);
+					_unit.DeliverAttack(victim, wrapper);
 				}
 			}
 		}

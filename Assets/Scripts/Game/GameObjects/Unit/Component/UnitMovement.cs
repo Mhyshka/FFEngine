@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class UnitMovement : AUnitComponent, IStatsModificationCallbacks
+public class UnitMovement : AUnitComponent
 {
 	#region Inspector Properties
 	public NavMeshAgent walker = null;
@@ -60,13 +60,31 @@ public class UnitMovement : AUnitComponent, IStatsModificationCallbacks
 	}
 	#endregion
 	
-
+	#region Events
+	internal override void RegisterForEvents ()
+	{
+		base.RegisterForEvents ();
+		_unit.onStatsModification += OnStatsModification;
+	}
+	
+	protected override void UnregisterForEvents ()
+	{
+		base.UnregisterForEvents ();
+		_unit.onStatsModification -= OnStatsModification;
+	}
+	
+	protected void OnStatsModification ()
+	{
+		UpdateSpeed();
+	}
+	#endregion
 	
 	#region Movement
 	internal void SetDestination(Vector3 a_destination)
 	{
 		walker.SetDestination(a_destination);
-		_unit.OnDestinationUpdated(a_destination);
+		if(_unit.onDestinationUpdated!= null)
+			_unit.onDestinationUpdated(a_destination);
 	}
 	
 	internal void Stop()
@@ -98,11 +116,6 @@ public class UnitMovement : AUnitComponent, IStatsModificationCallbacks
 		{
 			return 0f;
 		}
-	}
-	
-	public void OnStatsModification ()
-	{
-		UpdateSpeed();
 	}
 	
 	protected void UpdateSpeed()

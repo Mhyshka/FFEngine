@@ -40,8 +40,8 @@ public class PlayerOrderScript : APlayerScript
 		{
 			MoveToPositionOrder order = new MoveToPositionOrder(_player.selection.TerrainPosition,
 																MoveToPositionOrder.EType.Move);
-			_player.hero.OnMoveOrderReceived(order,
-											_player.selection.TerrainPosition);
+			_player.hero.movement.SetDestination(/*order,*/
+												_player.selection.TerrainPosition);
 		}
 	}
 	#endregion

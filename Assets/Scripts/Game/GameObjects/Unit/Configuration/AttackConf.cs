@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class AttackConf
 {
 	#region Inspector Properties
+	public string attackName = "attack";
 	public FloatModified range = null;
 	public FloatModified areaOfEffect = null;
 	public FloatModified cooldown = null;
@@ -17,6 +18,7 @@ public class AttackConf
 	internal AttackWrapper Compute(Unit a_src)
 	{
 		AttackWrapper attack = new AttackWrapper();
+		attack.name = attackName;
 		attack.source = a_src;
 		attack.damages = new List<DamageWrapper>();
 		

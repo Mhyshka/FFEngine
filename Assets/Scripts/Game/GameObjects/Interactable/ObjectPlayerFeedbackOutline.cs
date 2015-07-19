@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ObjectPlayerFeedbackOutline : AInteractableComponent, IHighlighCallback, ISelectionCallback, IHoverCallback
+public class ObjectPlayerFeedbackOutline : AInteractableComponent
 {
 	public enum EState
 	{
@@ -44,6 +44,34 @@ public class ObjectPlayerFeedbackOutline : AInteractableComponent, IHighlighCall
 		UpdateOutline();
 	}
 	#endregion
+	
+	#region Events
+	internal override void RegisterForEvents ()
+	{
+		base.RegisterForEvents ();
+		_interactable.onHighlightStart += OnHighlightStart;
+		_interactable.onHighlightStop += OnHighlightStop;
+		
+		_interactable.onHoverStart += OnHoverStart;
+		_interactable.onHoverStop += OnHoverStop;
+		
+		_interactable.onSelection += OnSelection;
+		_interactable.onDeselection += OnDeselection;
+	}
+	
+	protected override void UnregisterForEvents ()
+	{
+		base.UnregisterForEvents ();
+		_interactable.onHighlightStart -= OnHighlightStart;
+		_interactable.onHighlightStop -= OnHighlightStop;
+		
+		_interactable.onHoverStart -= OnHoverStart;
+		_interactable.onHoverStop -= OnHoverStop;
+		
+		_interactable.onSelection -= OnSelection;
+		_interactable.onDeselection -= OnDeselection;
+	}
+	#endregion
 
 	#region Outline
 	protected void UpdateOutline()
@@ -71,37 +99,37 @@ public class ObjectPlayerFeedbackOutline : AInteractableComponent, IHighlighCall
 	#endregion
 	
 	#region Callbacks
-	public void OnHighlightStart ()
+	protected void OnHighlightStart ()
 	{
 		_state = _state.Include(EState.Highlighted);
 		UpdateOutline();
 	}
 
-	public void OnHighlightStop ()
+	protected void OnHighlightStop ()
 	{
 		_state = _state.Remove(EState.Highlighted);
 		UpdateOutline();
 	}
 
-	public void OnSelection ()
+	protected void OnSelection ()
 	{
 		_state = _state.Include(EState.Selected);
 		UpdateOutline();
 	}
 
-	public void OnDeselection ()
+	protected void OnDeselection ()
 	{
 		_state = _state.Remove(EState.Selected);
 		UpdateOutline();
 	}
 
-	public void OnHoverStart ()
+	protected void OnHoverStart ()
 	{
 		_state = _state.Include(EState.Hovered);
 		UpdateOutline();
 	}
 
-	public void OnHoverStop ()
+	protected void OnHoverStop ()
 	{
 		_state = _state.Remove(EState.Hovered);
 		UpdateOutline();

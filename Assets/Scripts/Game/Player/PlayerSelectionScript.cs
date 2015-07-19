@@ -91,12 +91,12 @@ public class PlayerSelectionScript : APlayerScript
 	
 	internal void StartSelection()
 	{
-		_selectedObject.OnSelection();
+		_selectedObject.onSelection();
 	}
 	
 	internal void StopSelection()
 	{
-		_selectedObject.OnDeselection();
+		_selectedObject.onDeselection();
 		_selectedObject = null;
 	}
 	#endregion
@@ -148,13 +148,13 @@ public class PlayerSelectionScript : APlayerScript
 	
 	internal void StartHover()
 	{
-		_hoveredObjet.OnHoverStart();
+		_hoveredObjet.onHoverStart();
 	}
 	
 	internal void StopHover()
 	{
 		if(_hoveredObjet != null)
-			_hoveredObjet.OnHoverStop();
+			_hoveredObjet.onHoverStop();
 			
 		_hoveredObjet = null;
 	}

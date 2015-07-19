@@ -109,8 +109,10 @@ public class UnitDefense : AUnitComponent
 		foreach(DamageWrapper each in a_attack.damages)
 		{
 			report = ComputeDamage(each, a_attack.strikeType);
-			_unit.OnDamageTaken(report);
-			a_attack.source.OnDamageDealt(_unit, report);
+			_unit.ApplyDamages(report);
+			
+			if(a_attack.source.onDamageDealt != null)
+				a_attack.source.onDamageDealt(_unit, report);
 		}
 	}
 	
