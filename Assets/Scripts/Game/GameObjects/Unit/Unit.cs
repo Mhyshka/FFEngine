@@ -5,11 +5,12 @@ using System.Collections.Generic;
 public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovementCallbacks, IDamagesCallbacks, IStatusCallbacks, IStatsModificationCallbacks
 {
 	#region Inspector Properties
-	public UnitStats 		stats = null;
-	public UnitAttack 		attack = null;
-	public UnitDefense		defense = null;
-	public UnitLife 		life = null;
+	public UnitStats 			stats = null;
+	public UnitAttack 			attack = null;
+	public UnitDefense			defense = null;
+	public UnitLife 			life = null;
 	public new UnitAnimation    animation = null;
+	public UnitMovement			movement = null;
 	#endregion
 
 	#region Properties
@@ -128,6 +129,7 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 
 	public void OnAttackOrderReceived (AOrder a_order)
 	{
+		OnNewOrderReceived(a_order);
 		foreach(AUnitComponent each in _orderCallbacks)
 		{
 			if(each.enabled)
@@ -137,19 +139,23 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 		}
 	}
 
-	public void OnMoveOrderReceived (AOrder a_order)
+	public void OnMoveOrderReceived (AOrder a_order, Vector3 a_destination)
 	{
+		OnNewOrderReceived(a_order);
 		foreach(AUnitComponent each in _orderCallbacks)
 		{
 			if(each.enabled)
 			{
-				((IOrderCallbacks)each).OnMoveOrderReceived(a_order);
+				((IOrderCallbacks)each).OnMoveOrderReceived(a_order, a_destination);
 			}
 		}
+		
+		movement.SetDestination(a_destination);
 	}
 
 	public void OnStopOrderReceived (StopOrder a_order)
 	{
+		OnNewOrderReceived(a_order);
 		foreach(AUnitComponent each in _orderCallbacks)
 		{
 			if(each.enabled)
@@ -310,4 +316,19 @@ public class Unit : AInteractable, ITargettingCallbacks, IOrderCallbacks, IMovem
 		}	
 	}
 	#endregion
+	/*
+	internal delegate void SimpleCallback();
+	
+	internal delegate void UnitCallback(Unit a_unit);
+	
+	internal delegate void OrderCallback(AOrder a_order);
+	internal delegate void OrderPositionCallback(AOrder a_order, Vector3 a_position);
+	internal delegate void OrderUnitCallback(AOrder a_order, Unit a_target);
+	
+	internal delegate void Vector3Callback(Vector3 a_position);
+	
+	internal delegate void AttackConfCallback(AttackConf a_attackConf);
+	internal delegate void AttackWrapperCallback(AttackWrapper a_attackWrapper);
+	
+	*/
 }

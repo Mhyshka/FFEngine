@@ -11,12 +11,17 @@ Shader "Flaming Fist/Silhouette" {
     }
     SubShader
     {
-    
+    	Tags
+	    {
+	    	"RenderType"="Opaque"
+	    }
+	    
 	    Pass
         {
         	Name "Silhouette"
         	ZWrite Off
         	Cull Front
+        	Lighting Off
        
 	        CGPROGRAM
 	        #pragma vertex vert
@@ -71,10 +76,7 @@ Shader "Flaming Fist/Silhouette" {
         }
         
         
-	    Tags
-	    {
-	    	"RenderType"="Opaque"
-	    }
+	    
 
         CGPROGRAM
         #include "UnityCG.cginc"

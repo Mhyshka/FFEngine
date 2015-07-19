@@ -27,10 +27,10 @@ public class AInteractable : FullInspector.BaseBehavior, ISelectionCallback, IHo
 	
 	private void PreparesReferences()
 	{
-		foreach(AInteractableComponent each in GetComponents<AInteractableComponent>())
+		/*foreach(AInteractableComponent each in GetComponents<AInteractableComponent>())
 		{
 			ParseComponent(each);
-		}
+		}*/
 		
 		foreach(AInteractableComponent each in GetComponentsInChildren<AInteractableComponent>(true))
 		{

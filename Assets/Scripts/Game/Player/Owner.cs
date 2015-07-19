@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using FullInspector;
 
 public enum EOwnerStatus
 {
@@ -9,22 +10,26 @@ public enum EOwnerStatus
 	Player
 }
 
-public class Owner
+public class Owner : FullInspector.BaseBehavior
 {
 	#region Properties
-	internal EOwnerStatus status = EOwnerStatus.Neutral;
+	public EOwnerStatus status = EOwnerStatus.Neutral;
 	
-	protected string _name = "Owner";
-	internal string Name
+	public string Name
 	{
 		get
 		{
-			return _name;
+			return gameObject.name;
 		}
 		set
 		{
-			_name = value;
+			gameObject.name = value;
 		}
 	}
 	#endregion
+	
+	protected virtual void Awake()
+	{
+	
+	}
 }

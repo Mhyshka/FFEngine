@@ -74,7 +74,7 @@ internal class EventManager
 	
 	internal void FireEvent(string a_eventKey, FFEventParameter a_eventParam = null)
 	{
-		if (_mapping.ContainsKey (a_eventKey))
+		if (_mapping.ContainsKey (a_eventKey) && _mapping[a_eventKey] != null)
 		{
 			_mapping[a_eventKey].Invoke(a_eventParam);
 		}

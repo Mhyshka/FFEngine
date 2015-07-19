@@ -24,12 +24,11 @@ internal class InputBindingWidgetKey : InputBindingWidget
 	#region Methods
 	protected virtual void Awake ()
 	{
+		Debug.Log(name + " : " + key.ToString());
 		keycodebutton.callback += ModifyKeyCode;
 		triggerModeButton.callback += ToggleActivationMode;
 		
 		_inputKey = new InputEventKey(key,binding);
-		
-		//FFEngine.Inputs.Register(_inputKey);
 		
 		UpdateDisplay();
 	}

@@ -39,7 +39,7 @@ public enum EEventType
 internal enum EInputEventKey
 {
 	Select,
-	Move,
+	Interaction,
 	Spell1,
 	Spell2,
 	Spell3,

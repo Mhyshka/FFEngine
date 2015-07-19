@@ -1,20 +1,52 @@
 using UnityEngine;
 using System.Collections;
 
-internal class PlayerSelectionScript : MonoBehaviour
+public class PlayerSelectionScript : APlayerScript
 {
 	#region Inspector Properties
-	public Player player = null;
 	#endregion
 
 	#region Properties
-	AInteractable _hoveredObjet = null;
-	AInteractable _selectedObject = null;
+	protected AInteractable _hoveredObjet = null;
+	internal AInteractable HoveredObject
+	{
+		get
+		{
+			return _hoveredObjet;
+		}
+	}
+	
+	protected AInteractable _selectedObject = null;
+	internal AInteractable SelectedObject
+	{
+		get
+		{
+			return _selectedObject;
+		}
+	}
+	
+	protected bool _hasTerrainPosition;
+	internal bool HasTerrainPosition
+	{
+		get
+		{
+			return _hasTerrainPosition;
+		}
+	}
+	protected Vector3 _terrainPosition;
+	internal Vector3 TerrainPosition
+	{
+		get
+		{
+			return _terrainPosition;
+		}
+	}
 	#endregion
 
 	#region Methods
-	protected virtual void Awake ()
+	internal override void Init (Player a_player)
 	{
+		base.Init(a_player);
 		RegisterForEvent();
 	}
 	
@@ -25,7 +57,7 @@ internal class PlayerSelectionScript : MonoBehaviour
 
 	protected virtual void Update ()
 	{
-		if(!CheckForHover() && _hoveredObjet != null)
+		if(!UpdateHover() && _hoveredObjet != null)
 		{
 			StopHover();
 		}
@@ -70,18 +102,34 @@ internal class PlayerSelectionScript : MonoBehaviour
 	#endregion
 	
 	#region Hover
-	internal bool CheckForHover()
+	internal bool UpdateHover()
 	{
 		RaycastHit hit;
 		Camera main = Camera.main;
-		Ray ray = main.ScreenPointToRay(Input.mousePosition);			
+		Ray ray = main.ScreenPointToRay(Input.mousePosition);		
+		
+		// Hover Terrain
+		if(Physics.Raycast(ray,
+		                   out hit,
+		                   150f,
+		                   1 << LayerMask.NameToLayer("Terrain")))
+		{
+			_hasTerrainPosition = true;
+			_terrainPosition = hit.point;
+		}
+		else
+		{
+			_hasTerrainPosition = false;
+		}
+		
+		//Hover Interactable
 		if(Physics.Raycast(ray,
 		                   out hit,
 		                   150f,
 		                   1 << LayerMask.NameToLayer("Interaction")))
 		{
 			InteractionTarget target = hit.collider.GetComponent<InteractionTarget>();
-			AInteractable hovered = target.interactable;
+			AInteractable hovered = target.Interactable;
 			if(hovered != null)
 			{
 				//Hovered success

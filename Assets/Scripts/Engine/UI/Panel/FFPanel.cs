@@ -16,9 +16,11 @@ internal class FFPanel : MonoBehaviour
 	public bool isUsingTransition = true;
 	public TweenerGroup tweens = null;
 	public bool hideOnLoad = true;
+	public bool hasTweenAlpha = true;
 	#endregion
 
 	#region Properties
+	protected UIPanel panel;
 	internal virtual bool ShouldMoveToRoot
 	{
 		get
@@ -32,6 +34,7 @@ internal class FFPanel : MonoBehaviour
 
 	protected virtual void Awake()
 	{
+		panel = GetComponent<UIPanel>();
 		if(!debug)
 		{
 			FFEngine.UI.Register (gameObject.name, this);
@@ -57,7 +60,8 @@ internal class FFPanel : MonoBehaviour
 	#region Show
 	internal virtual void Show()
 	{
-		gameObject.SetActive(true);
+		if(!hasTweenAlpha && panel != null)
+			panel.alpha = 1f;
 		if(isUsingTransition)
 			PlayShowTransition ();
 		else
@@ -128,7 +132,8 @@ internal class FFPanel : MonoBehaviour
 	{
 		//Debug.Log("On Hidden : " + gameObject.name);
 		state = EState.Hidden;
-		gameObject.SetActive (false);
+		if(panel != null)
+			panel.alpha = 0f;
 	}
 	#endregion
 }

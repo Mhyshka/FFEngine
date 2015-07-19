@@ -131,7 +131,7 @@ internal interface IOrderCallbacks
 	/// <summary>
 	/// Called when this GO receive a move order.
 	/// </summary>
-	void OnMoveOrderReceived(AOrder a_order);
+	void OnMoveOrderReceived(AOrder a_order, Vector3 a_destination);
 	
 	/// <summary>
 	/// Called when this GO receive a STOP order.

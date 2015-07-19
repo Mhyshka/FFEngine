@@ -1,4 +1,4 @@
-Shader "Flaming Fist/Silhouette" {
+Shader "Flaming Fist/SilhouetteSurf" {
     Properties
     {
    		_Color ("Color", Color) = (1,1,1,1)
@@ -11,30 +11,36 @@ Shader "Flaming Fist/Silhouette" {
     }
     SubShader
     {
-    
-         Tags { "RenderType" = "Opaque" }
-      CGPROGRAM
-      #pragma surface surf Lambert vertex:vert
-      struct Input {
-          float2 uv_MainTex;
-          float3 customColor;
-      };
-      void vert (inout appdata_full v, out Input o) {
-          UNITY_INITIALIZE_OUTPUT(Input,o);
-          o.customColor = abs(v.normal);
-      }
-      sampler2D _MainTex;
-      void surf (Input IN, inout SurfaceOutput o) {
-          o.Albedo = tex2D (_MainTex, IN.uv_MainTex).rgb;
-          o.Albedo *= IN.customColor;
-      }
-      ENDCG
-        
-	    Tags
-	    {
-	    	"RenderType"="Opaque"
-	    }
-
+    	 
+          Tags { "RenderType" = "Opaque" }
+          Lighting Off
+          ZWrite On
+          Cull Front
+          
+	      CGPROGRAM
+	      #pragma surface surf Lambert vertex:vert
+	      
+	      uniform float4 _OutlineColor;
+	      uniform float _OutlineWidth;
+	      
+	      
+ 	      struct Input {
+ 				float useless;
+     	  };
+	      void vert (inout appdata_full v)
+	      {
+	     	  float4 objPos = mul ( _Object2World, float4(0,0,0,1) );
+	          float outlineSize = (sqrt(distance(_WorldSpaceCameraPos,objPos.rgb))*_OutlineWidth);
+	          v.vertex.xyz += v.normal * outlineSize;
+	      }
+	      
+	      void surf (Input IN, inout SurfaceOutput o)
+	      {
+          	o.Albedo = float4(_OutlineColor.rgb,1);
+     	  }
+	      ENDCG
+	    ZWrite On
+		Cull Back
         CGPROGRAM
         #include "UnityCG.cginc"
 		#pragma surface surf Standard fullforwardshadows 
