@@ -2,28 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 
-internal class EffectOverTimeWrapper
+internal class EffectOverTimeWrapper : Effect
 {
 	internal Unit a_source;
 	internal EffectOverTimeConf baseEffect;
 	
 	#region Duration
-	//public EffectDurationConf duration = null;
 	protected float _timeElapsed = 0f;
 	protected float _timeElapsedSinceRefresh = 0f;
 	#endregion
 	
 	#region Application
-	//public EffectApplicationConf application = null;
+
 	protected int _currentStackCount = 0;
-	#endregion
-	
-	#region Classification
-	//public EffectClassification classification = null;
-	#endregion
-	
-	#region Feedback
-	//public IconTitleDescFeedbackConf feedback = null;
 	#endregion
 	
 	#region Effects

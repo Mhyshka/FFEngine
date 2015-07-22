@@ -30,7 +30,7 @@ public enum EImparementType
 }
 
 [CreateAssetMenu()]
-public class EffectOverTimeConf : BaseScriptableObject
+public class EffectOverTimeConf : EffectConf
 {
 #region Duration
 	/// <summary>
@@ -128,7 +128,4 @@ public class EffectOverTimeConf : BaseScriptableObject
 		return effect;
 	}
  #endregion
-
-
-	
 }
