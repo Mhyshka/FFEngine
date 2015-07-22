@@ -11,7 +11,7 @@ public class AttackConf
 	public FloatModified areaOfEffect = null;
 	public FloatModified cooldown = null;
 	public FloatModified rechargeRate = null;
-	public List<DamageConf> damages = null;
+	public List<EffectDamageConf> damages = null;
 	#endregion
 
 	#region Properties
@@ -20,7 +20,7 @@ public class AttackConf
 		AttackWrapper attack = new AttackWrapper();
 		attack.name = attackName;
 		attack.source = a_src;
-		attack.damages = new List<DamageEffect>();
+		attack.damages = new List<EffectDamage>();
 		
 		EAttackStrikeType type = EAttackStrikeType.Normal;
 		float rand = Random.value;
@@ -34,27 +34,18 @@ public class AttackConf
 		}
 		attack.strikeType = type;
 		
-		foreach(DamageConf each in damages)
+		foreach(EffectDamageConf each in damages)
 		{
-			DamageEffect dmg = each.Compute(a_src) as DamageEffect;
+			EffectDamage dmg = each.Compute(a_src) as EffectDamage;
 			attack.damages.Add (dmg);
 		}
 		
 		return attack;
 	}
 	
-	protected void StrikeTypeProcess(DamageEffect dmg, EAttackStrikeType a_strike)
+	protected void StrikeTypeProcess(EffectDamage dmg, EAttackStrikeType a_strike)
 	{
-		/*if(a_strike == EAttackStrikeType.Crititcal)
-		{
-			damageModifier.percent += a_src.attack.CriticalDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.CriticalArpen);
-		}
-		else if(a_strike == EAttackStrikeType.Penetration)
-		{
-			damageModifier.percent += a_src.attack.PenetrationDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.PenetrationArpen);
-		}*/
+		/**/
 	}
 	#endregion
 

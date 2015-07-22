@@ -29,7 +29,6 @@ public enum EImparementType
 	Sleep
 }
 
-[CreateAssetMenu()]
 public class EffectOverTimeConf : EffectConf
 {
 #region Duration
@@ -117,9 +116,12 @@ public class EffectOverTimeConf : EffectConf
  #endregion
 
  #region Methods
-	internal EffectOverTimeWrapper Compute(Unit a_source)
+ 	/// <summary>
+ 	/// Returns an EffectOverTime
+  	/// </summary>
+	internal override Effect Compute(Unit a_source)
 	{
-		EffectOverTimeWrapper effect = new EffectOverTimeWrapper();
+		EffectOverTime effect = new EffectOverTime();
 		effect.a_source = a_source;
 		effect.baseEffect = this;
 		

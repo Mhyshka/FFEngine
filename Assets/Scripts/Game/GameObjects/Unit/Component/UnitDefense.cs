@@ -4,15 +4,15 @@ using System.Collections;
 public class UnitDefense : AUnitComponent
 {
 	#region Defensive Stats
-	public ArmorConfiguration generalArmor = null;
+	public ArmorConf generalArmor = null;
 	
-	public ArmorConfiguration slashingArmor = null;
-	public ArmorConfiguration crushingArmor = null;
-	public ArmorConfiguration piercingArmor = null;
+	public ArmorConf slashingArmor = null;
+	public ArmorConf crushingArmor = null;
+	public ArmorConf piercingArmor = null;
 	
-	public ArmorConfiguration magicArmor = null;
+	public ArmorConf magicArmor = null;
 	
-	public ArmorConfiguration spiritArmor = null;
+	public ArmorConf spiritArmor = null;
 	#endregion
 	
 	internal override void Init (AInteractable a_unit)
@@ -106,7 +106,7 @@ public class UnitDefense : AUnitComponent
 	{
 		DamageReport report;
 		
-		foreach(DamageEffect each in a_attack.damages)
+		foreach(EffectDamage each in a_attack.damages)
 		{
 			report = ComputeDamage(each, a_attack.strikeType);
 			_unit.ApplyDamages(report);
@@ -116,7 +116,7 @@ public class UnitDefense : AUnitComponent
 		}
 	}
 	
-	internal DamageReport ComputeDamage(DamageEffect a_dmg, EAttackStrikeType a_strikeType)
+	internal DamageReport ComputeDamage(EffectDamage a_dmg, EAttackStrikeType a_strikeType)
 	{
 		DamageReport report = new DamageReport();
 		Reduction reduction = GetResistance(a_dmg.type,a_dmg.arpen);
@@ -141,7 +141,7 @@ public class UnitDefense : AUnitComponent
 		return report;
 	}
 	
-	internal bool ShouldScratch(DamageEffect a_dmg)
+	internal bool ShouldScratch(EffectDamage a_dmg)
 	{
 		float rand = Random.value * 100f;
 		int armorAfterReduction = a_dmg.arpen.Compute(GerArmor(a_dmg.type).armor, GameConstants.ARPEN_REDUCTION_IS_FLAT_FIRST);

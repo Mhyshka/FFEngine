@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using FullInspector;
 
 [System.Serializable]
 public abstract class EffectConf

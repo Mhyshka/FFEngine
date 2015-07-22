@@ -8,7 +8,7 @@ public struct Armor
 }
 
 [System.Serializable]
-public class ArmorConfiguration
+public class ArmorConf
 {
 	#region Inspector Properties
 	public IntModified armor = new IntModified();
@@ -27,7 +27,7 @@ public class ArmorConfiguration
 		return result;
 	}
 	
-	public static Armor operator +(ArmorConfiguration x, ArmorConfiguration y) 
+	public static Armor operator +(ArmorConf x, ArmorConf y) 
 	{
 		Armor result = new Armor();
 		result.armor = x.armor + y.armor;

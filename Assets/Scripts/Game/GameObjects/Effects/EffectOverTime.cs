@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-internal class EffectOverTimeWrapper : Effect
+internal class EffectOverTime : Effect
 {
 	internal Unit a_source;
 	internal EffectOverTimeConf baseEffect;
@@ -15,9 +15,6 @@ internal class EffectOverTimeWrapper : Effect
 	#region Application
 
 	protected int _currentStackCount = 0;
-	#endregion
-	
-	#region Effects
 	#endregion
 	
 	#region Effects
@@ -41,10 +38,17 @@ internal class EffectOverTimeWrapper : Effect
 	public List<Effect> onFade = null;
 	#endregion
 	
-	internal EffectOverTimeWrapper()
+	internal EffectOverTime()
 	{
 		_timeElapsed = 0f;
 		_timeElapsedSinceRefresh = 0f;
 		_currentStackCount = 1;
 	}
+	
+	#region Methods
+	internal override void Apply (Unit a_target)
+	{
+		
+	}
+	#endregion
 }
