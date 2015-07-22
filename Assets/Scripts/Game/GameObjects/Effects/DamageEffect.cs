@@ -19,7 +19,7 @@ public enum EDamageType
 	True
 }
 
-public class DamageWrapper
+public class DamageEffect : Effect
 {
 	#region Inspector Properties
 	internal EDamageType type;
@@ -43,6 +43,11 @@ public class DamageWrapper
 		arpen = a_arpen;
 		//isRanged = a_isRanged;
 	}*/
+	
+	internal override void Apply (Unit a_target)
+	{
+		
+	}
 	#endregion
 }
 

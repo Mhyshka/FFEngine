@@ -20,7 +20,7 @@ public class AttackWrapper
 	internal Vector3 targetPosition = Vector3.zero;
 	internal Unit source = null; 
 	internal EAttackStrikeType strikeType;
-	internal List<DamageWrapper> damages = null;
+	internal List<DamageEffect> damages = null;
 	#endregion
 
 	#region Methods

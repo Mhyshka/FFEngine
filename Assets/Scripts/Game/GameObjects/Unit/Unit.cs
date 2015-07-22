@@ -11,6 +11,8 @@ public class Unit : AInteractable
 	public UnitLife 			life = null;
 	public new UnitAnimation    animation = null;
 	public UnitMovement			movement = null;
+	
+	public EffectOverTimeConf effect = null;
 	#endregion
 
 	#region Properties

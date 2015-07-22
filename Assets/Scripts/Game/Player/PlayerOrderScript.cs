@@ -38,8 +38,8 @@ public class PlayerOrderScript : APlayerScript
 		}
 		else if(_player.selection.HasTerrainPosition)
 		{
-			MoveToPositionOrder order = new MoveToPositionOrder(_player.selection.TerrainPosition,
-																MoveToPositionOrder.EType.Move);
+			/*MoveToPositionOrder order = new MoveToPositionOrder(_player.selection.TerrainPosition,
+																MoveToPositionOrder.EType.Move);*/
 			_player.hero.movement.SetDestination(/*order,*/
 												_player.selection.TerrainPosition);
 		}

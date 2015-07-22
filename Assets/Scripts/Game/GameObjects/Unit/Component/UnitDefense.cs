@@ -106,7 +106,7 @@ public class UnitDefense : AUnitComponent
 	{
 		DamageReport report;
 		
-		foreach(DamageWrapper each in a_attack.damages)
+		foreach(DamageEffect each in a_attack.damages)
 		{
 			report = ComputeDamage(each, a_attack.strikeType);
 			_unit.ApplyDamages(report);
@@ -116,7 +116,7 @@ public class UnitDefense : AUnitComponent
 		}
 	}
 	
-	internal DamageReport ComputeDamage(DamageWrapper a_dmg, EAttackStrikeType a_strikeType)
+	internal DamageReport ComputeDamage(DamageEffect a_dmg, EAttackStrikeType a_strikeType)
 	{
 		DamageReport report = new DamageReport();
 		Reduction reduction = GetResistance(a_dmg.type,a_dmg.arpen);
@@ -141,7 +141,7 @@ public class UnitDefense : AUnitComponent
 		return report;
 	}
 	
-	internal bool ShouldScratch(DamageWrapper a_dmg)
+	internal bool ShouldScratch(DamageEffect a_dmg)
 	{
 		float rand = Random.value * 100f;
 		int armorAfterReduction = a_dmg.arpen.Compute(GerArmor(a_dmg.type).armor, GameConstants.ARPEN_REDUCTION_IS_FLAT_FIRST);

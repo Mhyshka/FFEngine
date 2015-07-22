@@ -35,18 +35,21 @@ public class UnitMovement : AUnitComponent
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
-		walker.updateRotation = false;
+		if(walker != null)
+			walker.updateRotation = false;
 		
 		_speed = new FloatModified();
-		BaseSpeed = walker.speed;
+		
+		if(walker != null)
+			BaseSpeed = walker.speed;
+			
 		_speed.isFlatFirst = GameConstants.MOVE_SPEED_IS_FLAT_FIRST;
 		UpdateSpeed();
 	}
 	
 	protected virtual void Update()
 	{
-		//Debug.Log(walker.nextPosition.ToString());
-		if(walker.hasPath)
+		if(walker != null && walker.hasPath)
 		{
 			Vector3 direction = walker.steeringTarget - _unit.transform.position;
 			direction.y = 0;
@@ -82,14 +85,16 @@ public class UnitMovement : AUnitComponent
 	#region Movement
 	internal void SetDestination(Vector3 a_destination)
 	{
-		walker.SetDestination(a_destination);
+		if(walker != null)
+			walker.SetDestination(a_destination);
 		if(_unit.onDestinationUpdated!= null)
 			_unit.onDestinationUpdated(a_destination);
 	}
 	
 	internal void Stop()
 	{
-		walker.Stop();
+		if(walker != null)
+			walker.Stop();
 	}
 	#endregion
 	
@@ -122,7 +127,9 @@ public class UnitMovement : AUnitComponent
 	{
 		_speed.modifier.flat = AgilitySpeed + EffectFlatSpeed;
 		_speed.modifier.percent = EffectPercentSpeed;
-		walker.speed = CurrentSpeed;
+		
+		if(walker != null)
+			walker.speed = CurrentSpeed;
 	}
 	#endregion
 }

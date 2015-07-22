@@ -20,7 +20,7 @@ public class AttackConf
 		AttackWrapper attack = new AttackWrapper();
 		attack.name = attackName;
 		attack.source = a_src;
-		attack.damages = new List<DamageWrapper>();
+		attack.damages = new List<DamageEffect>();
 		
 		EAttackStrikeType type = EAttackStrikeType.Normal;
 		float rand = Random.value;
@@ -36,10 +36,25 @@ public class AttackConf
 		
 		foreach(DamageConf each in damages)
 		{
-			attack.damages.Add (each.Compute(a_src, type));
+			DamageEffect dmg = each.Compute(a_src) as DamageEffect;
+			attack.damages.Add (dmg);
 		}
 		
 		return attack;
+	}
+	
+	protected void StrikeTypeProcess(DamageEffect dmg, EAttackStrikeType a_strike)
+	{
+		/*if(a_strike == EAttackStrikeType.Crititcal)
+		{
+			damageModifier.percent += a_src.attack.CriticalDamages;
+			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.CriticalArpen);
+		}
+		else if(a_strike == EAttackStrikeType.Penetration)
+		{
+			damageModifier.percent += a_src.attack.PenetrationDamages;
+			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.PenetrationArpen);
+		}*/
 	}
 	#endregion
 
