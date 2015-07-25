@@ -6,6 +6,8 @@ public class Player : Owner
 	#region Inspector Properties
 	public Color color = Color.blue;
 	public Unit hero = null;
+	public EReportLevel reportLevel = EReportLevel.Normal;
+	public bool isMainPlayer = true;
 	#endregion
 	
 	#region Properties
@@ -17,6 +19,10 @@ public class Player : Owner
 	protected override void Awake ()
 	{
 		base.Awake ();
+		
+		if(isMainPlayer)
+			FFEngine.Game.Players.RegisterMainPlayer(this);
+			
 		FindPlayerScripts();
 	}
 	

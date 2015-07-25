@@ -1,10 +1,12 @@
 using UnityEngine;
 using System.Collections;
 
-[System.Serializable]
+
+
 /// <summary>
-/// Standard damage effect. Can Crit & penetrate.
+/// Attack damage effect. Can Crit & penetrate. you must call the Compute() that use an additional parameter.
 /// </summary>
+[System.Serializable]
 public class EffectDamageConf : EffectConf
 {
 	#region Inspector Properties
@@ -14,52 +16,39 @@ public class EffectDamageConf : EffectConf
 	#endregion
 
 	#region Properties
-	internal EAttackStrikeType strikeType = EAttackStrikeType.Normal;
-	private bool wasSet = false;
 	#endregion
 
 	#region Methods
 	/// <summary>
-	/// Returns a DamageEffect. You should consider calling the overload methods that provide EAttackStrikeType as an additional parameter.
+	/// Returns a DamageEffect.
 	/// </summary>
-	internal override Effect Compute(Unit a_src)
+	internal override Effect Compute(AttackInfos a_attackInfos)
 	{
 		EffectDamage dmg = new EffectDamage();
+		dmg.attackInfos = a_attackInfos;
 		
-		IntModifier damageModifier = a_src.attack.GetBonusDamage(type);
-		Reduction arpenModifier = a_src.attack.GetPenetration(type);
+		IntModifier damageModifier = a_attackInfos.source.attack.GetBonusDamage(type);
+		Reduction arpenModifier = a_attackInfos.source.attack.GetPenetration(type);
 		
-		if(wasSet && strikeType == EAttackStrikeType.Crititcal)
+		if(canCrit && a_attackInfos.critType == ECriticalType.Crititcal)
 		{
-			damageModifier.percent += a_src.attack.CriticalDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.CriticalArpen);
+			damageModifier.percent += a_attackInfos.source.attack.CriticalDamages;
+			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_attackInfos.source.attack.CriticalArpen);
 		}
-		else if(wasSet && strikeType == EAttackStrikeType.Penetration)
+		else if(canCrit && a_attackInfos.critType == ECriticalType.Penetration)
 		{
-			damageModifier.percent += a_src.attack.PenetrationDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_src.attack.PenetrationArpen);
+			damageModifier.percent += a_attackInfos.source.attack.PenetrationDamages;
+			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_attackInfos.source.attack.PenetrationArpen);
 		}
 		
 		dmg.amount = range.Value;
 		
-		dmg.amount = damageModifier.Compute(dmg.amount, GameConstants.DAMAGE_BONUS_IS_FLAT_FIRST);
+		dmg.amount = damageModifier.Compute(dmg.amount, FFEngine.Game.Constants.DAMAGE_BONUS_IS_FLAT_FIRST);
 		dmg.arpen =  arpenModifier;
 		
 		dmg.type = type;
 		
-		wasSet = false;
-		
 		return dmg;
-	}
-	
-	/// <summary>
-	/// Returns a DamageEffect
-	/// </summary>
-	internal virtual Effect Compute(Unit a_src, EAttackStrikeType a_type)
-	{
-		wasSet = true;
-		strikeType = a_type;
-		return Compute (a_src);
 	}
 	#endregion
 }

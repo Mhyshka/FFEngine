@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum EDamageType
 {
@@ -22,61 +23,66 @@ public enum EDamageType
 public class EffectDamage : Effect
 {
 	#region Inspector Properties
+	internal EffectDamageConf conf;
 	internal EDamageType type;
 	internal int amount;
 	internal Reduction arpen;
-	//public bool isRanged = false;
 	#endregion
 
 	#region Properties
+	internal override int MetaStrength
+	{
+		get
+		{
+			return amount;
+		}
+	}
+	
+	internal override bool IsRevertOnDestroy
+	{
+		get
+		{
+			return false;
+		}
+	}
 	#endregion
 
 	#region Methods
-	/*internal DamageWrapper(EDamageType a_type, 
-					int a_amount,
-	                Reduction a_arpen
-	                //bool a_isRanged,
-					)
-	{
-		type = a_type;
-		amount = a_amount;
-		arpen = a_arpen;
-		//isRanged = a_isRanged;
-	}*/
-	
-	internal override void Apply (Unit a_target)
-	{
-		
-	}
 	#endregion
-}
-
-public class DamageReport
-{
-	internal string attackName;
-	internal int applied;
-	internal int reducedByArmor;
-	internal int final;
-	internal EDamageType type;
-	internal EAttackStrikeType strikeType;
-	internal bool didScratch;
-	internal bool isKillingBlow;
 	
-	public static DamageReport operator + (DamageReport x, DamageReport y)
+	#region Effect
+	internal override AEffectReport Apply(Unit a_target)
 	{
 		DamageReport report = new DamageReport();
-		report.attackName = x.attackName;
-		report.applied = x.applied + y.applied;
-		report.reducedByArmor = x.reducedByArmor + y.reducedByArmor;
-		report.final = x.final + y.final;
-		report.strikeType = (int)x.strikeType > (int)y.strikeType ? x.strikeType : y.strikeType;
-		report.isKillingBlow = x.isKillingBlow || y.isKillingBlow;
-		report.didScratch = x.didScratch && y.didScratch;
+		
+		Reduction reduction = a_target.defense.GetResistance(type, arpen);
+		
+		report.attackInfos = attackInfos;
+		report.target = a_target;
+		report.type = type;
+		report.unreduced = amount;
+		report.final = reduction.Compute(report.unreduced, FFEngine.Game.Constants.ARMOR_REDUCTION_IS_FLAT_FIRST);
+		
+		//Scratching
+		if(attackInfos.critType == ECriticalType.Normal && a_target.defense.ShouldScratch(this))
+		{
+			report.didScratch = true;
+			report.final = Mathf.FloorToInt(report.final * FFEngine.Game.Constants.SCRATCH_DAMAGE_MULTIPLIER);
+		}
+		else
+		{
+			report.didScratch = false;
+		}
+		
+		report.reducedByArmor = report.final - report.unreduced;
+		
 		return report;
 	}
 	
-	public override string ToString ()
+	internal override AEffectReport Revert (Unit a_target)
 	{
-		return attackName + " : " + applied.ToString() + " - " + reducedByArmor.ToString() + " = " + final.ToString();
+		return new DamageReport();
 	}
+	#endregion
+	
 }

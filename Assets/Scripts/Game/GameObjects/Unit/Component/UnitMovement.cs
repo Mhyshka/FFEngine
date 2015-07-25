@@ -43,7 +43,7 @@ public class UnitMovement : AUnitComponent
 		if(walker != null)
 			BaseSpeed = walker.speed;
 			
-		_speed.isFlatFirst = GameConstants.MOVE_SPEED_IS_FLAT_FIRST;
+		_speed.isFlatFirst = FFEngine.Game.Constants.MOVE_SPEED_IS_FLAT_FIRST;
 		UpdateSpeed();
 	}
 	
@@ -103,7 +103,7 @@ public class UnitMovement : AUnitComponent
 	{
 		get
 		{
-			return  GameConstants.AGILITY_MOVE_SPEED_PER_POINT * _unit.stats.agility.Value;
+			return  FFEngine.Game.Constants.AGILITY_MOVE_SPEED_PER_POINT * _unit.stats.agility.Value;
 		}
 	}
 	

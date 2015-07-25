@@ -21,12 +21,12 @@ public class UnitStats : AUnitComponent
 	{
 		base.Init (a_unit);
 		
-		strength.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		agility.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		strength.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		agility.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
 		
-		intelligence.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		spirit.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		intelligence.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		spirit.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
 		
-		charisma.isFlatFirst = GameConstants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		charisma.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
 	}
 }

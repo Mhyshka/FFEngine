@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,9 +11,17 @@ public class Unit : AInteractable
 	public UnitLife 			life = null;
 	public new UnitAnimation    animation = null;
 	public UnitMovement			movement = null;
+	public UnitTimeHandler		time = null;
 	#endregion
 
 	#region Properties
+	internal string Name
+	{
+		get
+		{
+			return name;
+		}
+	}
 	#endregion
 	
 	#region Interface Lists
@@ -23,6 +31,12 @@ public class Unit : AInteractable
 	protected override void Awake ()
 	{
 		base.Awake();
+		FFEngine.Game.Units.RegisterUnit(this);
+	}
+	
+	protected virtual void OnDestroy()
+	{
+		FFEngine.Game.Units.UnregisterUnit(this);
 	}
 	
 	protected override void ParseComponent(AInteractableComponent each)
@@ -39,43 +53,24 @@ public class Unit : AInteractable
   		if(Input.GetKeyDown(KeyCode.Space))
 		{
 			animation.State = UnitAnimation.EState.Attack;
+			animation.animator.SetTrigger("Attack_Strike");
+			
 		}
 	}
 	#endregion
 	
-	#region API
-	/// <summary>
-	/// Call this when you want the character to inflict basic attack damages.
-	/// </summary>
-	internal void ThrowNormalAttack()
-	{	
-		attack.ThrowAttack(attack.basicAttack);
-	}
+	#region Damages & Attack reception
 	
-	/// <summary>
-	/// Call this when you want to apply an attack damages to a target.
-	/// </summary>
-	internal void DeliverAttack(Unit a_target, AttackWrapper a_attack)
+	internal void ReceiveAttack(EffectDamage a_dmg)
 	{
-		if(onAttackDelivered != null)
-			onAttackDelivered(a_target, a_attack);
-		a_target.ApplyAttack(a_attack);
-	}
-	
-	/// <summary>
-	/// Call this when this unit should received an attack damages.
-	/// </summary>
-	internal void ApplyAttack(AttackWrapper a_attack)
-	{
-		if(onAttackReceived != null)
-			onAttackReceived(a_attack);
-		defense.ApplyDamage(a_attack);
+		/*if(onDamageReceived != null)
+			onDamageReceived(a_dmg);*/
 	}
 	
 	/// <summary>
 	/// Called by the ApplyAttack() method after damages reduction from armor.
 	/// </summary>
-	internal void ApplyDamages(DamageReport a_report)
+	protected void ApplyDamages(DamageReport a_report)
 	{
 		if(onDamageTaken!= null)
 			onDamageTaken(a_report);
@@ -112,7 +107,6 @@ public class Unit : AInteractable
 	#region Attack Callbacks
 	internal AttackWrapperCallback onAttackReceived;
 	internal AttackCallback onAttackDelivered;
-	internal AttackConfCallback onAttackThrown;
 	#endregion
 	
 	#region Status Callbacks

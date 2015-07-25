@@ -1,0 +1,15 @@
+﻿using UnityEngine;
+using System.Collections;
+
+[System.Serializable]
+public class EffectApplyEffectOverTimeConf : EffectConf
+{
+	public EffectOverTimeConf effectToApply = null;
+	
+	internal override Effect Compute (AttackInfos a_attackInfos)
+	{
+		EffectApplyEffectOverTime effect = new EffectApplyEffectOverTime();
+		effect.effectOverTime = effectToApply.Compute(a_attackInfos);
+		return effect;
+	}
+}

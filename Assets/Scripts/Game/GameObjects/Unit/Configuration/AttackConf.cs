@@ -6,46 +6,64 @@ using System.Collections.Generic;
 public class AttackConf
 {
 	#region Inspector Properties
-	public string attackName = "attack";
+	public string name = "attack";
+	//TODO LOCALIZATION
+	internal string Name
+	{
+		get
+		{
+			return name;
+		}
+	}
 	public FloatModified range = null;
 	public FloatModified areaOfEffect = null;
 	public FloatModified cooldown = null;
 	public FloatModified rechargeRate = null;
-	public List<EffectDamageConf> damages = null;
+	public List<EffectConf> effects = null;
 	#endregion
 
 	#region Properties
-	internal AttackWrapper Compute(Unit a_src)
+	internal Vector3 TargetPosition(Unit a_source)
+	{
+		Vector3 pos = a_source.transform.position + a_source.transform.forward * range.Value;
+		return pos;
+	}
+	
+	internal List<Unit> SeekTargets(Unit a_soucre, Vector3 a_attackPosition)
+	{
+		List<Unit> targets = new List<Unit>();
+		
+		Collider[] colliders = Physics.OverlapSphere(a_attackPosition, areaOfEffect.Value, 1 << LayerMask.NameToLayer("Unit"));
+		
+		foreach(Collider each in colliders)
+		{
+			Unit newTarget = each.GetComponent<UnitTarget>().Unit;
+			if(newTarget != a_soucre)
+			{
+				if(newTarget != null)
+				{
+					targets.Add(newTarget);
+				}
+			}
+		}
+
+		return targets;
+	}
+	
+	internal AttackWrapper Compute(AttackInfos a_attackInfos)
 	{
 		AttackWrapper attack = new AttackWrapper();
-		attack.name = attackName;
-		attack.source = a_src;
-		attack.damages = new List<EffectDamage>();
+		attack.conf = this;
+		attack.attackInfos = a_attackInfos;
+		attack.effects = new List<Effect>();
 		
-		EAttackStrikeType type = EAttackStrikeType.Normal;
-		float rand = Random.value;
-		if(rand <= a_src.attack.CriticalChances)
+		foreach(EffectConf each in effects)
 		{
-			type = EAttackStrikeType.Crititcal;
-		}
-		else if(rand <= a_src.attack.PenetrationChances)
-		{
-			type = EAttackStrikeType.Penetration;
-		}
-		attack.strikeType = type;
-		
-		foreach(EffectDamageConf each in damages)
-		{
-			EffectDamage dmg = each.Compute(a_src) as EffectDamage;
-			attack.damages.Add (dmg);
+			Effect computed = each.Compute(a_attackInfos);
+			attack.effects.Add (computed);
 		}
 		
 		return attack;
-	}
-	
-	protected void StrikeTypeProcess(EffectDamage dmg, EAttackStrikeType a_strike)
-	{
-		/**/
 	}
 	#endregion
 

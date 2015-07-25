@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Animator))]
@@ -17,7 +17,7 @@ public class UnitAnimationEventHandler : AUnitComponent
 	/// </summary>
 	internal void OnAttackStrike()
 	{
-		_unit.ThrowNormalAttack();
+		_unit.attack.FireAttack(_unit.attack.basicAttack);
 	}
 	#endregion
 }

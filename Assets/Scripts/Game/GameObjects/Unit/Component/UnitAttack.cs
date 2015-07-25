@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class UnitAttack : AUnitComponent
 {
@@ -29,7 +30,7 @@ public class UnitAttack : AUnitComponent
 			reduc.flat 		+= bonusPhysicalArpen.flat;
 			reduc.percent 	+= bonusPhysicalArpen.percent;
 			
-			reduc.flat += _unit.stats.strength.Value * GameConstants.STRENGTH_ARPEN_PER_POINT;
+			reduc.flat += _unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_ARPEN_PER_POINT;
 			
 			return reduc;
 		}
@@ -83,7 +84,7 @@ public class UnitAttack : AUnitComponent
 			modifier.flat += bonusPhysicalDamage.flat;
 			modifier.percent += bonusPhysicalDamage.percent;
 			
-			modifier.percent += _unit.stats.strength.Value * GameConstants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
+			modifier.percent += _unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
 			
 			return modifier;
 		}
@@ -97,7 +98,7 @@ public class UnitAttack : AUnitComponent
 			modifier.flat += bonusMagicDamage.flat;
 			modifier.percent += bonusMagicDamage.percent;
 			
-			modifier.percent += _unit.stats.intelligence.Value * GameConstants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
+			modifier.percent += _unit.stats.intelligence.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
 			
 			return modifier;
 		}
@@ -136,7 +137,7 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return _unit.stats.agility.Value * GameConstants.AGILITY_CRITICAL_CHANCE_PER_POINT + bonusCriticalChance;
+			return _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_CRITICAL_CHANCE_PER_POINT + bonusCriticalChance;
 		}
 	}
 	
@@ -144,7 +145,7 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return GameConstants.CRITICAL_DAMAGE_BONUS_PERCENT + bonusCriticalDamage;
+			return FFEngine.Game.Constants.CRITICAL_DAMAGE_BONUS_PERCENT + bonusCriticalDamage;
 		}
 	}
 	
@@ -152,7 +153,7 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return GameConstants.CRITICAL_ARMOR_REDUCTION - bonusCriticalArpen;
+			return FFEngine.Game.Constants.CRITICAL_ARMOR_REDUCTION - bonusCriticalArpen;
 		}
 	}
 	#endregion
@@ -166,7 +167,7 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return _unit.stats.agility.Value * GameConstants.AGILITY_PENETRATING_CHANCE_PER_POINT + bonusPenetrationChance;
+			return _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_PENETRATING_CHANCE_PER_POINT + bonusPenetrationChance;
 		}
 	}
 	
@@ -174,7 +175,7 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return GameConstants.PENETRATION_DAMAGE_BONUS_PERCENT + bonusPenetrationDamage;
+			return FFEngine.Game.Constants.PENETRATION_DAMAGE_BONUS_PERCENT + bonusPenetrationDamage;
 		}
 	}
 	
@@ -182,32 +183,50 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			return GameConstants.PENETRATION_ARMOR_REDUCTION - bonusPenetrationArpen;
+			return FFEngine.Game.Constants.PENETRATION_ARMOR_REDUCTION - bonusPenetrationArpen;
 		}
 	}
 	#endregion
 	
 	#region Attack
-	internal void ThrowAttack(AttackConf a_attack)
+	/// <summary>
+	/// Check for possible targets and send them the attack.
+	/// </summary>
+	internal void FireAttack(AttackConf a_attack)
 	{
-		AttackWrapper wrapper = a_attack.Compute(_unit);
-		
-		Vector3 pos = transform.position + transform.forward * a_attack.range.Value;
-		wrapper.targetPosition = pos;
-		
-		Collider[] targets = Physics.OverlapSphere(pos, a_attack.areaOfEffect.Value, 1 << LayerMask.NameToLayer("Unit"));
-		
-		foreach(Collider each in targets)
+		Vector3 pos = a_attack.TargetPosition(_unit);
+		List<Unit> targets = a_attack.SeekTargets(_unit, pos);
+		if(targets.Count > 0)
 		{
-			Unit victim = each.GetComponent<UnitTarget>().Unit;
-			if(victim != _unit)
+			AttackInfos attackInfos = new AttackInfos();
+			attackInfos.affectedTargets = targets;
+			attackInfos.targetPosition = pos;
+			attackInfos.critType = TryToCrit();
+			attackInfos.source = _unit;
+			
+			AttackWrapper wrapper = a_attack.Compute(attackInfos);
+			foreach(Unit each in targets)
 			{
-				if(victim != null)
-				{
-					_unit.DeliverAttack(victim, wrapper);
-				}
+				Debug.Log(wrapper.Apply(each).ToString());
 			}
 		}
+	}
+	
+	internal ECriticalType TryToCrit()
+	{
+		ECriticalType critType = ECriticalType.Normal;
+		
+		float rand = Random.value;
+		if(rand <= CriticalChances)
+		{
+			critType = ECriticalType.Crititcal;
+		}
+		else if(rand <= PenetrationChances)
+		{
+			critType = ECriticalType.Penetration;
+		}
+	
+		return critType;
 	}
 	#endregion
 }

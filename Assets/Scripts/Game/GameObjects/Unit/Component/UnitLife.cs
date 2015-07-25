@@ -39,7 +39,7 @@ public class UnitLife : AUnitComponent
 	{
 		get
 		{
-			return GameConstants.STRENGTH_HP_PER_POINT * _unit.stats.strength.Value;
+			return FFEngine.Game.Constants.STRENGTH_HP_PER_POINT * _unit.stats.strength.Value;
 		}
 	}
 	
@@ -50,7 +50,7 @@ public class UnitLife : AUnitComponent
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
-		life.isFlatFirst = GameConstants.LIFE_BONUS_HP_IS_FLAT_FIRST;
+		life.isFlatFirst = FFEngine.Game.Constants.LIFE_BONUS_HP_IS_FLAT_FIRST;
 		
 		OnStatsModification();
 		_current = Mathf.Clamp(Mathf.CeilToInt(Max * startPercentage), 

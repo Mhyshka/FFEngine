@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum EAttackStrikeType
+public enum ECriticalType
 {
 	Normal,
 	Penetration,
@@ -16,13 +16,27 @@ public class AttackWrapper
 	#endregion
 
 	#region Properties
-	internal string name = "";
-	internal Vector3 targetPosition = Vector3.zero;
-	internal Unit source = null; 
-	internal EAttackStrikeType strikeType;
-	internal List<EffectDamage> damages = null;
+	internal AttackConf conf = null;
+	internal AttackInfos attackInfos = null;
+	internal List<Effect> effects = null;
 	#endregion
 
 	#region Methods
+	internal AttackReport Apply(Unit a_target)
+	{
+		//a_target.onAttackReceived(this);
+		
+		AttackReport report = new AttackReport();
+		report.attack = conf;
+		report.attackInfos = attackInfos;
+		report.target = a_target;
+		
+		foreach(Effect each in effects)
+		{
+			report.effects.Add(each.Apply(a_target));
+		}
+		
+		return report.Prepare();
+	}
 	#endregion
 }

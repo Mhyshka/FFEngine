@@ -3,7 +3,20 @@ using System.Collections;
 
 public abstract class Effect
 {
-	internal Unit source;
+	internal bool isStackable;
+	internal AttackInfos attackInfos;
 	
-	internal abstract void Apply(Unit a_target);
+	internal abstract AEffectReport Apply(Unit a_target);
+	
+	internal abstract AEffectReport Revert(Unit a_target);
+	
+	internal abstract bool IsRevertOnDestroy
+	{
+		get;
+	}
+	
+	internal abstract int MetaStrength
+	{
+		get;
+	}
 }

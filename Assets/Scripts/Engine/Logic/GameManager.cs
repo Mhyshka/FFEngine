@@ -2,12 +2,12 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Basic Game Manager that handles loading of GameModes.
+/// </summary>
 internal class GameManager
 {
 	#region Properties
-	internal List<GameLevelData> levels = new List<GameLevelData>();
-	internal int levelIndex = 0;
-	
 	protected AGameMode _currentGameMode = null;
 	protected string _currentSceneName = "";
 	#endregion

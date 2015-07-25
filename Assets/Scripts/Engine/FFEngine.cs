@@ -15,14 +15,14 @@ internal class FFEngine
 	private InputManager _inputManager;
 	internal static InputManager Inputs{get{return s_instance._inputManager;}}
 	
-	private GameManager _gameManager;
-	internal static GameManager Game{get{return s_instance._gameManager;}}
+	private RpgGameManager _gameManager;
+	internal static RpgGameManager Game{get{return s_instance._gameManager;}}
 	#endregion
 	
 	internal FFEngine()
 	{
 		s_instance = this;
-		_gameManager = new GameManager();
+		_gameManager = new RpgGameManager();
 		_uiManager = new UIManager();
 		_eventManager = new EventManager();
 		_inputManager = new InputManager();
