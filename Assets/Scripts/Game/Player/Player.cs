@@ -6,7 +6,7 @@ public class Player : Owner
 	#region Inspector Properties
 	public Color color = Color.blue;
 	public Unit hero = null;
-	public EReportLevel reportLevel = EReportLevel.Normal;
+	public EReportLevel reportLevel = EReportLevel.Verbose;
 	public bool isMainPlayer = true;
 	#endregion
 	

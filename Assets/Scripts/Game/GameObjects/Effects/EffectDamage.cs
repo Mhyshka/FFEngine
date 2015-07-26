@@ -8,6 +8,7 @@ public enum EDamageType
 	Slashing,
 	Piercing,
 	Crushing,
+	//Bleed,
 	
 //Magic
 	Magic,
@@ -37,14 +38,6 @@ public class EffectDamage : Effect
 			return amount;
 		}
 	}
-	
-	internal override bool IsRevertOnDestroy
-	{
-		get
-		{
-			return false;
-		}
-	}
 	#endregion
 
 	#region Methods
@@ -58,9 +51,13 @@ public class EffectDamage : Effect
 		Reduction reduction = a_target.defense.GetResistance(type, arpen);
 		
 		report.attackInfos = attackInfos;
+		report.effectInfos = effectInfos;
+		
+		int baseDmg = ComputeStackModifications();
+		
 		report.target = a_target;
 		report.type = type;
-		report.unreduced = amount;
+		report.unreduced = baseDmg;
 		report.final = reduction.Compute(report.unreduced, FFEngine.Game.Constants.ARMOR_REDUCTION_IS_FLAT_FIRST);
 		
 		//Scratching
@@ -77,6 +74,20 @@ public class EffectDamage : Effect
 		report.reducedByArmor = report.final - report.unreduced;
 		
 		return report;
+	}
+	
+	internal int ComputeStackModifications()
+	{
+		if(effectInfos != null)
+		{
+			if(effectInfos.doesStack && effectInfos.effectOverTime.CurrentStackCount > 1)
+			{
+				return effectInfos.perStackModifier.ComputeAdditive(amount, 
+				                                                     effectInfos.effectOverTime.CurrentStackCount);
+			}
+		}
+		
+		return amount;
 	}
 	
 	internal override AEffectReport Revert (Unit a_target)

@@ -12,6 +12,7 @@ public class Unit : AInteractable
 	public new UnitAnimation    animation = null;
 	public UnitMovement			movement = null;
 	public UnitTimeHandler		time = null;
+	public UnitEffectHandler	effect = null;
 	#endregion
 
 	#region Properties
@@ -52,9 +53,9 @@ public class Unit : AInteractable
 	{
   		if(Input.GetKeyDown(KeyCode.Space))
 		{
-			animation.State = UnitAnimation.EState.Attack;
 			animation.animator.SetTrigger("Attack_Strike");
-			
+			animation.State = UnitAnimation.EState.Attack;
+
 		}
 	}
 	#endregion

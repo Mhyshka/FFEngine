@@ -17,6 +17,7 @@ public enum EReportAlignement
 
 public abstract class ACombatReport
 {
+	internal int indentLevel = 0;
 	internal abstract EReportLevel Level
 	{
 		get;
@@ -27,4 +28,3 @@ public abstract class ACombatReport
 		get;
 	}
 }
-

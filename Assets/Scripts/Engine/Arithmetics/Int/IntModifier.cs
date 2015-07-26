@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-internal class IntModifier
+public class IntModifier
 {
 	#region Inspector Properties
 	public float percent = 0f;
@@ -29,6 +29,17 @@ internal class IntModifier
 		
 		return result;
 	}
+	
+	internal int ComputeAdditive(int a_value, int a_stack)
+	{
+		int result = a_value;
+		
+		result += Mathf.FloorToInt(result * percent * (a_stack - 1));
+		result += flat * (a_stack - 1);
+		
+		return result;
+	}
+	
 	
 	public static IntModifier operator + (IntModifier x, IntModifier y)
 	{

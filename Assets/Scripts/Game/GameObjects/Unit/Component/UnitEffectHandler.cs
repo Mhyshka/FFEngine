@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class UnitEffectHandler : AUnitComponent
 {
 	protected List<EffectOverTime> _effects;
+	protected List<EffectOverTime> _toRemove = new List<EffectOverTime>();
 	
 	#region Init
 	internal override void Init (AInteractable a_unit)
@@ -16,26 +17,31 @@ public class UnitEffectHandler : AUnitComponent
 	#endregion
 	
 	#region Applying
-	internal EffectApplyResult TryApplyEffect(EffectOverTime a_effect)
+	internal EffectOverTimeReport TryApplyEffect(EffectOverTime a_effect)
 	{
+		EffectOverTimeReport report;
+		
 		if(a_effect.conf.stackMethod == EUnitEffectStackMethod.OnePerUnit)
 		{
 			EffectOverTime previousEffect = GetEffectOfType(a_effect);
 			if(previousEffect != null)
 			{
 				ReplaceEffect(previousEffect, a_effect);
-				a_effect.Refresh();
-				return EffectApplyResult.Refreshed;
+				report = a_effect.Refresh();
 			}
 			else
 			{
 				AddNewEffect(a_effect);
-				a_effect.Apply();
-				return EffectApplyResult.Applied;
+				report = a_effect.Apply();
 			}
 		}
+		else
+		{
+			report = new EffectOverTimeReport();
+			report.successfullyApplied = false;
+		}
 		
-		return EffectApplyResult.NotApplied;
+		return report;
 	}
 	
 	/// <summary>
@@ -44,19 +50,40 @@ public class UnitEffectHandler : AUnitComponent
 	protected void AddNewEffect(EffectOverTime a_effect)
 	{
 		_effects.Add(a_effect);
-		a_effect.Prepare(_unit);
+		if(!a_effect.IsPrepared)
+			a_effect.Prepare(_unit);
 	}
 	#endregion
 	
 	#region Management
 	protected virtual void Update()
 	{
+		_toRemove.Clear();
 		foreach(EffectOverTime each in _effects)
 		{
-			if(each.Update(_unit.time.EffectTimeScale * Time.deltaTime))
+			each.Update(_unit.time.EffectTimeScale * Time.deltaTime);
+			
+			EffectOverTimeReport report;
+			while(each.TickNeeded > 0)
 			{
-				EffectTimeOut(each);
+				Debug.Log(each.Tick().ToString());
 			}
+				
+			if(each.ShouldTimeout)
+			{
+				Debug.Log(each.Timeout().ToString());
+			}
+				
+			if(each.ShouldTimeout)//Wasn't reseted
+			{
+				Debug.Log(each.Destroy().ToString());
+				_toRemove.Add(each);
+			}
+		}
+		
+		foreach(EffectOverTime each in _toRemove)
+		{
+			RemoveEffect(each);
 		}
 	}
 	#endregion
@@ -107,27 +134,14 @@ public class UnitEffectHandler : AUnitComponent
 	
 	internal void ReplaceEffect(EffectOverTime a_previous, EffectOverTime a_new)
 	{
-		a_new.Prepare (_unit);
+		if(!a_new.IsPrepared)
+			a_new.Prepare (_unit, a_previous.CurrentStackCount);
 		a_new.timeElapsed = a_previous.timeElapsed;
 		RemoveEffect(a_previous);
-	}
-	
-	internal void EffectTimeOut(EffectOverTime a_effect)
-	{
-		a_effect.Timeout();
-		_effects.Remove(a_effect);
-		a_effect.Destroy();
+		AddNewEffect(a_new);
 	}
 	#endregion
 }
-
-public enum EffectApplyResult
-{
-	NotApplied,
-	Applied,
-	Refreshed
-}
-
 
 /*
 	if(a_effect.conf.stackLimit == EEffectStackLimit.None)

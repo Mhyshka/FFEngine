@@ -36,16 +36,16 @@ public enum EUnitEffectStackMethod
 	One
 }
 
-public enum EffectOverTimeTrigger
+public enum EEffectOverTimeTrigger
 {
-	Apply = 1 << 1,
-	Refresh = 1 << 2,
-	Tick = 1 << 3,
-	Update = 1 << 4,
-	Dispel = 1 << 5,
-	TargetDeath = 1 << 6,
-	TargetInvalid = 1 << 7,
-	TimeOut = 1 << 8
+	Apply,
+	Refresh,
+	Tick,
+	Dispel,
+	TargetDeath,
+	TargetInvalid,
+	TimeOut,
+	Destroy
 }
 
 [System.Serializable]
@@ -113,7 +113,7 @@ public class EffectOverTimeConf
 
 #region Feedback
 	[InspectorHeader("Feedback")]
-	public GameObject fxPrefab = null;//Placeholder
+	//public GameObject fxPrefab = null;//Placeholder
 	public IconTitleDescFeedbackConf ui = null;
 #endregion
 
@@ -131,6 +131,12 @@ public class EffectOverTimeConf
 		EffectOverTime effect = new EffectOverTime();
 		effect.attackInfos = a_attackInfos;
 		effect.conf = this;
+		
+		foreach(EffectConfWrapper each in effects)
+		{
+			effect.effects.Add(each.Compute(a_attackInfos));
+		}
+		
 		return effect;
 	}
  #endregion
@@ -148,15 +154,33 @@ public class EffectOverTimeConf
 		/// <summary>
 		/// A mask that defines where the effect triggers.
 		/// </summary>
-		[BitMaskEnumAttribute(typeof(EffectOverTimeTrigger))]
-		public int trigger = 0;
+		public EffectTriggerConf trigger = null;
+		
+		public bool doesStack = true;
+		
+		public IntModifier perStackModifier = null;
 		
 		internal EffectOverTime.EffectWrapper Compute(AttackInfos a_attackInfos)
 		{
 			EffectOverTime.EffectWrapper wrapper = new EffectOverTime.EffectWrapper();
-			wrapper.trigger = (EffectOverTimeTrigger)trigger;
+			wrapper.trigger = trigger;
 			wrapper.effect = effect.Compute(a_attackInfos);
+			wrapper.doesStack = doesStack;
+			wrapper.perStackModifier = perStackModifier;
 			return wrapper;
 		}
 	}
+}
+
+
+[System.Serializable]
+public class EffectTriggerConf
+{
+	public bool OnApply = false;
+	public bool OnRefresh = false;
+	public bool OnTick = false;
+	public bool OnTimeOut = false;
+	public bool OnDispel = false;
+	public bool OnTargetDeath = false;
+	public bool OnTargetInvalid = false;
 }

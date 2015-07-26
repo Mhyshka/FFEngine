@@ -2,7 +2,7 @@
 using System.Collections;
 
 [System.Serializable]
-internal class FloatModifier
+public class FloatModifier
 {
 	#region Inspector Properties
 	public float percent = 0f;
@@ -26,6 +26,16 @@ internal class FloatModifier
 			result += result * percent;
 			result += flat;
 		}
+		
+		return result;
+	}
+	
+	internal float ComputeAdditive(float a_value, int a_stack)
+	{
+		float result = a_value;
+		
+		result += result * percent * (a_stack - 1);
+		result += flat * (a_stack - 1);
 		
 		return result;
 	}

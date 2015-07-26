@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class EffectOverTimeReport : EffectOverTimeReport
+public class EffectOverTimeReport : AEffectGroupReport
 {
-	internal EEffectApplyResult applyResult = EEffectApplyResult.NotApplied;
-	internal List<AEffectReport> appliedEffects = null;
-
+	#region Properties
 	internal EffectOverTimeConf effect = null;
+	internal EEffectOverTimeTrigger trigger = EEffectOverTimeTrigger.Apply;
+	internal bool successfullyApplied = true;
 	
 	internal override EReportAlignement Alignement
 	{
@@ -21,74 +21,82 @@ public class EffectOverTimeReport : EffectOverTimeReport
 	{
 		get
 		{
-			switch(applyResult)
-			{
-				case EEffectApplyResult.Applied : 
-				return EReportLevel.Reduced;
-				
-				case EEffectApplyResult.Refreshed :
-				return EReportLevel.Reduced;
-				
-				case EEffectApplyResult.NotApplied :
-				return EReportLevel.Verbose;
-				
-				case EEffectApplyResult.Resisted :
-				return EReportLevel.Normal;
-				
-				case EEffectApplyResult.Immune :
-				return EReportLevel.Normal;
-			}
-			
-			return EReportLevel.Verbose;
+			return EReportLevel.Normal;
 		}
 	}
+	#endregion
 	
 	public override string ToString ()
 	{
 		string report = "";
 		for(int i = 0 ; i < indentLevel ; i++)
 			report += "\t";
-		if(applyResult == EEffectApplyResult.Applied)
+			
+		if(successfullyApplied)
 		{
-			report += string.Format("{0} is affected by {1}'s {2}.", target.Name,
-																	attackInfos.source.Name,
-																	effect.Name);
-			foreach(AEffectReport each in appliedEffects)
+			if(trigger == EEffectOverTimeTrigger.Apply)
 			{
-				each.indentLevel = indentLevel + 1;
-				report += "\n" + each.ToString();
+				report += string.Format("{0} is affected by {1}'s {2}.", target.Name,
+																		attackInfos.source.Name,
+																		effect.Name);
+																		
+				foreach(AEffectReport each in effects)
+				{
+					each.indentLevel = indentLevel + 1;
+					report += "\n" + each.ToString();
+				}
+			}
+			else if(trigger == EEffectOverTimeTrigger.Refresh)
+			{
+				report += string.Format("{0}'s {1} is refreshed on {2}.", attackInfos.source.Name,
+				                       									effect.Name,
+													                    target.Name);
+				foreach(AEffectReport each in effects)
+				{
+					each.indentLevel = indentLevel + 1;
+					report += "\n" + each.ToString();
+				}
+			}
+			else if(trigger == EEffectOverTimeTrigger.Tick)
+			{
+				report += string.Format("{0}'s {1} ticks on {2}.", attackInfos.source.Name,
+											                        effect.Name,
+											                        target.Name);
+				foreach(AEffectReport each in effects)
+				{
+					each.indentLevel = indentLevel + 1;
+					report += "\n" + each.ToString();
+				}
+			}
+			else if(trigger == EEffectOverTimeTrigger.Dispel)
+			{
+				report += string.Format("{0}'s {1} was dispelled from {2}.", attackInfos.source.Name,
+													                        effect.Name,
+													                        target.Name);
+				foreach(AEffectReport each in effects)
+				{
+					each.indentLevel = indentLevel + 1;
+					report += "\n" + each.ToString();
+				}
+			}
+			else if(trigger == EEffectOverTimeTrigger.TimeOut || trigger == EEffectOverTimeTrigger.TargetDeath || trigger == EEffectOverTimeTrigger.TargetInvalid)
+			{
+				report += string.Format("{0}'s {1} faded from {2}.", attackInfos.source.Name,
+											                        effect.Name,
+											                        target.Name);
+				foreach(AEffectReport each in effects)
+				{
+					each.indentLevel = indentLevel + 1;
+					report += "\n" + each.ToString();
+				}
 			}
 		}
-		else if(applyResult == EEffectApplyResult.Refreshed)
-		{
-			report += string.Format("{0}'s {1} is refreshed on {2}.", attackInfos.source.Name,
-			                       									effect.Name,
-												                    target.Name);
-			foreach(AEffectReport each in appliedEffects)
-			{
-				each.indentLevel = indentLevel + 1;
-				report += "\n" + each.ToString();
-			}
-		}
-		else if(applyResult == EEffectApplyResult.NotApplied)
+		else
 		{
 			report += string.Format("{0}'s {1} couldn't be applied on {2}.", attackInfos.source.Name,
 													                        effect.Name,
 													                        target.Name);
 		}
-		else if(applyResult == EEffectApplyResult.Resisted)
-		{
-			report += string.Format("{0} resisted to {1}'s {2}.", target.Name,
-										                        attackInfos.source.Name,
-										                        effect.Name);
-		}
-		else if(applyResult == EEffectApplyResult.Immune)
-		{
-			report += string.Format("{0} was immune to {1}'s {2}.", target.Name,
-											                        attackInfos.source.Name,
-											                        effect.Name);
-		}
-		
 		return report;
 	}
 }

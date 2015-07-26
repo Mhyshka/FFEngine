@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public abstract class EffectConf
 {	
 	public bool canCrit = true;
-	public bool revertOnDestroy = false;
 	
 	internal abstract Effect Compute(AttackInfos a_attackInfos);
 }

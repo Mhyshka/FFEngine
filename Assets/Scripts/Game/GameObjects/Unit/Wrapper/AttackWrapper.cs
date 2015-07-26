@@ -24,8 +24,6 @@ public class AttackWrapper
 	#region Methods
 	internal AttackReport Apply(Unit a_target)
 	{
-		//a_target.onAttackReceived(this);
-		
 		AttackReport report = new AttackReport();
 		report.attack = conf;
 		report.attackInfos = attackInfos;
@@ -35,8 +33,7 @@ public class AttackWrapper
 		{
 			report.effects.Add(each.Apply(a_target));
 		}
-		
-		return report.Prepare();
+		return report;
 	}
 	#endregion
 }

@@ -12,21 +12,10 @@ public class EffectApplyEffectOverTime : Effect
 			return effectOverTime.MetaStrength;
 		}
 	}
-	
-	internal override bool IsRevertOnDestroy
-	{
-		get
-		{
-			return false;
-		}
-	}
 
 	internal override AEffectReport Apply (Unit a_target)
 	{
-		EffectOverTimeApplyReport report = new EffectOverTimeApplyReport();
-		report.attackInfos = attackInfos;
-		report.target = a_target;
-		report.effect = effectOverTime;
+		EffectOverTimeReport report = a_target.effect.TryApplyEffect(effectOverTime);
 		return report;
 	}
 	

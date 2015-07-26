@@ -9,6 +9,7 @@ public class EffectApplyEffectOverTimeConf : EffectConf
 	internal override Effect Compute (AttackInfos a_attackInfos)
 	{
 		EffectApplyEffectOverTime effect = new EffectApplyEffectOverTime();
+		effect.attackInfos = a_attackInfos;
 		effect.effectOverTime = effectToApply.Compute(a_attackInfos);
 		return effect;
 	}
