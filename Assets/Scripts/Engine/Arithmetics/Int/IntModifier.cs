@@ -1,19 +1,22 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public class IntModifierFromEffect
+{
+	internal IntModifier modifier = null;
+	internal EffectOverTime source = null;
+}
+
 public class IntModifier
 {
-	#region Inspector Properties
-	public float percent = 0f;
-	public int flat = 0;
-	#endregion
-
 	#region Properties
-	internal bool isFlatFirst = false;
+	internal float percent = 0f;
+	internal int flat = 0;
+	internal bool canGoUnderZero = true;
 	#endregion
 
 	#region Methods
-	internal int Compute(int a_value, bool a_isFlatFirst)
+	internal virtual int Compute(int a_value, bool a_isFlatFirst)
 	{
 		int result = a_value;
 		if(a_isFlatFirst)
@@ -27,10 +30,15 @@ public class IntModifier
 			result += flat;
 		}
 		
+		if(!canGoUnderZero)
+		{
+			result = Mathf.Min(a_value, 0);
+		}
+		
 		return result;
 	}
 	
-	internal int ComputeAdditive(int a_value, int a_stack)
+	internal virtual int ComputeAdditive(int a_value, int a_stack)
 	{
 		int result = a_value;
 		

@@ -1,40 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public struct Armor
-{
-	internal int armor;
-	internal int flat;
-}
-
 [System.Serializable]
 public class ArmorConf
 {
 	#region Inspector Properties
-	public IntModified armor = new IntModified();
+	public IntModifiedCustomConf armor = null;
 	#endregion
 	
 	#region Properties
-	internal IntModified flat = new IntModified();
+	internal IntModifiedCustomConf flat = null;
 	#endregion
 	
 	#region Methods	
-	public Armor ToResistance()
+	internal Resistance Compute()
 	{
-		Armor result = new Armor();
+		Resistance result = new Resistance();
 		result.armor = armor.Value;
 		result.flat = flat.Value;
 		return result;
 	}
-	
-	public static Armor operator +(ArmorConf x, ArmorConf y) 
-	{
-		Armor result = new Armor();
-		result.armor = x.armor + y.armor;
-		result.flat = x.flat + y.flat;
-		return result;
-	}
 	#endregion
-	
-	
 }
