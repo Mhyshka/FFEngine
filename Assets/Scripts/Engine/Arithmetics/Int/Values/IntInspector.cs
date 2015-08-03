@@ -2,7 +2,7 @@
 using System.Collections;
 
 [System.Serializable]
-public class IntHardcode : IntValue
+public class IntInspector : IntValue
 {
 	#region Inspector Properties
 	public int value = 0;

@@ -6,7 +6,7 @@ public class EffectApplyEffectOverTimeConf : EffectConf
 {
 	public EffectOverTimeConf effectToApply = null;
 	
-	internal override Effect Compute (AttackInfos a_attackInfos)
+	internal override AEffect Compute (AttackInfos a_attackInfos)
 	{
 		EffectApplyEffectOverTime effect = new EffectApplyEffectOverTime();
 		effect.attackInfos = a_attackInfos;

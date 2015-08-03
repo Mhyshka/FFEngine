@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,6 +7,14 @@ public class AttackConf
 {
 	#region Inspector Properties
 	public string name = "attack";
+	public FloatModifiedConf range = null;
+	public FloatModifiedConf areaOfEffect = null;
+	public FloatModifiedConf cooldown = null;
+	public FloatModifiedConf rechargeRate = null;
+	public List<EffectConf> effects = null;
+	#endregion
+
+	#region Properties
 	//TODO LOCALIZATION
 	internal string Name
 	{
@@ -15,17 +23,10 @@ public class AttackConf
 			return name;
 		}
 	}
-	public FloatModified range = null;
-	public FloatModified areaOfEffect = null;
-	public FloatModified cooldown = null;
-	public FloatModified rechargeRate = null;
-	public List<EffectConf> effects = null;
-	#endregion
-
-	#region Properties
+	
 	internal Vector3 TargetPosition(Unit a_source)
 	{
-		Vector3 pos = a_source.transform.position + a_source.transform.forward * range.Value;
+		Vector3 pos = a_source.transform.position + a_source.transform.forward * range.Compute().Value;
 		return pos;
 	}
 	
@@ -33,7 +34,7 @@ public class AttackConf
 	{
 		List<Unit> targets = new List<Unit>();
 		
-		Collider[] colliders = Physics.OverlapSphere(a_attackPosition, areaOfEffect.Value, 1 << LayerMask.NameToLayer("Unit"));
+		Collider[] colliders = Physics.OverlapSphere(a_attackPosition, areaOfEffect.Compute().Value, 1 << LayerMask.NameToLayer("Unit"));
 		
 		foreach(Collider each in colliders)
 		{
@@ -55,11 +56,11 @@ public class AttackConf
 		AttackWrapper attack = new AttackWrapper();
 		attack.conf = this;
 		attack.attackInfos = a_attackInfos;
-		attack.effects = new List<Effect>();
+		attack.effects = new List<AEffect>();
 		
 		foreach(EffectConf each in effects)
 		{
-			Effect computed = each.Compute(a_attackInfos);
+			AEffect computed = each.Compute(a_attackInfos);
 			attack.effects.Add (computed);
 		}
 		

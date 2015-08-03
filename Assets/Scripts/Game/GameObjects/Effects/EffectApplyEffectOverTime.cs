@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class EffectApplyEffectOverTime : Effect
+public class EffectApplyEffectOverTime : AEffect
 {
 	internal EffectOverTime effectOverTime = null;
 	

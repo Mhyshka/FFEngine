@@ -7,7 +7,7 @@ public abstract class EffectConf
 {	
 	public bool canCrit = true;
 	
-	internal abstract Effect Compute(AttackInfos a_attackInfos);
+	internal abstract AEffect Compute(AttackInfos a_attackInfos);
 }
 
 public class AttackInfos

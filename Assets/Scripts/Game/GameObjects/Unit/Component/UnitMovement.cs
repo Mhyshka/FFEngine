@@ -43,7 +43,6 @@ public class UnitMovement : AUnitComponent
 		if(walker != null)
 			BaseSpeed = walker.speed;
 			
-		_speed.isFlatFirst = FFEngine.Game.Constants.MOVE_SPEED_IS_FLAT_FIRST;
 		UpdateSpeed();
 	}
 	
@@ -107,29 +106,16 @@ public class UnitMovement : AUnitComponent
 		}
 	}
 	
-	protected float EffectFlatSpeed
-	{
-		get
-		{
-			return 0f;
-		}
-	}
-	
-	protected float EffectPercentSpeed
-	{
-		get
-		{
-			return 0f;
-		}
-	}
-	
 	protected void UpdateSpeed()
 	{
-		_speed.modifier.flat = AgilitySpeed + EffectFlatSpeed;
-		_speed.modifier.percent = EffectPercentSpeed;
+		/*_speed.modifier.flat = AgilitySpeed + EffectFlatSpeed;
+		_speed.modifier.percent = EffectPercentSpeed;*/
 		
 		if(walker != null)
 			walker.speed = CurrentSpeed;
 	}
+	#endregion
+	
+	#region Speed Modification
 	#endregion
 }

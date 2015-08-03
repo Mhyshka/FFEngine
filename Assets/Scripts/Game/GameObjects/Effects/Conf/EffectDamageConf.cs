@@ -10,41 +10,36 @@ using System.Collections;
 public class EffectDamageConf : EffectConf
 {
 	#region Inspector Properties
-	public IntRange range = null;
-	public Reduction arpen = new Reduction(); 
-	public EDamageType type = new EDamageType();
+	public IntValue baseAmount = null;
+	public IntModifier arpen = null; 
+	public EDamageType type = EDamageType.Slashing;
 	#endregion
 
 	#region Properties
 	#endregion
 
 	#region Methods
-	/// <summary>
-	/// Returns a DamageEffect.
-	/// </summary>
-	internal override Effect Compute(AttackInfos a_attackInfos)
+	internal override AEffect Compute(AttackInfos a_attackInfos)
 	{
 		EffectDamage dmg = new EffectDamage();
 		dmg.attackInfos = a_attackInfos;
 		
-		IntModifier damageModifier = a_attackInfos.source.attack.GetBonusDamage(type);
-		Reduction arpenModifier = a_attackInfos.source.attack.GetPenetration(type);
-		
+		IntModifier damageFromStats = a_attackInfos.source.attack.GetBonusDamage(type);
+		IntModifier arpenFromStats = a_attackInfos.source.attack.GetPenetration(type);
 		if(canCrit && a_attackInfos.critType == ECriticalType.Crititcal)
 		{
-			damageModifier.percent += a_attackInfos.source.attack.CriticalDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_attackInfos.source.attack.CriticalArpen);
+			damageFromStats.Add(a_attackInfos.source.attack.CriticalDamages);
+			arpenFromStats.Add(a_attackInfos.source.attack.CriticalArpen);
 		}
 		else if(canCrit && a_attackInfos.critType == ECriticalType.Penetration)
 		{
-			damageModifier.percent += a_attackInfos.source.attack.PenetrationDamages;
-			arpenModifier.percent = Mathf.Clamp01(arpenModifier.percent + a_attackInfos.source.attack.PenetrationArpen);
+			damageFromStats.Add(a_attackInfos.source.attack.PenetrationDamages);
+			arpenFromStats.Add(a_attackInfos.source.attack.PenetrationArpen);
 		}
 		
-		dmg.amount = range.Value;
-		
-		dmg.amount = damageModifier.Compute(dmg.amount, FFEngine.Game.Constants.DAMAGE_BONUS_IS_FLAT_FIRST);
-		dmg.arpen =  arpenModifier;
+		dmg.amount = baseAmount.Value;
+		dmg.amount = damageFromStats.Compute(dmg.amount, FFEngine.Game.Constants.DAMAGE_BONUS_IS_FLAT_FIRST);
+		dmg.arpen =  arpenFromStats;
 		
 		dmg.type = type;
 		

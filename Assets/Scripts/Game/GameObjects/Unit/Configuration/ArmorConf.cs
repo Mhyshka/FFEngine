@@ -6,18 +6,15 @@ public class ArmorConf
 {
 	#region Inspector Properties
 	public IntModifiedCustomConf armor = null;
-	#endregion
-	
-	#region Properties
-	internal IntModifiedCustomConf flat = null;
+	public IntModifiedCustomConf flat = null;
 	#endregion
 	
 	#region Methods	
-	internal Resistance Compute()
+	internal Armor Compute()
 	{
-		Resistance result = new Resistance();
-		result.armor = armor.Value;
-		result.flat = flat.Value;
+		Armor result = new Armor();
+		result.armor = armor.Compute();
+		result.flat = flat.Compute();
 		return result;
 	}
 	#endregion

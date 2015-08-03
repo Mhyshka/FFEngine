@@ -5,14 +5,22 @@ using System.Collections;
 public class FloatModifierConf
 {
 	#region Inspector Properties
-	public FloatModified percent = null;
-	public FloatModified flat = null;
+	public FloatValue percent = null;
+	public FloatValue flat = null;
 	#endregion
 	
 	#region Properties
 	#endregion
 	
 	#region Methods
+	internal FloatModifier Compute()
+	{
+		FloatModifier modifier = new FloatModifier();
+		
+		modifier.flat = flat.Value;
+		modifier.percent = percent.Value;
+		return modifier;
+	}
 	#endregion
 }
 

@@ -12,7 +12,6 @@ public class IntModifier
 	#region Properties
 	internal float percent = 0f;
 	internal int flat = 0;
-	internal bool canGoUnderZero = true;
 	#endregion
 
 	#region Methods
@@ -30,11 +29,6 @@ public class IntModifier
 			result += flat;
 		}
 		
-		if(!canGoUnderZero)
-		{
-			result = Mathf.Min(a_value, 0);
-		}
-		
 		return result;
 	}
 	
@@ -46,6 +40,19 @@ public class IntModifier
 		result += flat * (a_stack - 1);
 		
 		return result;
+	}
+	
+	internal void Add(IntModifier a_toAdd)
+	{
+		
+	}
+	
+	internal bool IsBonus
+	{
+		get
+		{
+			return percent >= 0f && flat >= 0;
+		}
 	}
 	
 	

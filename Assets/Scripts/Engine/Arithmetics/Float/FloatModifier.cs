@@ -1,12 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[System.Serializable]
+public class FloatModifierFromEffect
+{
+	internal FloatModifier modifier = null;
+	internal EffectOverTime source = null;
+}
+
 public class FloatModifier
 {
 	#region Inspector Properties
-	public float percent = 0f;
-	public float flat = 0f;
+	internal float percent = 0f;
+	internal float flat = 0f;
 	#endregion
 	
 	#region Properties
@@ -40,6 +45,15 @@ public class FloatModifier
 		return result;
 	}
 	
+	internal bool IsBonus
+	{
+		get
+		{
+			return percent >= 0f && flat >= 0f;
+		}
+	}
+	#endregion
+	
 	public static FloatModifier operator + (FloatModifier x, FloatModifier y)
 	{
 		FloatModifier result = new FloatModifier();
@@ -47,5 +61,4 @@ public class FloatModifier
 		result.percent = x.percent + y.percent;
 		return result;
 	}
-	#endregion
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class Effect
+public abstract class AEffect
 {
 	internal AttackInfos attackInfos = null;
 	internal EffectOverTimeInfos effectInfos = null;

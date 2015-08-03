@@ -4,100 +4,109 @@ using System.Collections;
 public class UnitDefense : AUnitComponent
 {
 	#region Defensive Stats
-	public ArmorConf generalArmor = null;
+	internal Armor general = null;
 	
-	public ArmorConf slashingArmor = null;
-	public ArmorConf crushingArmor = null;
-	public ArmorConf piercingArmor = null;
+		internal Armor physical = null;
+			internal Armor slashing = null;
+			internal Armor crushing = null;
+			internal Armor piercing = null;
 	
-	public ArmorConf magicArmor = null;
-	
-	public ArmorConf spiritArmor = null;
+		internal Armor magic = null;
+			internal Armor fire = null;
+			internal Armor frost = null;
+			internal Armor lightning = null;
+			
+		internal Armor bleed = null;
+		internal Armor poison = null;
+		internal Armor spirit = null;
 	#endregion
 	
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
-		generalArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		generalArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
 		
-		slashingArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		slashingArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		
-		crushingArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		crushingArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		
-		piercingArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		piercingArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		
-		magicArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		magicArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		
-		spiritArmor.armor.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
-		spiritArmor.flat.isFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_IS_FLAT_FIRST;
+		PrepareArmorModifiers(general);
+			PrepareArmorModifiers(physical);
+				PrepareArmorModifiers(slashing);
+				PrepareArmorModifiers(crushing);
+				PrepareArmorModifiers(piercing);
+				PrepareArmorModifiers(bleed);
+			PrepareArmorModifiers(magic);
+				PrepareArmorModifiers(fire);
+				PrepareArmorModifiers(frost);
+				PrepareArmorModifiers(lightning);
+				PrepareArmorModifiers(poison);
+			PrepareArmorModifiers(spirit);
 	}
 	
 	#region Armor
-	internal Armor GerArmor(EDamageType type)
+	protected Resistance _currentResistance = new Resistance();
+	internal Resistance GetResistance(EDamageType type)
 	{
-		Armor armor;
+		_currentResistance.armor = 0;
+		_currentResistance.flat = 0;
 		
 		switch(type)
 		{
-		case EDamageType.Slashing :
-			armor = generalArmor + slashingArmor;
-			break;
-			
-		case EDamageType.Crushing :
-			armor = generalArmor + crushingArmor;
-			break;
-			
-		case EDamageType.Piercing :
-			armor = generalArmor + piercingArmor;
-			break;
-			
-		case EDamageType.Magic :
-			armor = generalArmor + magicArmor;
-			break;
-			
-		case EDamageType.Spirit :
-			armor = generalArmor + spiritArmor;
-			break;
-			
-		case EDamageType.True :
-			armor = new Armor();
-			break;
-			
-		default: 
-			armor = new Armor();
-			break;
+		//PHYSICAL
+			case EDamageType.Slashing :
+				_currentResistance.Add(general);
+				_currentResistance.Add(physical);
+				_currentResistance.Add(slashing);
+				break;
+				
+			case EDamageType.Crushing :
+				_currentResistance.Add(general);
+				_currentResistance.Add(physical);
+				_currentResistance.Add(crushing);
+				break;
+				
+			case EDamageType.Piercing :
+				_currentResistance.Add(general);
+				_currentResistance.Add(physical);
+				_currentResistance.Add(piercing);
+				break;
+				
+		//MAGIC
+			case EDamageType.Fire :
+				_currentResistance.Add(general);
+				_currentResistance.Add(magic);
+				_currentResistance.Add(fire);
+				break;
+				
+			case EDamageType.Frost :
+				_currentResistance.Add(general);
+				_currentResistance.Add(magic);
+				_currentResistance.Add(frost);
+				break;
+				
+			case EDamageType.Ligthing :
+				_currentResistance.Add(general);
+				_currentResistance.Add(magic);
+				_currentResistance.Add(lightning);
+				break;
+				
+		//STANDALONE
+			case EDamageType.Bleed :
+				_currentResistance.Add(general);
+				//_currentResistance.Add(physical);
+				_currentResistance.Add(bleed);
+				break;
+				
+			case EDamageType.Poison :
+				_currentResistance.Add(general);
+				//_currentResistance.Add(magic);
+				_currentResistance.Add(poison);
+				break;
+				
+			case EDamageType.Spirit :
+				_currentResistance.Add(general);
+				//_currentResistance.Add(magic);
+				_currentResistance.Add(spirit);
+				break;
 		}
 		
-		return armor;
-	}
-	
-	internal Reduction GetResistance(EDamageType type, Reduction a_arpen)
-	{
-		Armor armor = GerArmor(type);
-		
-		Reduction reduc = new Reduction();
-		reduc.percent = ComputePercentReduction(armor.armor, a_arpen);
-		reduc.flat = ComputeFlatReduction(armor.flat, a_arpen);
-		return reduc;
-	}
-	
-	internal float ComputePercentReduction(int armor, Reduction a_arpen)
-	{
-		int effectiveArmor = a_arpen.Compute(armor, FFEngine.Game.Constants.ARPEN_REDUCTION_IS_FLAT_FIRST);
-		
-		float reduction = 1f + (- 1f / Mathf.Exp(effectiveArmor/50f));
-		
-		return reduction;
-	}
-	
-	internal float ComputeFlatReduction(int flat, Reduction a_arpen)
-	{
-		return flat * (1f - a_arpen.percent);
+		return _currentResistance;
 	}
 	#endregion
 	
@@ -105,7 +114,7 @@ public class UnitDefense : AUnitComponent
 	internal bool ShouldScratch(EffectDamage a_dmg)
 	{
 		float rand = Random.value * 100f;
-		int armorAfterReduction = a_dmg.arpen.Compute(GerArmor(a_dmg.type).armor, FFEngine.Game.Constants.ARPEN_REDUCTION_IS_FLAT_FIRST);
+		int armorAfterReduction = a_dmg.arpen.Compute(GetResistance(a_dmg.type).armor, FFEngine.Game.Constants.ARMOR_REDUCTION_FROM_ARPEN_IS_FLAT_FIRST);
 		if(rand < Mathf.Clamp(armorAfterReduction, 0f, 100f))
 		{
 			return true;
@@ -114,4 +123,41 @@ public class UnitDefense : AUnitComponent
 		return false;
 	}
 	#endregion
+	
+	static internal void PrepareArmorModifiers(Armor a_res)
+	{
+		/*9a_res.armor.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_BONUS_IS_FLAT_FIRST;
+		a_res.armor.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_MALUS_IS_FLAT_FIRST;
+		a_res.armor.reducStackMethod = FFEngine.Game.Constants.ARMOR_REDUC_STACK;
+		
+		a_res.flat.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_BONUS_IS_FLAT_FIRST;
+		a_res.flat.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_MALUS_IS_FLAT_FIRST;
+		a_res.flat.reducStackMethod = FFEngine.Game.Constants.ARMOR_REDUC_STACK;*/
+	}
+}
+
+public class Armor
+{
+	internal IntModified armor = null;
+	internal IntModified flat = null;
+}
+
+public class Resistance
+{
+	internal int armor = 0;
+	internal int flat = 0;
+	
+	internal void Add(Armor a_armor)
+	{
+		armor += a_armor.armor.Value;
+		flat += a_armor.flat.Value;
+	}
+	
+	internal IntModifier Compute(IntModifier a_arpen)
+	{
+		IntModifier reduc = new IntModifier();
+		reduc.percent = GameConstants.ArmorPercentReduction(armor, a_arpen);
+		reduc.flat = flat - Mathf.CeilToInt(flat * a_arpen.percent);
+		return reduc;
+	}
 }

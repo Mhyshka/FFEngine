@@ -21,12 +21,17 @@ public class UnitStats : AUnitComponent
 	{
 		base.Init (a_unit);
 		
-		strength.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		agility.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		
-		intelligence.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		spirit.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
-		
-		charisma.isFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_SCORE_IS_FLAT_FIRST;
+		PrepareAttributeIntModified(strength);
+		PrepareAttributeIntModified(agility);
+		PrepareAttributeIntModified(intelligence);
+		PrepareAttributeIntModified(spirit);
+		PrepareAttributeIntModified(charisma);
+	}
+	
+	static internal void PrepareAttributeIntModified(IntModified a_mod)
+	{
+		/*a_mod.bonusIsFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_BONUS_IS_FLAT_FIRST;
+		a_mod.malusIsFlatFirst = FFEngine.Game.Constants.ATTRIBUTES_MALUS_IS_FLAT_FIRST;
+		a_mod.reducStack = FFEngine.Game.Constants.ATTRIBUTES_REDUC_STACK;*/
 	}
 }

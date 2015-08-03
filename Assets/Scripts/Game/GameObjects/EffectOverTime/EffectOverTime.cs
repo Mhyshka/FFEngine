@@ -314,7 +314,7 @@ public class EffectOverTime
 		internal IntModifier perStackModifier = null;
 		//EffectInfos end
 		
-		internal Effect effect;
+		internal AEffect effect;
 		internal EffectTriggerConf trigger;
 	}
 }

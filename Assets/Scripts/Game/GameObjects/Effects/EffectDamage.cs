@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,26 +9,27 @@ public enum EDamageType
 	Slashing,
 	Piercing,
 	Crushing,
-	//Bleed,
+
 	
 //Magic
-	Magic,
-	/*Fire,
+	Fire,
 	Frost,
-	Poison,
-	Ligthing,*/
-	Spirit,
+	Ligthing,
 	
+//StandAlone
+	Poison,
+	Bleed,
+	Spirit,
 	True
 }
 
-public class EffectDamage : Effect
+public class EffectDamage : AEffect
 {
 	#region Inspector Properties
 	internal EffectDamageConf conf;
 	internal EDamageType type;
 	internal int amount;
-	internal Reduction arpen;
+	internal IntModifier arpen;
 	#endregion
 
 	#region Properties
@@ -48,7 +50,7 @@ public class EffectDamage : Effect
 	{
 		DamageReport report = new DamageReport();
 		
-		Reduction reduction = a_target.defense.GetResistance(type, arpen);
+		IntModifier reduction = a_target.defense.GetResistance(type).Compute(arpen);
 		
 		report.attackInfos = attackInfos;
 		report.effectInfos = effectInfos;
@@ -58,7 +60,8 @@ public class EffectDamage : Effect
 		report.target = a_target;
 		report.type = type;
 		report.unreduced = baseDmg;
-		report.final = reduction.Compute(report.unreduced, FFEngine.Game.Constants.ARMOR_REDUCTION_IS_FLAT_FIRST);
+		report.final = reduction.Compute(report.unreduced,
+										FFEngine.Game.Constants.DAMAGE_REDUCTION_FROM_ARMOR_IS_FLAT_FIRST);
 		
 		//Scratching
 		if(attackInfos.critType == ECriticalType.Normal && a_target.defense.ShouldScratch(this))

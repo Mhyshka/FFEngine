@@ -50,7 +50,9 @@ public class UnitLife : AUnitComponent
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
-		life.isFlatFirst = FFEngine.Game.Constants.LIFE_BONUS_HP_IS_FLAT_FIRST;
+		
+		/*life.bonusIsFlatFirst = FFEngine.Game.Constants.LIFE_BONUS_IS_FLAT_FIRST;
+		life.malusIsFlatFirst = FFEngine.Game.Constants.LIFE_MALUS_IS_FLAT_FIRST;*/
 		
 		OnStatsModification();
 		_current = Mathf.Clamp(Mathf.CeilToInt(Max * startPercentage), 
@@ -95,9 +97,9 @@ public class UnitLife : AUnitComponent
 		_unit.onStatsModification -= OnStatsModification;
 	}
 	
-	protected void OnStatsModification()
+	internal void OnStatsModification()
 	{
-		life.modifier.flat = BonusMaxHP;
+	
 	}
 	#endregion
 }

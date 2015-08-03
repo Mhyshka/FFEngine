@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public enum EArithmeticOperation
@@ -19,7 +19,7 @@ public class IntArithmetic : IntValue
 
 	#region Inspector Properties
 
-	public IntValue leftVal = new IntHardcode();
+	public IntValue leftVal = null;
 	public EArithmeticOperation operation = EArithmeticOperation.Plus;
 	public IntValue rightVal = null;
 	#endregion
