@@ -42,8 +42,11 @@ public class EffectOverTimeReport : AEffectGroupReport
 																		
 				foreach(AEffectReport each in effects)
 				{
-					each.indentLevel = indentLevel + 1;
-					report += "\n" + each.ToString();
+					if(each != null)
+					{
+						each.indentLevel = indentLevel + 1;
+						report += "\n" + each.ToString();
+					}
 				}
 			}
 			else if(trigger == EEffectOverTimeTrigger.Refresh)
@@ -53,8 +56,11 @@ public class EffectOverTimeReport : AEffectGroupReport
 													                    target.Name);
 				foreach(AEffectReport each in effects)
 				{
-					each.indentLevel = indentLevel + 1;
-					report += "\n" + each.ToString();
+					if(each != null)
+					{
+						each.indentLevel = indentLevel + 1;
+						report += "\n" + each.ToString();
+					}
 				}
 			}
 			else if(trigger == EEffectOverTimeTrigger.Tick)
@@ -64,8 +70,11 @@ public class EffectOverTimeReport : AEffectGroupReport
 											                        target.Name);
 				foreach(AEffectReport each in effects)
 				{
-					each.indentLevel = indentLevel + 1;
-					report += "\n" + each.ToString();
+					if(each != null)
+					{
+						each.indentLevel = indentLevel + 1;
+						report += "\n" + each.ToString();
+					}
 				}
 			}
 			else if(trigger == EEffectOverTimeTrigger.Dispel)
@@ -75,8 +84,11 @@ public class EffectOverTimeReport : AEffectGroupReport
 													                        target.Name);
 				foreach(AEffectReport each in effects)
 				{
-					each.indentLevel = indentLevel + 1;
-					report += "\n" + each.ToString();
+					if(each != null)
+					{
+						each.indentLevel = indentLevel + 1;
+						report += "\n" + each.ToString();
+					}
 				}
 			}
 			else if(trigger == EEffectOverTimeTrigger.TimeOut || trigger == EEffectOverTimeTrigger.TargetDeath || trigger == EEffectOverTimeTrigger.TargetInvalid)
@@ -86,8 +98,11 @@ public class EffectOverTimeReport : AEffectGroupReport
 											                        target.Name);
 				foreach(AEffectReport each in effects)
 				{
-					each.indentLevel = indentLevel + 1;
-					report += "\n" + each.ToString();
+					if(each != null)
+					{
+						each.indentLevel = indentLevel + 1;
+						report += "\n" + each.ToString();
+					}
 				}
 			}
 		}

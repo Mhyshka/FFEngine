@@ -2,22 +2,28 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class AInteractable : FullInspector.BaseBehavior
+public class AInteractable : MonoBehaviour
 {
 	#region Inspector Properties
-	public string nameLocKey = "Selectable";
+	public InteractableConf conf = null;
 	#endregion
 
 	#region Properties
+	internal string Name
+	{
+		get
+		{
+			return conf.nameKey;
+		}
+	}
 	#endregion
 	
 	#region Interface Lists
 	#endregion
 
 	#region Starts Methods
-	protected override void Awake()
+	protected virtual void Awake()
 	{
-		base.Awake();
 		PreparesReferences();
 	}
 	

@@ -45,11 +45,35 @@ public class FloatModifier
 		return result;
 	}
 	
+	internal virtual int ComputeAdditive(int a_value, int a_stack)
+	{
+		int result = a_value;
+		
+		result += Mathf.FloorToInt(result * percent * (a_stack - 1));
+		result += Mathf.FloorToInt(flat * (a_stack - 1));
+		
+		return result;
+	}
+	
+	internal void Add(FloatModifier a_toAdd)
+	{
+		percent += a_toAdd.percent;
+		flat += a_toAdd.flat;
+	}
+	
 	internal bool IsBonus
 	{
 		get
 		{
 			return percent >= 0f && flat >= 0f;
+		}
+	}
+	
+	internal bool IsUseless
+	{
+		get
+		{
+			return percent == 0f && flat == 0;
 		}
 	}
 	#endregion

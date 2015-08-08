@@ -95,7 +95,7 @@ public class EffectDamage : AEffect
 	
 	internal override AEffectReport Revert (Unit a_target)
 	{
-		return new DamageReport();
+		return null;
 	}
 	#endregion
 	

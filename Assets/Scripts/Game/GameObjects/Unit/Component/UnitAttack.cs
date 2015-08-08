@@ -4,58 +4,81 @@ using System.Collections.Generic;
 
 public class UnitAttack : AUnitComponent
 {
-	#region Inspector Properties
-	public AttackConf basicAttack = null;
+	#region Properties
+	internal Attack basicAttack = null;
 	#endregion
 	
 	internal override void Init (AInteractable a_unit)
 	{
 		base.Init (a_unit);
+		
+		if(_unit.UnitConf != null && _unit.UnitConf.attack != null)
+		{
+			basicAttack = _unit.UnitConf.attack.basicAttack.Compute();
+			
+			bonusPhysical = _unit.UnitConf.attack.physicalBonus.Compute();
+			bonusMagical = _unit.UnitConf.attack.magicalBonus.Compute();
+			
+			criticalBonus = _unit.UnitConf.attack.criticalBonus.Compute();
+			criticalBonus.critChances.BaseValue += FFEngine.Game.Constants.CRITICAL_BASE_CHANCE;
+			criticalBonus.damage.percent.BaseValue += FFEngine.Game.Constants.CRITICAL_DAMAGE_BONUS_PERCENT;
+			criticalBonus.damage.flat.BaseValue += FFEngine.Game.Constants.CRITICAL_DAMAGE_BONUS_FLAT;
+			criticalBonus.arpen.percent.BaseValue += FFEngine.Game.Constants.CRITICAL_ARMOR_PERCENT_REDUCTION;
+			criticalBonus.arpen.flat.BaseValue += FFEngine.Game.Constants.CRITICAL_ARMOR_FLAT_REDUCTION;	
+			
+			penetrationBonus = _unit.UnitConf.attack.penetratingBonus.Compute();
+			penetrationBonus.critChances.BaseValue += FFEngine.Game.Constants.PENETRATION_BASE_CHANCES;
+			penetrationBonus.damage.percent.BaseValue += FFEngine.Game.Constants.PENETRATION_DAMAGE_BONUS_PERCENT;
+			penetrationBonus.damage.flat.BaseValue += FFEngine.Game.Constants.PENETRATION_DAMAGE_BONUS_FLAT;
+			penetrationBonus.arpen.percent.BaseValue += FFEngine.Game.Constants.PENETRATION_ARMOR_PERCENT_REDUCTION;
+			penetrationBonus.arpen.flat.BaseValue += FFEngine.Game.Constants.PENETRATION_ARMOR_FLAT_REDUCTION;	
+		}
+		else
+		{
+			Debug.LogWarning("Unit Conf Issue in UnitAttack.");
+		}
 	}
 	
 	#region Armor Penetration
 	#endregion
 	
 	#region Bonus Physical Damages
+	internal AttackBonus bonusPhysical = null;
 	internal IntModifier BonusPhysicalDamages
 	{
 		get
 		{
-			IntModifier modifier = new IntModifier();
-			modifier.percent += _unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
-			return modifier;
+			//bonusPhysical.damage.percent.BaseValue = _unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
+			return bonusPhysical.damage.Value;
 		}
 	}
 	
-	internal IntModifier BonusPhysicalPenetration
+	internal IntModifier BonusPhysicalArpen
 	{
 		get
 		{
-			IntModifier reduc = new IntModifier();
-			reduc.flat += Mathf.FloorToInt(_unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_ARPEN_PER_POINT);
-			return reduc;
+			//bonusPhysical.arpen.flat.BaseValue = Mathf.FloorToInt(_unit.stats.strength.Value * FFEngine.Game.Constants.STRENGTH_ARPEN_PER_POINT);
+			return bonusPhysical.arpen.Value;
 		}
 	}
 	#endregion
 	
 	#region Bonus Magical Damages
+	internal AttackBonus bonusMagical = null;
 	internal IntModifier BonusMagicDamages
 	{
 		get
 		{
-			IntModifier modifier = new IntModifier();
-			modifier.percent += _unit.stats.intelligence.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
-			
-			return modifier;
+			//bonusMagical.damage.percent.BaseValue = _unit.stats.intelligence.Value * FFEngine.Game.Constants.STRENGTH_DAMAGE_PERCENT_PER_POINT;
+			return bonusMagical.damage.Value;
 		}
 	}
 	
-	internal IntModifier BonusMagicPenetration
+	internal IntModifier BonusMagicArpen
 	{
 		get
 		{
-			IntModifier reduc = new IntModifier();
-			return reduc;
+			return bonusMagical.arpen.Value;
 		}
 	}
 	#endregion
@@ -66,9 +89,8 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			float result = FFEngine.Game.Constants.CRITICAL_BASE_CHANCE;
-			result += _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_CRITICAL_CHANCE_PER_POINT;
-			return result;
+			//criticalBonus.critChances.BaseValue += _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_CRITICAL_CHANCE_PER_POINT;
+			return criticalBonus.critChances.Value;
 		}
 	}
 	
@@ -76,10 +98,8 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			IntModifier modifier = new IntModifier();
-			modifier.percent = FFEngine.Game.Constants.CRITICAL_DAMAGE_BONUS_PERCENT;
-			modifier.flat = FFEngine.Game.Constants.CRITICAL_DAMAGE_BONUS_FLAT;
-			return modifier;
+			
+			return criticalBonus.damage.Value;
 		}
 	}
 	
@@ -87,11 +107,8 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			IntModifier reduction = new IntModifier();
-			reduction.percent = FFEngine.Game.Constants.CRITICAL_ARMOR_PERCENT_REDUCTION;
-			reduction.flat = FFEngine.Game.Constants.CRITICAL_ARMOR_FLAT_REDUCTION;
-			
-			return reduction;
+					
+			return criticalBonus.arpen.Value;
 		}
 	}
 	#endregion
@@ -102,9 +119,8 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			float result = FFEngine.Game.Constants.PENETRATION_BASE_CHANCES;
-			result += _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_PENETRATING_CHANCE_PER_POINT;
-			return result;
+			//penetrationBonus.critChances.BaseValue += _unit.stats.agility.Value * FFEngine.Game.Constants.AGILITY_PENETRATING_CHANCE_PER_POINT;
+			return penetrationBonus.critChances.Value;
 		}
 	}
 
@@ -113,32 +129,32 @@ public class UnitAttack : AUnitComponent
 	{
 		get
 		{
-			IntModifier modifier = new IntModifier();
-			modifier.percent = FFEngine.Game.Constants.PENETRATION_DAMAGE_BONUS_PERCENT;
-			modifier.flat = FFEngine.Game.Constants.PENETRATION_DAMAGE_BONUS_FLAT;
-			
-			return modifier;
+			return penetrationBonus.damage.Value;
 		}
 	}
 	
 	internal IntModifier PenetrationArpen
 	{
 		get
-		{
-			IntModifier arpen = new IntModifier();
-			arpen.percent = FFEngine.Game.Constants.CRITICAL_ARMOR_PERCENT_REDUCTION;
-			arpen.flat = FFEngine.Game.Constants.CRITICAL_ARMOR_FLAT_REDUCTION;
-
-			return arpen;
+		{		
+			return penetrationBonus.arpen.Value;
 		}
 	}
 	#endregion
 	
 	#region Attack
+	internal Attack BasicAttack
+	{
+		get
+		{
+			return basicAttack;
+		}
+	}
+	
 	/// <summary>
 	/// Check for possible targets and send them the attack.
 	/// </summary>
-	internal void FireAttack(AttackConf a_attack)
+	internal void FireAttack(Attack a_attack)
 	{
 		Vector3 pos = a_attack.TargetPosition(_unit);
 		List<Unit> targets = a_attack.SeekTargets(_unit, pos);
@@ -227,48 +243,56 @@ public class UnitAttack : AUnitComponent
 	#endregion
 }
 
-public class BonusArpen
+public class BonusArpen : IntModifiedModifier
 {
-	internal FloatModified percent = null;
-	internal IntModified flat = null;
-	
 	internal BonusArpen()
 	{
 		percent = new FloatModified();
-		percent.bonusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.bonus;
-		percent.malusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.malus;
-		percent.reducStackMethod = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.stack;
-	}
-	
-	internal IntModifier Reduction
-	{
-		get
+		flat = new IntModified();
+		
+		if(Application.isPlaying)
 		{
-			IntModifier reduction = new IntModifier();
-			reduction.percent = FFEngine.Game.Constants.PENETRATION_ARMOR_PERCENT_REDUCTION;
-			reduction.percent += percent.Value;
+			percent.bonusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.bonus;
+			percent.malusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.malus;
+			percent.reducStackMethod = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.stack;
 			
-			reduction.flat = FFEngine.Game.Constants.PENETRATION_ARMOR_FLAT_REDUCTION;
-			reduction.flat += flat.Value;
 			
-			return reduction;
+			flat.bonusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.bonus;
+			flat.malusIsFlatFirst = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.malus;
+			flat.reducStackMethod = FFEngine.Game.Constants.ARPEN_MODIFIED_CONF.stack;
 		}
+	}
+}
+
+public class BonusDamage : IntModifiedModifier
+{
+	internal BonusDamage()
+	{
+		percent = new FloatModified();
+		flat = new IntModified();
+		if(Application.isPlaying)
+		{
+			percent.bonusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.bonus;
+			percent.malusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.malus;
+			percent.reducStackMethod = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.stack;
+			
+			flat.bonusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.bonus;
+			flat.malusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.malus;
+			flat.reducStackMethod = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.stack;
+		}
+		
 	}
 }
 
 public class AttackBonus
 {
-	internal IntModified damage = null;
+	internal BonusDamage damage = null;
 	internal BonusArpen arpen = null;
 	
-	internal AttackBonus(int a_baseDamage)
+	internal AttackBonus()
 	{
+		damage = new BonusDamage();
 		arpen = new BonusArpen();
-		
-		damage = new IntModified();
-		damage.bonusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.bonus;
-		damage.malusIsFlatFirst = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.malus;
-		damage.reducStackMethod = FFEngine.Game.Constants.DAMAGE_MODIFIED_CONF.stack;
 	}
 }
 
@@ -276,9 +300,14 @@ public class CritBonus : AttackBonus
 {
 	internal FloatModified critChances = null;
 	
-	internal CritBonus(int a_baseDamage, float a_baseCritChance) : base(a_baseDamage)
+	internal CritBonus() : base()
 	{
 		critChances = new FloatModified();
-		// NO PERCENT MODIFICATION ON CRIT STATS. Only flat that already grants %.
+		if(Application.isPlaying)
+		{
+			critChances.bonusIsFlatFirst = FFEngine.Game.Constants.CRIT_CHANCES_MODIFIED_CONF.bonus;
+			critChances.malusIsFlatFirst = FFEngine.Game.Constants.CRIT_CHANCES_MODIFIED_CONF.malus;
+			critChances.reducStackMethod = FFEngine.Game.Constants.CRIT_CHANCES_MODIFIED_CONF.stack;
+		}
 	}
 }

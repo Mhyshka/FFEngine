@@ -23,3 +23,24 @@ public class IntModifierConf
 	#endregion
 }
 
+[System.Serializable]
+public class IntModifierInspectorConf
+{
+	#region Inspector Properties
+	public float percent = 0f;
+	public int flat = 0;
+	#endregion
+	
+	#region Properties
+	internal IntModifier Compute()
+	{
+		IntModifier mod = new IntModifier();
+		mod.percent = percent;
+		mod.flat = flat;
+		return mod;
+	}
+	#endregion
+	
+	#region Methods
+	#endregion
+}

@@ -76,7 +76,6 @@ public class UnitEffectHandler : AUnitComponent
 				
 			if(each.ShouldTimeout)//Wasn't reseted
 			{
-				Debug.Log(each.Destroy().ToString());
 				_toRemove.Add(each);
 			}
 		}

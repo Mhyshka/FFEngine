@@ -5,7 +5,19 @@ using System.Collections.Generic;
 public class IntModified
 {
 	#region Inspector Properties
-	internal int baseValue = 0;
+	protected int _baseValue = 0;
+	internal int BaseValue
+	{
+		get
+		{
+			return _baseValue;
+		}
+		set
+		{
+			_baseValue = value;
+			_needsToBeCompute = true;
+		}
+	}
 	internal EReducPerStack reducStackMethod = EReducPerStack.ReduceWhatsLeft;
 	internal bool bonusIsFlatFirst = false;
 	internal bool malusIsFlatFirst = true;
@@ -37,7 +49,7 @@ public class IntModified
 	#region Computing
 	internal void ComputeValue()
 	{
-		value = baseValue;
+		value = _baseValue;
 		
 		SumUpBonuses ();
 		value = _bonus.Compute(value, bonusIsFlatFirst);

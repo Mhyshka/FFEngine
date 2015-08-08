@@ -2,10 +2,13 @@
 using System.Collections;
 
 [System.Serializable]
-public abstract class FloatValue
+public class FloatValue
 {
-	internal abstract float Value
+	internal virtual float Value
 	{
-		get;
+		get
+		{
+			return 0f;
+		}
 	}
 }

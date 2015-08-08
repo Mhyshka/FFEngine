@@ -32,6 +32,16 @@ public class IntModifier
 		return result;
 	}
 	
+	internal float ComputeAdditive(float a_value, int a_stack)
+	{
+		float result = a_value;
+		
+		result += result * percent * (a_stack - 1);
+		result += flat * (a_stack - 1);
+		
+		return result;
+	}
+	
 	internal virtual int ComputeAdditive(int a_value, int a_stack)
 	{
 		int result = a_value;
@@ -44,7 +54,8 @@ public class IntModifier
 	
 	internal void Add(IntModifier a_toAdd)
 	{
-		
+		percent += a_toAdd.percent;
+		flat += a_toAdd.flat;
 	}
 	
 	internal bool IsBonus
@@ -52,6 +63,14 @@ public class IntModifier
 		get
 		{
 			return percent >= 0f && flat >= 0;
+		}
+	}
+	
+	internal bool IsUseless
+	{
+		get
+		{
+			return percent == 0f && flat == 0;
 		}
 	}
 	

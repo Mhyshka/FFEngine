@@ -21,11 +21,11 @@ public class UnitMovement : AUnitComponent
 	{
 		get
 		{
-			return _speed.baseValue;
+			return _speed.BaseValue;
 		}
 		set
 		{
-			_speed.baseValue = value;
+			_speed.BaseValue = value;
 			UpdateSpeed();
 		}
 	}

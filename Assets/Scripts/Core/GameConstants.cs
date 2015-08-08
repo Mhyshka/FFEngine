@@ -4,13 +4,13 @@ using System.Collections;
 public class GameConstants
 {	
 	#region Attacks
-	public float   CRITICAL_BASE_CHANCE = 3.0f;
+	public float   CRITICAL_BASE_CHANCE = 0.03f;
 	public int     CRITICAL_DAMAGE_BONUS_FLAT = 0;
 	public float   CRITICAL_DAMAGE_BONUS_PERCENT = 1f;
 	public float   CRITICAL_ARMOR_PERCENT_REDUCTION = 0.70f;
 	public int     CRITICAL_ARMOR_FLAT_REDUCTION = 0;
 	
-	public float   PENETRATION_BASE_CHANCES = 3.0f;
+	public float   PENETRATION_BASE_CHANCES = 0.03f;
 	public int     PENETRATION_DAMAGE_BONUS_FLAT = 0;
 	public float   PENETRATION_DAMAGE_BONUS_PERCENT = 0f;
 	public float   PENETRATION_ARMOR_PERCENT_REDUCTION = 0.50f;
@@ -45,16 +45,17 @@ public class GameConstants
 	
 	#region Modifiers
 	internal bool DAMAGE_BONUS_IS_FLAT_FIRST = true;
-	
-	
-	internal bool ARMOR_REDUCTION_FROM_ARPEN_IS_FLAT_FIRST = true;
+	internal bool ARMOR_REDUCTION_FROM_ARPEN_IS_FLAT_FIRST = false;
 	internal bool DAMAGE_REDUCTION_FROM_ARMOR_IS_FLAT_FIRST = true;
 	
 	internal ModifiedConf ARPEN_MODIFIED_CONF = new ModifiedConf();
 	internal ModifiedConf DAMAGE_MODIFIED_CONF = new ModifiedConf();
-	internal ModifiedConf LIFE_MODIFIED_CONF = new ModifiedConf();
+	internal ModifiedConf CRIT_CHANCES_MODIFIED_CONF = new ModifiedConf();
+	
 	internal ModifiedConf ARMOR_MODIFIED_CONF = new ModifiedConf();
+	
 	internal ModifiedConf ATTRIBUTES_MODIFIED_CONF = new ModifiedConf();
+	internal ModifiedConf LIFE_MODIFIED_CONF = new ModifiedConf();
 	internal ModifiedConf MOVE_SPEED_MODIFIED_CONF = new ModifiedConf();
 	#endregion
 	

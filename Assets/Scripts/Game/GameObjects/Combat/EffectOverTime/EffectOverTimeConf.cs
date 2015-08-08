@@ -158,7 +158,7 @@ public class EffectOverTimeConf
 		
 		public bool doesStack = true;
 		
-		public IntModifier perStackModifier = null;
+		public IntModifierConf perStackModifier = null;
 		
 		internal EffectOverTime.EffectWrapper Compute(AttackInfos a_attackInfos)
 		{
@@ -166,7 +166,7 @@ public class EffectOverTimeConf
 			wrapper.trigger = trigger;
 			wrapper.effect = effect.Compute(a_attackInfos);
 			wrapper.doesStack = doesStack;
-			wrapper.perStackModifier = perStackModifier;
+			wrapper.perStackModifier = perStackModifier.Compute();
 			return wrapper;
 		}
 	}

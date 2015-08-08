@@ -11,7 +11,7 @@ public class EffectDamageConf : EffectConf
 {
 	#region Inspector Properties
 	public IntValue baseAmount = null;
-	public IntModifier arpen = null; 
+	public IntModifierConf arpen = null; 
 	public EDamageType type = EDamageType.Slashing;
 	#endregion
 

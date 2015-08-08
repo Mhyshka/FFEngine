@@ -16,7 +16,7 @@ public class AttackWrapper
 	#endregion
 
 	#region Properties
-	internal AttackConf conf = null;
+	internal Attack conf = null;
 	internal AttackInfos attackInfos = null;
 	internal List<AEffect> effects = null;
 	#endregion

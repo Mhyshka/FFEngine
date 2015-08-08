@@ -36,7 +36,7 @@ public abstract class AEffectGroupReport : AEffectReport
 			int total = 0;
 			foreach(AEffectReport each in effects)
 			{
-				total += each.FinalDamages;
+				total += each != null ? each.FinalDamages : 0;
 			}
 			return total;
 		}
@@ -49,7 +49,7 @@ public abstract class AEffectGroupReport : AEffectReport
 			int total = 0;
 			foreach(AEffectReport each in effects)
 			{
-				total += each.UnreducedDamages;
+				total += each != null ? each.UnreducedDamages : 0;
 			}
 			return total;
 		}
@@ -62,7 +62,7 @@ public abstract class AEffectGroupReport : AEffectReport
 			int total = 0;
 			foreach(AEffectReport each in effects)
 			{
-				total += each.ReducedByArmor;
+				total += each != null ? each.ReducedByArmor : 0;
 			}
 			return total;
 		}

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class AttackReport : AEffectGroupReport
 {
 	#region Properties
-	internal AttackConf attack = null;
+	internal Attack attack = null;
 	
 	internal override EReportAlignement Alignement
 	{

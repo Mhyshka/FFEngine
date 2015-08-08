@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Unit : AInteractable
 {
 	#region Inspector Properties
-	public UnitStats 			stats = null;
+	public UnitAttributes 			stats = null;
 	public UnitAttack 			attack = null;
 	public UnitDefense			defense = null;
 	public UnitLife 			life = null;
@@ -16,11 +16,11 @@ public class Unit : AInteractable
 	#endregion
 
 	#region Properties
-	internal string Name
+	internal UnitConf UnitConf
 	{
 		get
 		{
-			return name;
+			return conf as UnitConf;
 		}
 	}
 	#endregion

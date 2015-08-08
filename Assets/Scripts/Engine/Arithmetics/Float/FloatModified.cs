@@ -4,9 +4,21 @@ using System.Collections.Generic;
 
 public class FloatModified
 {
-	#region Inspector Properties
-	internal float baseValue = 0f;
-	internal bool canGoUnderZero = true;
+	#region To Set Properties
+	protected float _baseValue = 0f;
+	internal float BaseValue
+	{
+		get
+		{
+			return _baseValue;
+		}
+		set
+		{
+			_baseValue = value;
+			_needsToBeCompute = true;
+		}
+	}
+	internal bool canGoUnderZero = false;
 	internal EReducPerStack reducStackMethod = EReducPerStack.ReduceWhatsLeft;
 	internal bool bonusIsFlatFirst = false;
 	internal bool malusIsFlatFirst = true;
@@ -20,7 +32,7 @@ public class FloatModified
 	protected FloatModifier _malus = new FloatModifier();
 	
 	protected bool _needsToBeCompute = true;
-	protected float value = 0;
+	protected float _value = 0;
 	
 	internal float Value
 	{
@@ -30,7 +42,7 @@ public class FloatModified
 			{
 				ComputeValue();
 			}
-			return value;
+			return _value;
 		}
 	}
 	#endregion
@@ -38,17 +50,17 @@ public class FloatModified
 	#region Computing
 	internal void ComputeValue()
 	{
-		value = baseValue;
+		_value = _baseValue;
 		
 		SumUpBonuses ();
-		value = _bonus.Compute(value, bonusIsFlatFirst);
+		_value = _bonus.Compute(_value, bonusIsFlatFirst);
 		
 		SumUpReductions ();
 		
-		value = _malus.Compute(value, malusIsFlatFirst);
+		_value = _malus.Compute(_value, malusIsFlatFirst);
 			
 		if(reducStackMethod == EReducPerStack.ReduceWhatsLeft)
-			value = Mathf.Max(value, 0f);
+			_value = Mathf.Max(_value, 0f);
 		
 		_needsToBeCompute = false;
 	}

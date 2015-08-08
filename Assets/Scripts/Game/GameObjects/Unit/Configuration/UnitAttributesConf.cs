@@ -4,11 +4,16 @@ using System.Collections;
 [System.Serializable]
 public class UnitAttributesConf
 {
-	public IntModified strength = null;
-	public IntModified agility = null;
+	public int strength = 0;
+	public int agility = 0;
 	
-	public IntModified intelligence = null;
-	public IntModified spirit = null;
+	public int intelligence = 0;
+	public int perception = 0;
 	
-	public IntModified charisma = null;
+	public int spirit = 0;
+	
+	public int charisma = 0;
+	
+	public int level = 1;
+	public int xp = 25;
 }

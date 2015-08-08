@@ -15,7 +15,7 @@ public class UnitLife : AUnitComponent
 	{
 		get
 		{
-			return life.baseValue;
+			return life.BaseValue;
 		}
 	}
 	

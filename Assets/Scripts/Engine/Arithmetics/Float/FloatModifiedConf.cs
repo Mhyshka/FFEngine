@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [System.Serializable]
@@ -19,35 +19,7 @@ public class FloatModifiedConf
 	{
 		FloatModified modified = new FloatModified();
 		
-		modified.baseValue = baseValue.Value;
-		modified.reducStackMethod = reductionStackMethod;
-		modified.bonusIsFlatFirst = bonusIsFlatFirst;
-		modified.malusIsFlatFirst = malusIsFlatFirst;
-		
-		return modified;
-	}
-	#endregion
-}
-
-[System.Serializable]
-public class FloatModifiedCustomConf
-{
-	#region Inspector Properties
-	public FloatValue baseValue = null;
-	internal EReducPerStack reductionStackMethod = EReducPerStack.ReduceWhatsLeft;
-	internal bool bonusIsFlatFirst = false;
-	internal bool malusIsFlatFirst = true;
-	#endregion
-	
-	#region Properties
-	#endregion
-	
-	#region Methods
-	internal FloatModified Compute()
-	{
-		FloatModified modified = new FloatModified();
-		
-		modified.baseValue = baseValue.Value;
+		modified.BaseValue = baseValue.Value;
 		modified.reducStackMethod = reductionStackMethod;
 		modified.bonusIsFlatFirst = bonusIsFlatFirst;
 		modified.malusIsFlatFirst = malusIsFlatFirst;

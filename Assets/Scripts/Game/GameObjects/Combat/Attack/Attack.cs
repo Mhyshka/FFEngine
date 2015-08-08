@@ -2,39 +2,41 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-[System.Serializable]
-public class AttackConf
+public class Attack
 {
 	#region Inspector Properties
-	public string name = "attack";
-	public FloatModifiedConf range = null;
-	public FloatModifiedConf areaOfEffect = null;
-	public FloatModifiedConf cooldown = null;
-	public FloatModifiedConf rechargeRate = null;
-	public List<EffectConf> effects = null;
 	#endregion
 
 	#region Properties
+	internal AttackConf conf = null;
+	
+	internal FloatModified range = null;
+	internal FloatModified effectRadius = null;
+	internal FloatModified cooldown = null;
+	internal FloatModified recharge = null;
+	
+	internal List<EffectConf> onHitEffects = null;
+	
 	//TODO LOCALIZATION
 	internal string Name
 	{
 		get
 		{
-			return name;
+			return conf.Name;
 		}
 	}
 	
-	internal Vector3 TargetPosition(Unit a_source)
+	internal virtual Vector3 TargetPosition(Unit a_source)
 	{
-		Vector3 pos = a_source.transform.position + a_source.transform.forward * range.Compute().Value;
+		Vector3 pos = a_source.transform.position + a_source.transform.forward * range.Value;
 		return pos;
 	}
 	
-	internal List<Unit> SeekTargets(Unit a_soucre, Vector3 a_attackPosition)
+	internal virtual List<Unit> SeekTargets(Unit a_soucre, Vector3 a_attackPosition)
 	{
 		List<Unit> targets = new List<Unit>();
 		
-		Collider[] colliders = Physics.OverlapSphere(a_attackPosition, areaOfEffect.Compute().Value, 1 << LayerMask.NameToLayer("Unit"));
+		Collider[] colliders = Physics.OverlapSphere(a_attackPosition, effectRadius.Value, 1 << LayerMask.NameToLayer("Unit"));
 		
 		foreach(Collider each in colliders)
 		{
@@ -47,18 +49,18 @@ public class AttackConf
 				}
 			}
 		}
-
+		
 		return targets;
 	}
 	
-	internal AttackWrapper Compute(AttackInfos a_attackInfos)
+	internal virtual AttackWrapper Compute(AttackInfos a_attackInfos)
 	{
 		AttackWrapper attack = new AttackWrapper();
 		attack.conf = this;
 		attack.attackInfos = a_attackInfos;
 		attack.effects = new List<AEffect>();
 		
-		foreach(EffectConf each in effects)
+		foreach(EffectConf each in onHitEffects)
 		{
 			AEffect computed = each.Compute(a_attackInfos);
 			attack.effects.Add (computed);

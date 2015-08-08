@@ -1,19 +1,26 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [System.Serializable]
 public class FloatModifiedModifierConf
 {
 	#region Inspector Propertes
-	public FloatModifiedCustomConf percent = null;
-	public FloatModifiedCustomConf flat = null;
+	public FloatValue percent = null;
+	public FloatValue flat = null;
 	#endregion
 	
 	internal FloatModifiedModifier Compute()
 	{
 		FloatModifiedModifier mod = new FloatModifiedModifier();
-		mod.percent = percent.Compute();
-		mod.flat = flat.Compute();
+		
+		FloatModified newMod = new FloatModified();
+		newMod.BaseValue = percent.Value;
+		mod.percent = newMod;
+		
+		newMod = new FloatModified();
+		newMod.BaseValue = flat.Value;
+		mod.flat = newMod;
+		
 		return mod;
 	}
 }

@@ -25,18 +25,28 @@ public class UnitDefense : AUnitComponent
 	{
 		base.Init (a_unit);
 		
-		PrepareArmorModifiers(general);
-			PrepareArmorModifiers(physical);
-				PrepareArmorModifiers(slashing);
-				PrepareArmorModifiers(crushing);
-				PrepareArmorModifiers(piercing);
-				PrepareArmorModifiers(bleed);
-			PrepareArmorModifiers(magic);
-				PrepareArmorModifiers(fire);
-				PrepareArmorModifiers(frost);
-				PrepareArmorModifiers(lightning);
-				PrepareArmorModifiers(poison);
-			PrepareArmorModifiers(spirit);
+		if(_unit.UnitConf != null && _unit.UnitConf.defense != null)
+		{
+			general = _unit.UnitConf.defense.general.Compute();
+			
+			physical = _unit.UnitConf.defense.physical.Compute();
+			slashing = _unit.UnitConf.defense.slashing.Compute();
+			crushing = _unit.UnitConf.defense.crushing.Compute();
+			piercing = _unit.UnitConf.defense.piercing.Compute();
+			
+			magic = _unit.UnitConf.defense.magic.Compute();
+			fire = _unit.UnitConf.defense.fire.Compute();
+			frost = _unit.UnitConf.defense.frost.Compute();
+			lightning = _unit.UnitConf.defense.lightning.Compute();
+			
+			bleed = _unit.UnitConf.defense.bleed.Compute();
+			poison = _unit.UnitConf.defense.poison.Compute();
+			spirit = _unit.UnitConf.defense.spirit.Compute();
+		}
+		else
+		{
+			Debug.LogWarning("Unit Conf Issue in UnitDefense.");
+		}
 	}
 	
 	#region Armor
@@ -123,23 +133,48 @@ public class UnitDefense : AUnitComponent
 		return false;
 	}
 	#endregion
-	
-	static internal void PrepareArmorModifiers(Armor a_res)
-	{
-		/*9a_res.armor.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_BONUS_IS_FLAT_FIRST;
-		a_res.armor.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_MALUS_IS_FLAT_FIRST;
-		a_res.armor.reducStackMethod = FFEngine.Game.Constants.ARMOR_REDUC_STACK;
-		
-		a_res.flat.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_BONUS_IS_FLAT_FIRST;
-		a_res.flat.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_SCORE_MALUS_IS_FLAT_FIRST;
-		a_res.flat.reducStackMethod = FFEngine.Game.Constants.ARMOR_REDUC_STACK;*/
-	}
 }
 
 public class Armor
 {
 	internal IntModified armor = null;
 	internal IntModified flat = null;
+	
+	internal Armor()
+	{
+		armor = new IntModified();
+		armor.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.bonus;
+		armor.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.malus;
+		armor.reducStackMethod = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.stack;
+		
+		flat = new IntModified();
+		flat.bonusIsFlatFirst = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.bonus;
+		flat.malusIsFlatFirst = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.malus;
+		flat.reducStackMethod = FFEngine.Game.Constants.ARMOR_MODIFIED_CONF.stack;
+	}
+}
+
+public class ArmorConf
+{
+	/// <summary>
+	/// The armor. Converted into % damage reduction.
+	/// </summary>
+	public int armor = 0;
+	
+	/// <summary>
+	/// The flat reduction. Reduce the damage received by this amount.
+	/// </summary>
+	public int flat = 0;
+	
+	internal Armor Compute()
+	{
+		Armor result = new Armor();
+		
+		result.armor.BaseValue = armor;
+		result.flat.BaseValue = flat;
+		
+		return result;
+	}
 }
 
 public class Resistance
@@ -161,3 +196,5 @@ public class Resistance
 		return reduc;
 	}
 }
+
+
