@@ -10,12 +10,12 @@ public class DebugTest : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		manager.Client.SetDebugMode(true);
+		manager.Client.DebugMode = true;
 		manager.Client.CanFindSelf = true;
-		manager.Client.StartDiscovery("_tcp.");
+		manager.Client.StartDiscovery("_http._tcp.");
 		
-		manager.Host.SetDebugMode(true);
-		manager.Host.StartAdvertising("_tcp.","My zeroconf room");
+		//manager.Host.SetDebugMode(true);
+		manager.Host.StartAdvertising("_http._tcp.","My zeroconf room");
 	}
 	
 	void Update()
@@ -26,8 +26,8 @@ public class DebugTest : MonoBehaviour
 			/*if(manager.Client.State != EZeroconfClientState.Idle)
 				manager.Client.StopDiscovery();*/
 				
-			if(manager.Host.State != EZeroconfHostState.Idle)
-				manager.Host.StopAdvertising();
+			/*if(manager.Host.State != EZeroconfHostState.Idle)
+				manager.Host.StopAdvertising();*/
 		}
 	}
 }
