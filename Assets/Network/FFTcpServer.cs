@@ -1,19 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 
 namespace FFNetworking
 {
-	internal class Server
+	internal class FFTcpServer
 	{
 		#region Properties
 		protected IPEndPoint _endPoint;
 		protected TcpListener _tcpListener;
 		protected Thread _listeningThread;
-		protected Dictionary<Player,TcpClient> _clients;
+		protected Dictionary<Player,FFTcpClient> _clients;
 		protected bool _isListening = false;
 		
 		internal int Port
@@ -25,12 +26,12 @@ namespace FFNetworking
 		}
 		#endregion
 		
-		internal Server()
+		internal FFTcpServer()
 		{
 			_tcpListener = new TcpListener(IPAddress.Loopback,0);
 			StartAcceptingConnections();
 			_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
-			_clients = new Dictionary<Player,TcpClient>();
+			_clients = new Dictionary<Player,FFTcpClient>();
 			FFLog.Log(EDbgCat.Networking,"Server prepared on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
 		}
 		
@@ -82,12 +83,21 @@ namespace FFNetworking
 			if(_isListening && _tcpListener.Pending())
 			{
 				TcpClient newClient = _tcpListener.AcceptTcpClient();
-				IPEndPoint newEp = newClient.Client.RemoteEndPoint as IPEndPoint;
+				FFTcpClient newFFClient = new FFTcpClient(newClient);
 				
+				IPEndPoint newEp = newClient.Client.RemoteEndPoint as IPEndPoint;
 				Player player = new Player(newEp);
 				
-				_clients.Add(player, newClient);
+				_clients.Add(player, newFFClient);
+				
 				FFLog.LogError(EDbgCat.Networking,"New Client");
+				
+				FFResponseRoomInfo roomInfo = new FFResponseRoomInfo();
+				roomInfo.currentPlayerCount = 2;
+				roomInfo.maxPlayerCount = 3;
+				roomInfo.gameName = "My Game!";
+				
+				newFFClient.QueueMessage(roomInfo);
 			}
 		}
 		#endregion

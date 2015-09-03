@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Zeroconf;
 using FFNetworking;
@@ -7,7 +7,7 @@ internal class DebugTest : MonoBehaviour
 {
 	public ZeroconfManager manager = null;
 	
-	public Server _server;
+	public FFTcpServer _server;
 	
 	private float _timeElapsed;
 	// Use this for initialization
@@ -19,7 +19,7 @@ internal class DebugTest : MonoBehaviour
 		
 		//manager.Host.SetDebugMode(true);
 		
-		_server = new Server();
+		_server = new FFTcpServer();
 		
 		manager.Host.StartAdvertising("_http._tcp.","My zeroconf room", _server.Port);
 		
@@ -33,7 +33,7 @@ internal class DebugTest : MonoBehaviour
 		_timeElapsed += Time.deltaTime;
 		if(_timeElapsed > 10f)
 		{
-			_server.StopAcceptingConnections();
+			//_server.StopAcceptingConnections();
 			/*if(manager.Client.State != EZeroconfClientState.Idle)
 				manager.Client.StopDiscovery();*/
 				
@@ -44,7 +44,7 @@ internal class DebugTest : MonoBehaviour
 	
 	void OnRoomAdded(ZeroconfRoom a_room)
 	{
-		FFLog.LogError("On Room Found");
-		Client client = new Client(a_room.EndPoint);
+		FFLog.LogError("On Room Found : " + a_room.EndPoint.ToString());
+		FFTcpClient client = new FFTcpClient(a_room);
 	}
 }
