@@ -13,8 +13,8 @@ internal class DebugTest : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		manager.Client.DebugMode = true;
-		manager.Client.CanFindSelf = true;
+		//manager.Client.DebugMode = true;
+		//manager.Client.CanFindSelf = true;
 		manager.Client.StartDiscovery("_http._tcp.");
 		
 		//manager.Host.SetDebugMode(true);
@@ -33,7 +33,7 @@ internal class DebugTest : MonoBehaviour
 		_timeElapsed += Time.deltaTime;
 		if(_timeElapsed > 10f)
 		{
-			_server.StopAcceptingConnections();
+			//_server.StopAcceptingConnections();
 			/*if(manager.Client.State != EZeroconfClientState.Idle)
 				manager.Client.StopDiscovery();*/
 				
@@ -44,7 +44,8 @@ internal class DebugTest : MonoBehaviour
 	
 	void OnRoomAdded(ZeroconfRoom a_room)
 	{
-		FFLog.LogError("On Room Found");
+		Debug.LogError("On Room Found");
 		Client client = new Client(a_room.EndPoint);
+		Debug.LogError("On Room Found2");
 	}
 }
