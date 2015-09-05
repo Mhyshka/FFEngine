@@ -21,7 +21,6 @@ namespace FFNetworking
 		#region Properties
 		internal TcpClient tcpClient;
 		
-		protected ZeroconfRoom _room;
 		protected Thread _readerThread;
 		protected Thread _writerThread;
 		#endregion
@@ -30,11 +29,10 @@ namespace FFNetworking
 		/// <summary>
 		/// Called by the client
 		/// </summary>
-		internal FFTcpClient(ZeroconfRoom a_room)
+		internal FFTcpClient(IPEndPoint a_remote)
 		{
-			_room = a_room;
 			tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback,0));
-			tcpClient.Connect(a_room.EndPoint);
+			tcpClient.Connect(a_remote);
 			
 			_readerThread = new Thread(new ThreadStart(ReaderTask));
 			_readerThread.Start();
@@ -62,6 +60,8 @@ namespace FFNetworking
 		internal void Close()
 		{
 			tcpClient.Close();
+			_writerThread.Abort();
+			_readerThread.Abort();
 		}
 		#endregion
 		
@@ -70,6 +70,7 @@ namespace FFNetworking
 		{
 			lock(_toSendMessages)
 			{
+				FFLog.Log(EDbgCat.Networking,"Queue message");
 				_toSendMessages.Enqueue(a_message);
 			}
 		}
@@ -78,19 +79,24 @@ namespace FFNetworking
 		
 		protected void Write(FFMessage a_message)
 		{
+			FFLog.Log(EDbgCat.Networking,"Write");
 			MemoryStream stream = new MemoryStream();
 			s_binaryFormatter.Serialize(stream,a_message);
 			byte[] data = stream.ToArray();
+			FFLog.LogError(data.Length.ToString());
 			tcpClient.GetStream().Write(data,0,data.Length);
 		}
 		
 		protected void WriterTask()
 		{
-			while(tcpClient.GetStream().CanWrite && _toSendMessages.Count > 0)
+			while(tcpClient.Connected)
 			{
-				lock(_toSendMessages)
+				if(tcpClient.GetStream().CanWrite && _toSendMessages.Count > 0)
 				{
-					Write (_toSendMessages.Dequeue());
+					lock(_toSendMessages)
+					{
+						Write (_toSendMessages.Dequeue());
+					}
 				}
 			}
 		}
@@ -99,19 +105,24 @@ namespace FFNetworking
 		#region Reader
 		protected void Read()
 		{
+			FFLog.Log(EDbgCat.Networking,"Read");
 			object data = s_binaryFormatter.Deserialize(tcpClient.GetStream());
-			/*FFMessage messages = data as FFMessage[];
+			FFLog.LogError(data.ToString());
+			FFMessage[] messages = data as FFMessage[];
 			foreach(FFMessage each in messages)
 			{
-				each.Read();
-			}*/
+				each.Read(tcpClient);
+			}
 		}
 		
 		protected void ReaderTask()
 		{
-			while(tcpClient.GetStream().CanRead && tcpClient.GetStream().DataAvailable)
+			while(tcpClient.Connected)
 			{
-				Read ();
+				if(tcpClient.GetStream().CanRead && tcpClient.GetStream().DataAvailable)
+				{
+					Read ();
+				}
 			}
 		}
 		#endregion

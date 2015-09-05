@@ -4,6 +4,7 @@ using System.Net.Sockets;
 
 namespace FFNetworking
 {
+	[System.Serializable]
 	internal class FFQueryRoomInfo : FFMessage
 	{
 		#region Properties

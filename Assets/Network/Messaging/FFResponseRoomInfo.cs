@@ -4,6 +4,7 @@ using System.Net.Sockets;
 
 namespace FFNetworking
 {
+	[System.Serializable]
 	internal class FFResponseRoomInfo : FFMessage
 	{
 		#region Properties
@@ -15,8 +16,8 @@ namespace FFNetworking
 		#region Methods
 		internal override void Read(TcpClient a_tcpClient)
 		{
-		
-		}
+			FFLog.LogError("Je suis un message de room info.");
+		}	
 		#endregion
 	}
 }

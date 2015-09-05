@@ -29,10 +29,16 @@ namespace FFNetworking
 		internal FFTcpServer()
 		{
 			_tcpListener = new TcpListener(IPAddress.Loopback,0);
-			StartAcceptingConnections();
+			_tcpListener.Start();
 			_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 			_clients = new Dictionary<Player,FFTcpClient>();
 			FFLog.Log(EDbgCat.Networking,"Server prepared on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
+		}
+		
+		internal void Close()
+		{
+			StopAcceptingConnections();
+			_tcpListener.Stop ();
 		}
 		
 		#region Client Acceptation
@@ -42,7 +48,6 @@ namespace FFNetworking
 			{
 				FFLog.Log(EDbgCat.Networking,"Server start listening");
 				_isListening = true;
-				_tcpListener.Start ();
 				_listeningThread = new Thread(new ThreadStart(ListeningTask));
 				_listeningThread.Start();
 			}
@@ -56,9 +61,7 @@ namespace FFNetworking
 		{
 			if(_isListening)
 			{
-				_tcpListener.Stop ();
 				_listeningThread.Abort();
-				_tcpListener = null;
 				_isListening = false;
 				FFLog.Log(EDbgCat.Networking,"Stop thread");
 			}
@@ -79,9 +82,9 @@ namespace FFNetworking
 		
 		internal void HandlePendingConnections()
 		{
-			
 			if(_isListening && _tcpListener.Pending())
 			{
+				FFLog.LogError("Accepting connection.");
 				TcpClient newClient = _tcpListener.AcceptTcpClient();
 				FFTcpClient newFFClient = new FFTcpClient(newClient);
 				
