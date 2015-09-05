@@ -13,10 +13,9 @@ internal class DebugTest : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		manager.Client.DebugMode = true;
+		/*manager.Client.DebugMode = true;
 		manager.Client.CanFindSelf = true;
-		
-		manager.Host.DebugMode = true;
+		manager.Host.DebugMode = true;*/
 	}
 	
 	void Update()
