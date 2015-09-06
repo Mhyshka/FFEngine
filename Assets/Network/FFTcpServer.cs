@@ -38,8 +38,7 @@ namespace FFNetworking
 				{
 					if(each.AddressFamily == AddressFamily.InterNetwork && each != IPAddress.Loopback)
 					{
-						ipv4 = each;
-						break;
+						FFLog.Log(each.ToString());
 					}
 				}
 				
