@@ -28,17 +28,54 @@ namespace FFNetworking
 		
 		internal FFTcpServer()
 		{
-			_tcpListener = new TcpListener(IPAddress.Loopback,0);
-			_tcpListener.Start();
-			_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
-			_clients = new Dictionary<Player,FFTcpClient>();
-			FFLog.Log(EDbgCat.Networking,"Server prepared on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
+			/*try
+			{*/
+				_isListening = false;
+				
+				IPAddress[] ipAddresses = Dns.GetHostEntry("localhost").AddressList;
+				IPAddress ipv4 = null;
+				foreach(IPAddress each in ipAddresses)
+				{
+					if(each.AddressFamily == AddressFamily.InterNetwork && each != IPAddress.Loopback)
+					{
+						ipv4 = each;
+						break;
+					}
+				}
+				
+				_tcpListener = new TcpListener(ipv4, 0);
+				_tcpListener.Start();
+				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
+				_clients = new Dictionary<Player,FFTcpClient>();
+				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
+			/*}
+			catch(SocketException e)
+			{
+				FFLog.LogError(EDbgCat.Networking, "Couldn't create server TCPListener." + e.StackTrace);
+			}*/
 		}
 		
 		internal void Close()
 		{
-			StopAcceptingConnections();
-			_tcpListener.Stop ();
+			if(_isListening)
+			{
+				StopAcceptingConnections();
+			}
+			
+			try
+			{
+				_tcpListener.Stop();
+			}
+			catch(SocketException e)
+			{
+				FFLog.LogError(EDbgCat.Networking, "Couldn't Stop server." + e.StackTrace);
+			}
+			
+			foreach(FFTcpClient client in _clients.Values)
+			{
+				client.Close();
+			}
+			_clients.Clear();
 		}
 		
 		#region Client Acceptation
@@ -49,6 +86,7 @@ namespace FFNetworking
 				FFLog.Log(EDbgCat.Networking,"Server start listening");
 				_isListening = true;
 				_listeningThread = new Thread(new ThreadStart(ListeningTask));
+				_listeningThread.IsBackground = true;
 				_listeningThread.Start();
 			}
 			else
@@ -84,28 +122,30 @@ namespace FFNetworking
 		{
 			if(_isListening && _tcpListener.Pending())
 			{
-				FFLog.LogError("Accepting connection.");
+				FFLog.Log(EDbgCat.Networking, "Pending connection.");
 				TcpClient newClient = _tcpListener.AcceptTcpClient();
-				FFTcpClient newFFClient = new FFTcpClient(newClient);
 				
+				FFTcpClient newFFClient = new FFTcpClient(newClient);
+				newFFClient.StartWorkers();
 				IPEndPoint newEp = newClient.Client.RemoteEndPoint as IPEndPoint;
 				Player player = new Player(newEp);
-				
 				_clients.Add(player, newFFClient);
 				
-				FFLog.LogError(EDbgCat.Networking,"New Client");
-				
-				FFResponseRoomInfo roomInfo = new FFResponseRoomInfo();
-				roomInfo.currentPlayerCount = 2;
-				roomInfo.maxPlayerCount = 3;
-				roomInfo.gameName = "My Game!";
-				
-				newFFClient.QueueMessage(roomInfo);
+				WelcomeClient(newFFClient);
 			}
 		}
-		#endregion
 		
-		#region Reading
+		protected void WelcomeClient(FFTcpClient a_newClient)
+		{
+			FFLog.LogError(EDbgCat.Networking, "New Client");
+			
+			FFResponseRoomInfo roomInfo = new FFResponseRoomInfo();
+			roomInfo.currentPlayerCount = 2;
+			roomInfo.maxPlayerCount = 3;
+			roomInfo.gameName = "My Game!";
+			
+			a_newClient.QueueMessage(roomInfo);
+		}
 		#endregion
 	}
 }

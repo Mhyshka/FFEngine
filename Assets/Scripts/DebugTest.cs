@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Zeroconf;
 using FFNetworking;
+using System.Net;
 
 internal class DebugTest : MonoBehaviour
 {
@@ -46,6 +47,19 @@ internal class DebugTest : MonoBehaviour
 		_isDiscovering = true;
 		manager.Client.StartDiscovery("_http._tcp.");
 		manager.Client.onRoomAdded += OnRoomAdded;
+		
+		if(_server != null)
+		{
+			IPEndPoint ep = new IPEndPoint(IPAddress.Parse("192.168.0.15"),_server.Port);
+			if(ep != null)
+			{
+				FFTcpClient client = new FFTcpClient(ep);
+				if(client.Connect())
+				{
+					client.StartWorkers();
+				}
+			}
+		}
 	}
 	
 	void StopDiscover()
@@ -57,8 +71,16 @@ internal class DebugTest : MonoBehaviour
 	
 	void OnRoomAdded(ZeroconfRoom a_room)
 	{
-		FFLog.LogError("On Room Found : " + a_room.EndPoint.ToString());
-		//FFTcpClient client = new FFTcpClient(a_room);
+		FFLog.LogError("On Room Found : " + a_room.EndPoint.ToString());		
+		/*IPEndPoint ep = a_room.EndPoint;
+		if(ep != null)
+		{
+			FFTcpClient client = new FFTcpClient(ep);
+			if(client.Connect())
+			{
+				client.StartWorkers();
+			}
+		}*/
 	}
 	
 	bool _isAdvertising = false;
@@ -66,6 +88,7 @@ internal class DebugTest : MonoBehaviour
 	{
 		_isAdvertising = true;
 		_server = new FFTcpServer();
+		_server.StartAcceptingConnections();
 		manager.Host.StartAdvertising("_http._tcp.","My zeroconf room", _server.Port);
 	}
 	
