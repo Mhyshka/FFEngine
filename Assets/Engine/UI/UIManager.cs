@@ -7,11 +7,8 @@ namespace FFEngine
 	internal class UIManager
 	{
 		#region Properties
-		internal FF_UI_Root root;
+		internal UIRoot _root;
 		private LoadingScreen _loadingScreen;
-		
-		private Camera _uiCamera;
-		internal Camera UICamera{get{return _uiCamera;}}
 		
 		private Dictionary<string, FFPanel> _panelsByName;
 		
@@ -22,11 +19,6 @@ namespace FFEngine
 		internal UIManager()
 		{
 			_panelsByName = new Dictionary<string, FFPanel> ();
-		}
-		
-		internal void RegisterUiCamera(Camera a_cam)
-		{
-			_uiCamera = a_cam;
 		}
 		
 		#region Loading
@@ -95,6 +87,11 @@ namespace FFEngine
 		#endregion
 		
 		#region Register
+		internal void RegisterRoot(UIRoot a_rootUi)
+		{
+			_root = a_rootUi;
+		}
+		
 		internal void Register(string a_eventKey, FFPanel a_panel)
 		{
 			_panelsToLoadCount--;
@@ -108,7 +105,7 @@ namespace FFEngine
 					{
 						parent = parent.parent;
 					}
-					a_panel.transform.SetParent(root.transform);
+					a_panel.transform.SetParent(_root.transform);
 					
 					GameObject.Destroy(parent.gameObject);
 				}

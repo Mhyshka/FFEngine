@@ -6,7 +6,8 @@ using System.Collections;
 internal enum EDbgCat
 {
 	Zeroconf,
-	Networking
+	Networking,
+	UI
 }
 
 internal class FFLog

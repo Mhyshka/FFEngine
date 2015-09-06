@@ -4,6 +4,7 @@ using System.Collections;
 namespace FFEngine
 {
 	[RequireComponent(typeof(CanvasGroup))]
+	[RequireComponent(typeof(Animator))]
 	internal class FFPanel : MonoBehaviour
 	{
 		internal enum EState
@@ -38,13 +39,19 @@ namespace FFEngine
 		{
 			_canvasGroup = GetComponent<CanvasGroup>();
 			_animator = GetComponent<Animator>();
+			
+			if (!hideOnLoad)
+			{
+				_animator.SetInteger("StartingState", 1);
+			}
+			else
+			{
+				_animator.SetInteger("StartingState", -1);
+			}
+			
 			if(!debug)
 			{
 				FFEngine.UI.Register (gameObject.name, this);
-				if (hideOnLoad)
-					OnHidden ();
-				else
-					OnShown ();
 			}
 		}
 	
@@ -56,26 +63,14 @@ namespace FFEngine
 		#region Show
 		internal virtual void Show()
 		{
-			if(!hasTweenAlpha && _canvasGroup != null)
-				_canvasGroup.alpha = 1f;
-			if(isUsingTransition)
-				PlayShowTransition ();
-			else
-				OnShown();
-		}
-		
-		protected virtual void PlayShowTransition ()
-		{
-			//Debug.Log("Showing : " + gameObject.name);
-			if (state == EState.Hidden)
+			if(state == EState.Shown || state == EState.Showing)
 			{
+				_animator.SetTrigger("Show");
 				state = EState.Showing;
-				tweens.PlayForward ();
 			}
-			else if (state == EState.Hidding)
+			else
 			{
-				state = EState.Showing;
-				tweens.Toggle ();
+				FFLog.LogWarning(EDbgCat.UI, "Already shown / showing");
 			}
 		}
 		#endregion
@@ -83,52 +78,35 @@ namespace FFEngine
 		#region Hide
 		internal virtual void Hide()
 		{
-			if(isUsingTransition)
-				PlayHideTransition ();
-			else
-				OnHidden();
-		}
-	
-		protected virtual void PlayHideTransition ()
-		{
-			if (state == EState.Shown)
+			if(state == EState.Shown || state == EState.Showing)
 			{
+				_animator.SetTrigger("Hide");
 				state = EState.Hidding;
-				tweens.PlayReverse ();
 			}
-			else if (state == EState.Showing)
+			else
 			{
-				state = EState.Hidding;
-				tweens.Toggle ();
+				FFLog.LogWarning(EDbgCat.UI, "Already hidden / hiding");
 			}
 		}
 		#endregion
 		
 		#region Transition Events
-		public void OnTransitionComplete()
+		/// <summary>
+		/// Callback from animator
+		/// </summary>
+		public virtual void OnShown()
 		{
-			if (state == EState.Showing || state == EState.Hidden)
-			{
-				OnShown();
-			}
-			else if (state == EState.Hidding || state == EState.Shown)
-			{
-				OnHidden();
-			}
-		}
-	
-		internal virtual void OnShown()
-		{
-			//Debug.Log("On Shown : " + gameObject.name);
+			FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
 			state = EState.Shown;
 		}
 	
-		internal virtual void OnHidden()
+		/// <summary>
+		/// Callback from animator
+		/// </summary>
+		public virtual void OnHidden()
 		{
-			//Debug.Log("On Hidden : " + gameObject.name);
+			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
 			state = EState.Hidden;
-			if(_canvasGroup != null)
-				_canvasGroup.alpha = 0f;
 		}
 		#endregion
 	}

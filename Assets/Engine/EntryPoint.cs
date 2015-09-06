@@ -11,12 +11,11 @@ namespace FFEngine
 		void Awake()
 		{
 			_engine = new FFEngine();
-			FFEngine.Initialize();
 		}
 		
 		void Update()
 		{
-			FFEngine.DoUpdate();
+			_engine.DoUpdate();
 		}
 	}
 }
