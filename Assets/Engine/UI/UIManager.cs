@@ -28,11 +28,11 @@ namespace FFEngine
 			if(a_panelList != null && a_panelList.Length > 0)
 			{
 				_isLoading = true;
-				Debug.Log ("Starting to load " + a_panelList.Length + " panels.");
+				FFLog.LogWarning(EDbgCat.UI,"Starting to load " + a_panelList.Length + " panels.");
 				foreach(string each in a_panelList)
 				{
 					if(string.IsNullOrEmpty(each))
-						Debug.LogWarning("Null of empty panel given.");
+						FFLog.LogWarning(EDbgCat.UI,"Null of empty panel given.");
 					else
 						LoadAsyncScene(each);
 				}
@@ -40,7 +40,7 @@ namespace FFEngine
 			else
 			{
 				_isLoading = false;
-				Debug.Log ("No panel to load, UIManager is done.");
+				FFLog.LogWarning(EDbgCat.UI,"No panel to load, UIManager is done.");
 				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
 				return;
 			}
@@ -81,7 +81,7 @@ namespace FFEngine
 		{
 			get
 			{
-				return _loadingScreen.state;
+				return _loadingScreen.State;
 			}
 		}
 		#endregion
@@ -112,13 +112,13 @@ namespace FFEngine
 			}
 			else
 			{
-				Debug.LogWarning("Same panel registered twice.");
+				FFLog.LogWarning(EDbgCat.UI,"Same panel registered twice.");
 			}
 			
 			if(_panelsToLoadCount == 0 && _isLoading)
 			{
 				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
-				Debug.Log ("UI LOADING COMPLETE");
+				FFLog.LogWarning(EDbgCat.UI,"UI LOADING COMPLETE");
 			}
 		}
 		
@@ -130,7 +130,7 @@ namespace FFEngine
 			}
 			else
 			{
-				Debug.LogWarning("No panel registered with this key : " + a_eventKey);
+				FFLog.LogWarning(EDbgCat.UI,"No panel registered with this key : " + a_eventKey);
 			}
 		}
 		#endregion
@@ -143,7 +143,7 @@ namespace FFEngine
 				return _panelsByName[a_eventKey];
 			}
 	
-			Debug.LogWarning("No panel registered with this key : " + a_eventKey);
+			FFLog.LogWarning(EDbgCat.UI,"No panel registered with this key : " + a_eventKey);
 			return null;
 		}
 		#endregion
@@ -161,12 +161,12 @@ namespace FFEngine
 			foreach(string each in _panelsByName.Keys)
 			{
 				if(!panelsToShow.Contains(each) && 
-				   (_panelsByName[each].state == FFPanel.EState.Shown || _panelsByName[each].state == FFPanel.EState.Showing))
+				   (_panelsByName[each].State == FFPanel.EState.Shown || _panelsByName[each].State == FFPanel.EState.Showing))
 				{
 					HideSpecificPanel(each);
 				}
 				else if(panelsToShow.Contains(each) && 
-				       (_panelsByName[each].state == FFPanel.EState.Hidden || _panelsByName[each].state == FFPanel.EState.Hidding))
+				        (_panelsByName[each].State == FFPanel.EState.Hidden || _panelsByName[each].State == FFPanel.EState.Hidding))
 				{
 					RequestDisplay(each);
 				}
@@ -183,17 +183,17 @@ namespace FFEngine
 		{
 			if(!_panelsByName.ContainsKey(a_panel))
 			{
-				Debug.LogWarning("No panel found using this name : " + a_panel);
+				FFLog.LogWarning(EDbgCat.UI,"No panel found using this name : " + a_panel);
 				return;
 			}
 			
-			if(_panelsByName[a_panel].state == FFPanel.EState.Hidden || _panelsByName[a_panel].state == FFPanel.EState.Hidding)
+			if(_panelsByName[a_panel].State == FFPanel.EState.Hidden || _panelsByName[a_panel].State == FFPanel.EState.Hidding)
 			{
 				_panelsByName[a_panel].Show();
 			}
 			else
 			{
-				Debug.LogWarning("Panel is already shown or showing : " + a_panel);
+				FFLog.LogWarning(EDbgCat.UI,"Panel is already shown or showing : " + a_panel);
 			}
 		}
 		
@@ -201,17 +201,17 @@ namespace FFEngine
 		{
 			if(!_panelsByName.ContainsKey(a_panel))
 			{
-				Debug.LogWarning("No panel found using this name : " + a_panel);
+				FFLog.LogWarning(EDbgCat.UI,"No panel found using this name : " + a_panel);
 				return;
 			}
 			
-			if(_panelsByName[a_panel].state == FFPanel.EState.Showing || _panelsByName[a_panel].state == FFPanel.EState.Shown)
+			if(_panelsByName[a_panel].State == FFPanel.EState.Showing || _panelsByName[a_panel].State == FFPanel.EState.Shown)
 			{
 				_panelsByName[a_panel].Hide();
 			}
 			else
 			{
-				Debug.LogWarning("Panel is already hidden or hidding : " + a_panel);
+				FFLog.LogWarning(EDbgCat.UI,"Panel is already hidden or hidding : " + a_panel);
 			}
 		}
 		
@@ -219,7 +219,7 @@ namespace FFEngine
 		{
 			foreach (FFPanel each in _panelsByName.Values)
 			{
-				if(each.state != FFPanel.EState.Hidden && each.state != FFPanel.EState.Hidding)
+				if(each.State != FFPanel.EState.Hidden && each.State != FFPanel.EState.Hidding)
 					each.Hide();
 			}
 		}

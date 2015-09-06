@@ -7,6 +7,13 @@ namespace FFEngine
 	{	
 		#region Properties
 		private static FFEngine s_instance;
+		internal static FFEngine Instance
+		{
+			get
+			{
+				return s_instance;
+			}
+		}
 		
 		private EventManager _eventManager;
 		internal static EventManager Events{get{return s_instance._eventManager;}}

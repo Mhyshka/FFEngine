@@ -17,7 +17,6 @@ namespace FFEngine
 	
 		#region Inspector Properties
 		public bool debug = false;
-		public bool isUsingTransition = true;
 		public bool hideOnLoad = true;
 		#endregion
 	
@@ -32,21 +31,33 @@ namespace FFEngine
 			}
 		}
 		
-		internal EState state = EState.Hidden;
+		protected EState _state = EState.Hidden;
+		internal EState State
+		{
+			get
+			{
+				return _state;
+			}
+		}
 		#endregion
 	
 		protected virtual void Awake()
 		{
+			#if RELEASE
+			debug = false;	
+			#endif
 			_canvasGroup = GetComponent<CanvasGroup>();
 			_animator = GetComponent<Animator>();
 			
 			if (!hideOnLoad)
 			{
 				_animator.SetInteger("StartingState", 1);
+				OnShown();
 			}
 			else
 			{
 				_animator.SetInteger("StartingState", -1);
+				OnHidden();
 			}
 			
 			if(!debug)
@@ -63,10 +74,11 @@ namespace FFEngine
 		#region Show
 		internal virtual void Show()
 		{
-			if(state == EState.Shown || state == EState.Showing)
+			if(_state == EState.Shown || _state == EState.Showing)
 			{
+				gameObject.SetActive(true);
 				_animator.SetTrigger("Show");
-				state = EState.Showing;
+				_state = EState.Showing;
 			}
 			else
 			{
@@ -78,10 +90,10 @@ namespace FFEngine
 		#region Hide
 		internal virtual void Hide()
 		{
-			if(state == EState.Shown || state == EState.Showing)
+			if(_state == EState.Shown || _state == EState.Showing)
 			{
 				_animator.SetTrigger("Hide");
-				state = EState.Hidding;
+				_state = EState.Hidding;
 			}
 			else
 			{
@@ -97,7 +109,7 @@ namespace FFEngine
 		public virtual void OnShown()
 		{
 			FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
-			state = EState.Shown;
+			_state = EState.Shown;
 		}
 	
 		/// <summary>
@@ -106,7 +118,8 @@ namespace FFEngine
 		public virtual void OnHidden()
 		{
 			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
-			state = EState.Hidden;
+			_state = EState.Hidden;
+			gameObject.SetActive(false);
 		}
 		#endregion
 	}

@@ -7,11 +7,10 @@ namespace FFEngine
 	{
 		protected override void Awake ()
 		{
-			FFEngine.UI.RegisterLoadingScreen(this);
-			if (hideOnLoad)
-				OnHidden ();
-			else
-				OnShown ();
+			if(!debug)
+				FFEngine.UI.RegisterLoadingScreen(this);
+				
+			base.Awake();
 		}
 		
 		protected override void OnDestroy ()
