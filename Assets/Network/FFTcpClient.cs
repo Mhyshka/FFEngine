@@ -31,8 +31,20 @@ namespace FFNetworking
 		/// </summary>
 		internal FFTcpClient(IPEndPoint a_remote)
 		{
-			_tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback,0));
-			_remote = a_remote;
+			IPAddress[] ipAddresses = Dns.GetHostEntry(string.Empty).AddressList;
+			IPAddress ipv4 = null;
+			foreach(IPAddress each in ipAddresses)
+			{
+				if(each.AddressFamily == AddressFamily.InterNetwork)
+				{
+					ipv4 = each;
+					break;
+				}
+			}
+			
+			_tcpClient = new TcpClient(new IPEndPoint(ipv4,0));
+			_remote = new IPEndPoint(a_remote.Address, a_remote.Port);
+			FFLog.Log (EDbgCat.Networking, "New TCPClient with ep : " + a_remote.ToString());
 		}
 		
 		/// <summary>
@@ -47,17 +59,16 @@ namespace FFNetworking
 		#region Connection
 		internal bool Connect()
 		{
-			try
-			{
+			/*try
+			{*/
 				_tcpClient.Connect(_remote);
 				return true;
-			}
+			/*}
 			catch (SocketException e) 
 			{
-				FFLog.LogError("Couldn't connect to server.");
-				FFLog.LogError(e.StackTrace);
+				FFLog.LogError("Couldn't connect to server." + e.StackTrace);
 				return false;
-			}
+			}*/
 			
 			return false;
 		}
@@ -73,7 +84,7 @@ namespace FFNetworking
 		
 		internal void StartWorkers()
 		{
-			if(_readerThread == null && !_readerThread.IsAlive)
+			if(_readerThread == null || !_readerThread.IsAlive)
 			{
 				_readerThread = new Thread(new ThreadStart(ReaderTask));
 				_readerThread.IsBackground = true;
