@@ -28,18 +28,31 @@ namespace FFNetworking
 		
 		internal FFTcpServer()
 		{
-			try
-			{
-				_tcpListener = new TcpListener(IPAddress.Loopback,0);
+			/*try
+			{*/
+				_isListening = false;
+				
+				IPAddress[] ipAddresses = Dns.GetHostEntry("localhost").AddressList;
+				IPAddress ipv4 = null;
+				foreach(IPAddress each in ipAddresses)
+				{
+					if(each.AddressFamily == AddressFamily.InterNetwork && each != IPAddress.Loopback)
+					{
+						ipv4 = each;
+						break;
+					}
+				}
+				
+				_tcpListener = new TcpListener(ipv4, 0);
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 				_clients = new Dictionary<Player,FFTcpClient>();
 				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
-			}
+			/*}
 			catch(SocketException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't start create server TCPListener." + e.StackTrace);
-			}
+				FFLog.LogError(EDbgCat.Networking, "Couldn't create server TCPListener." + e.StackTrace);
+			}*/
 		}
 		
 		internal void Close()
