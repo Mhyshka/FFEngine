@@ -29,7 +29,7 @@ namespace FF.Networking
 		/// <summary>
 		/// Called by the client
 		/// </summary>
-		internal FFTcpClient(IPEndPoint a_remote)
+		internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
 		{
 			_tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback,0));
 			_remote = a_remote;

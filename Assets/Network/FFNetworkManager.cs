@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using System.Net.Sockets;
+using System.Net;
+
 using Zeroconf;
 
 namespace FF.Networking
@@ -21,8 +24,6 @@ namespace FF.Networking
 		{
 			_mainRoom = null;
 			_mainClient = null;
-			_server = new FFTcpServer();
-			_clients = new Dictionary<ZeroconfRoom, FFTcpClient>();
 		}
 		
 		~FFNetworkManager()
@@ -49,6 +50,25 @@ namespace FF.Networking
 				return _server;
 			}
 		}
+		
+		internal void StartServer()
+		{
+			if(_server == null)
+			{
+				_server = new FFTcpServer(NetworkIP);
+			}
+			else
+			{
+				FFLog.LogWarning(EDbgCat.Networking, "You're trying to start another server.");
+			}
+		}
+		
+		internal void StopServer()
+		{
+			_server.Close();
+			_server = null;
+		}
+		
 		#endregion
 		
 		#region Clients
@@ -76,6 +96,26 @@ namespace FF.Networking
 			get
 			{
 				return _mainClient;
+			}
+		}
+		#endregion
+		
+		#region IP
+		internal IPAddress NetworkIP
+		{
+			get
+			{
+				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
+				IPAddress ipv4 = null;
+				foreach(IPAddress each in ipAddresses)
+				{
+					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
+					{
+						return each;
+					}
+				}
+				
+				return null;
 			}
 		}
 		#endregion
