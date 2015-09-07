@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FFEngine
+namespace FF
 {
 	#region Callbacks
 	internal delegate void SimpleCallback();

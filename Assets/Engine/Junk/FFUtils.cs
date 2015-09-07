@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Text.RegularExpressions;
 
-namespace FFEngine
+namespace FF
 {
 	public class FFUtils
 	{

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace FFEngine
+namespace FF
 {
 	//Custom Inspector
 	public abstract class AGameState : MonoBehaviour

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace FFEngine
+namespace FF
 {
 	[RequireComponent(typeof(RectTransform))]
 	internal class UIRoot : MonoBehaviour

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace FFEngine
+namespace FF
 {
 	public class EntryPoint : MonoBehaviour
 	{

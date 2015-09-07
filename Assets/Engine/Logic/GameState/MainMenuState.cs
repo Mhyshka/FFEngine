@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using FFNetworking;
+using FF.Networking;
 
-namespace FFEngine
+namespace FF
 {
 	internal class MainMenuState : AMenuGameState
 	{

@@ -1,4 +1,4 @@
-namespace FFEngine
+namespace FF
 {
 	internal enum EStateID
 	{

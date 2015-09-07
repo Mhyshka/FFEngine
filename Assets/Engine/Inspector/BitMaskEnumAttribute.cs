@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FFEngine
+namespace FF
 {
 	public class BitMaskEnumAttribute : PropertyAttribute
 	{

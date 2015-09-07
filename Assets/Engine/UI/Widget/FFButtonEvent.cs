@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-namespace FFEngine
+namespace FF
 {/// <summary>
 /// Custom button to place over a Unity UI button. Called FFEngine.Event.FireEvent with the set event type or event key.
 /// </summary>

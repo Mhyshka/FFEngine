@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FFEngine
+namespace FF
 {
 	//Custom Inspector Link ( From AGameState )
 	public abstract class AGameMode : MonoBehaviour

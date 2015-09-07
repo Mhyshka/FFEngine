@@ -3,7 +3,7 @@ using System.Collections;
 using System.Net.Sockets;
 using System.Net;
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	internal class Player
 	{

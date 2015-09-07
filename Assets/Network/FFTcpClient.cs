@@ -12,7 +12,7 @@ using System.IO;
 using Zeroconf;
 
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	internal class FFTcpClient
 	{
