@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using Zeroconf;
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	internal class FFNetworkManager
 	{

@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using FFNetworking;
+using FF.Networking;
 
-namespace FFEngine
+namespace FF
 {
 	internal class MainMenuState : AMenuGameState
 	{
@@ -23,7 +23,7 @@ namespace FFEngine
 		{
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Main menu state enter.");
-			FFTcpServer server = new FFTcpServer();
+			//FFTcpServer server = new FFTcpServer();
 		}
 
 		internal override int Manage ()

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 
 
-namespace FFEngine
+namespace FF
 {
 	internal class FFNavigationBarPanel : FFPanel
 	{

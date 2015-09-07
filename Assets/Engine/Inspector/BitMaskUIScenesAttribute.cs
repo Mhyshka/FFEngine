@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Text.RegularExpressions;
 
-namespace FFEngine
+namespace FF
 {
 	public class BitMaskUIScenesAttribute : PropertyAttribute
 	{

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
-using FFEngine;
+using FF;
 
 public static class EditorExtension
 {

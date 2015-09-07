@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
-using FFEngine;
+using FF;
 
 [CustomEditor(typeof(AGameState),true)]
 public class StateEditor : Editor

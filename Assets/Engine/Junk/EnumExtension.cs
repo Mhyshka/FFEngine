@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FFEngine
+namespace FF
 {
 	/// <summary>
 	/// Extension methods to make working with Enum values easier

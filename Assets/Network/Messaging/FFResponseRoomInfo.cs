@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Net.Sockets;
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	[System.Serializable]
 	internal class FFResponseRoomInfo : FFMessage

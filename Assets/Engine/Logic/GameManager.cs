@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FFEngine
+namespace FF
 {
 	/// <summary>
 	/// Basic Game Manager that handles loading of GameModes.

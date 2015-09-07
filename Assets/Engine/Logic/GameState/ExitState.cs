@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace FFEngine
+namespace FF
 {
 	// Custom editor
 	public class ExitState : AGameState

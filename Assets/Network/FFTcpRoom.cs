@@ -3,7 +3,7 @@ using System.Collections;
 
 using Zeroconf;
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	internal class FFTcpRoom : ZeroconfRoom
 	{
