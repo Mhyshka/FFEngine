@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.Networking;
+
 namespace FF
 {
 	internal class FFEngine
@@ -24,6 +26,9 @@ namespace FF
 		/*private InputManager _inputManager;
 		internal static InputManager Inputs{get{return s_instance._inputManager;}}*/
 		
+		private FFNetworkManager _networkManager;
+		internal static FFNetworkManager Network{get{return s_instance._networkManager;}}
+		
 		private GameManager _gameManager;
 		internal static GameManager Game{get{return s_instance._gameManager;}}
 		#endregion
@@ -34,6 +39,7 @@ namespace FF
 			_gameManager = new GameManager();
 			_uiManager = new UIManager();
 			_eventManager = new EventManager();
+			_networkManager = new FFNetworkManager();
 			//_inputManager = new InputManager();
 		}
 	

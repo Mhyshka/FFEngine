@@ -154,14 +154,14 @@ namespace FF
 		#endregion
 	
 		#region Access
-		internal FFPanel GetPanel(string a_eventKey)
+		internal FFPanel GetPanel(string a_sceneName)
 		{
-			if (_panelsByName.ContainsKey (a_eventKey))
+			if (_panelsByName.ContainsKey (a_sceneName))
 			{
-				return _panelsByName[a_eventKey];
+				return _panelsByName[a_sceneName];
 			}
 	
-			FFLog.LogWarning(EDbgCat.UI,"No panel registered with this key : " + a_eventKey);
+			FFLog.LogWarning(EDbgCat.UI,"No panel registered with this key : " + a_sceneName);
 			return null;
 		}
 		#endregion
