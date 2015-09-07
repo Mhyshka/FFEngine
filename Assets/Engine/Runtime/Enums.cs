@@ -14,6 +14,7 @@ namespace FFEngine
 	{
 		None = -1,
 		Main = 2000,
+		GameModePicker,
 		Settings
 	}
 	

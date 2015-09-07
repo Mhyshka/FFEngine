@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace FFEngine
 {
-	internal class MainMenuState : AMenuGameState
+	internal class GameModePickerState : AMenuGameState
 	{
 		#region Inspector Properties
 		#endregion
@@ -14,14 +14,14 @@ namespace FFEngine
 		#region States Methods
 		internal override int ID {
 			get {
-				return (int)EMenuStateID.Main;
+				return (int)EMenuStateID.GameModePicker;
 			}
 		}
 
 		internal override void Enter ()
 		{
 			base.Enter ();
-			FFLog.Log(EDbgCat.Logic,"Main menu state enter.");
+			FFLog.Log(EDbgCat.Logic,"Game Mode Picker state enter.");
 		}
 
 		internal override int Manage ()
@@ -39,13 +39,15 @@ namespace FFEngine
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent ("OnPlayPressed", OnPlayPressed);
+			FFEngine.Events.RegisterForEvent ("onHostPressed", OnHostPressed);
+			FFEngine.Events.RegisterForEvent ("onJoinPressed", OnJoinPressed);
 		}
 
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent ("OnPlayPressed", OnPlayPressed);
+			FFEngine.Events.UnregisterForEvent ("onHostPressed", OnHostPressed);
+			FFEngine.Events.UnregisterForEvent ("onJoinPressed", OnJoinPressed);
 		}
 
 		
@@ -56,9 +58,16 @@ namespace FFEngine
 		}
 
 
-		internal void OnPlayPressed(FFEventParameter a_args)
+		internal void OnHostPressed(FFEventParameter a_args)
 		{
-			FFLog.Log(EDbgCat.Logic,"Main menu state - OnPlayPressed");
+			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnHostPressed");
+			Debug.Log (a_args);
+		}
+		
+		
+		internal void OnJoinPressed(FFEventParameter a_args)
+		{
+			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnJoinPressed");
 			Debug.Log (a_args);
 		}
 		#endregion
