@@ -61,7 +61,7 @@ namespace FF
 		internal void OnPlayPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Main menu state - OnPlayPressed");
-			Debug.Log (a_args);
+			RequestState ((int)EMenuStateID.GameModePicker);
 		}
 		#endregion
 
