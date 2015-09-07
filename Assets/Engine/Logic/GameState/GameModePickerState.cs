@@ -22,6 +22,12 @@ namespace FF
 		{
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker state enter.");
+
+			FFGameModePickerPanel lGameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
+			lGameModePickerPanel.setPlayerNameInputField (SystemInfo.deviceName);
+
+			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
+			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
 		}
 
 		internal override int Manage ()
@@ -39,15 +45,15 @@ namespace FF
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent ("onHostPressed", OnHostPressed);
-			FFEngine.Events.RegisterForEvent ("onJoinPressed", OnJoinPressed);
+			FFEngine.Events.RegisterForEvent ("OnHostPressed", OnHostPressed);
+			FFEngine.Events.RegisterForEvent ("OnJoinPressed", OnJoinPressed);
 		}
 
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent ("onHostPressed", OnHostPressed);
-			FFEngine.Events.UnregisterForEvent ("onJoinPressed", OnJoinPressed);
+			FFEngine.Events.UnregisterForEvent ("OnHostPressed", OnHostPressed);
+			FFEngine.Events.UnregisterForEvent ("OnJoinPressed", OnJoinPressed);
 		}
 
 		
