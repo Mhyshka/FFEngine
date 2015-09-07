@@ -79,6 +79,8 @@ namespace FFEngine
 				if(!gameObject.activeSelf)
 					gameObject.SetActive(true);
 					
+				_canvasGroup.interactable = true;
+				_canvasGroup.blocksRaycasts = true;
 				_animator.SetTrigger("Show");
 				_state = EState.Showing;
 				FFLog.Log(EDbgCat.UI, "Showing : " + gameObject.ToString());
@@ -123,6 +125,8 @@ namespace FFEngine
 		{
 			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
 			_state = EState.Hidden;
+			_canvasGroup.interactable = false;
+			_canvasGroup.blocksRaycasts = false;
 		}
 		#endregion
 	}

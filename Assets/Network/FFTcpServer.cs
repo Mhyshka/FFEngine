@@ -32,11 +32,11 @@ namespace FFNetworking
 			{*/
 				_isListening = false;
 				
-				IPAddress[] ipAddresses = Dns.GetHostEntry("localhost").AddressList;
+				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
 				IPAddress ipv4 = null;
 				foreach(IPAddress each in ipAddresses)
 				{
-					if(each.AddressFamily == AddressFamily.InterNetwork && each != IPAddress.Loopback)
+					if(each.AddressFamily == AddressFamily.InterNetwork &&!IPAddress.IsLoopback(each))
 					{
 						FFLog.Log(each.ToString());
 					}
