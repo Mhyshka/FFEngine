@@ -11,6 +11,9 @@ namespace FFEngine
 		
 		[HideInInspector]
 		public int panelsToShow = 0;
+		
+		[HideInInspector]
+		public string[] panelNamesToShow = null;
 		#endregion
 		
 		#region Properties
@@ -31,10 +34,16 @@ namespace FFEngine
 			_timeElapsedSinceEnter = 0f;
 			_requestedStateId = -1;
 			
+			//TODO : debug editor script. Temporary
+			foreach(string each in panelNamesToShow)
+			{
+				FFLog.Log(EDbgCat.UI, "Requesting panel " + each + " from " + this.GetType().ToString());
+			}
+			//debug editor script. Temporary
+			
 			if(panelsToShow != 0)
 			{
-				FFEngine.UI.SwitchToPanels(FFUtils.BitMaskToPanels(panelsToShow,
-			                                                  	  _gameMode.loading.loadedPanelsScenes));
+				FFEngine.UI.SwitchToPanels(panelNamesToShow);
 			}
 			                                                  	  
 			RegisterForEvent();

@@ -28,7 +28,7 @@ namespace FFEngine
 			if(a_panelList != null && a_panelList.Length > 0)
 			{
 				_isLoading = true;
-				FFLog.LogWarning(EDbgCat.UI,"Starting to load " + a_panelList.Length + " panels.");
+				FFLog.Log(EDbgCat.UI,"Starting to load " + a_panelList.Length + " panels.");
 				foreach(string each in a_panelList)
 				{
 					if(string.IsNullOrEmpty(each))
@@ -40,7 +40,7 @@ namespace FFEngine
 			else
 			{
 				_isLoading = false;
-				FFLog.LogWarning(EDbgCat.UI,"No panel to load, UIManager is done.");
+				FFLog.Log(EDbgCat.UI,"No panel to load, UIManager is done.");
 				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
 				return;
 			}
@@ -65,6 +65,23 @@ namespace FFEngine
 		internal void RegisterLoadingScreen(LoadingScreen a_loading)
 		{
 			_loadingScreen = a_loading;
+			
+			Transform parent = a_loading.transform;
+			while(parent.parent != null)
+			{
+				parent = parent.parent;
+			}
+			a_loading.transform.SetParent(_root.transform);
+			
+			GameObject.Destroy(parent.gameObject);
+		}
+		
+		internal bool HasLoadingScreen
+		{
+			get
+			{
+				return _loadingScreen != null;
+			}
 		}
 		
 		internal void DisplayLoading()
@@ -100,12 +117,13 @@ namespace FFEngine
 				_panelsByName.Add (a_eventKey, a_panel);
 				if(a_panel.ShouldMoveToRoot)
 				{
-					Transform parent = a_panel.transform;
+					RectTransform panel = a_panel.transform as RectTransform;
+					RectTransform parent = a_panel.transform as RectTransform;
 					while(parent.parent != null)
 					{
-						parent = parent.parent;
+						parent = parent.parent as RectTransform;
 					}
-					a_panel.transform.SetParent(_root.transform);
+					panel.SetParent(_root.transform, false);
 					
 					GameObject.Destroy(parent.gameObject);
 				}
@@ -118,7 +136,7 @@ namespace FFEngine
 			if(_panelsToLoadCount == 0 && _isLoading)
 			{
 				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
-				FFLog.LogWarning(EDbgCat.UI,"UI LOADING COMPLETE");
+				FFLog.Log(EDbgCat.UI,"UI LOADING COMPLETE");
 			}
 		}
 		

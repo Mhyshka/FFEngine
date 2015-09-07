@@ -11,12 +11,15 @@ namespace FFEngine
 		
 		[BitMaskUIScenesAttribute]
 		public int panelsToLoad = 0;
+		
+		[HideInInspector]
+		public string[] panelNamesToLoad = null;
 	#endregion
 	
 	#region Properties
 		internal string[] loadedPanelsScenes;
 	
-		protected float POST_LOADING_DURATION = 2.0f;
+		protected float POST_LOADING_DURATION = 0.1f;
 		protected float _postLoadTimeElapsed = 0f;
 	#endregion
 	
@@ -40,8 +43,7 @@ namespace FFEngine
 				_gameMode.LoadAsyncScene(each);
 			}
 			
-			loadedPanelsScenes = FFUtils.BitMaskToUiScenes(panelsToLoad);
-			FFEngine.UI.LoadPanelsSet(loadedPanelsScenes);
+			FFEngine.UI.LoadPanelsSet(panelNamesToLoad);
 		}
 	
 		internal override int Manage ()
@@ -62,7 +64,8 @@ namespace FFEngine
 	
 		internal override void Exit ()
 		{
-			FFEngine.UI.HideLoading();
+			if(FFEngine.UI.HasLoadingScreen)
+				FFEngine.UI.HideLoading();
 			base.Exit ();
 		}
 	#endregion

@@ -1,4 +1,4 @@
-﻿namespace FFEngine
+namespace FFEngine
 {
 	internal enum EStateID
 	{
@@ -13,7 +13,7 @@
 	internal enum EMenuStateID
 	{
 		None = -1,
-		Title = 2000,
+		Main = 2000,
 		Settings
 	}
 	
@@ -27,12 +27,11 @@
 	public enum EEventType
 	{
 		Custom = -1,
-		UILoadingComplete,
+		UILoadingComplete = 0,
 		GMLoadingComplete,
 		AsyncLoadingComplete,
 		Next,
 		Back,
-		NextState,
 		Confirm,
 		Decline,
 		BackToMenu

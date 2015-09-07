@@ -60,7 +60,7 @@ namespace FFEngine
 				OnHidden();
 			}
 			
-			if(!debug)
+			if(!debug && !(this is LoadingScreen))
 			{
 				FFEngine.UI.Register (gameObject.name, this);
 			}
@@ -74,11 +74,14 @@ namespace FFEngine
 		#region Show
 		internal virtual void Show()
 		{
-			if(_state == EState.Shown || _state == EState.Showing)
+			if(_state == EState.Hidden || _state == EState.Hidding)
 			{
-				gameObject.SetActive(true);
+				if(!gameObject.activeSelf)
+					gameObject.SetActive(true);
+					
 				_animator.SetTrigger("Show");
 				_state = EState.Showing;
+				FFLog.Log(EDbgCat.UI, "Showing : " + gameObject.ToString());
 			}
 			else
 			{
@@ -94,6 +97,7 @@ namespace FFEngine
 			{
 				_animator.SetTrigger("Hide");
 				_state = EState.Hidding;
+				FFLog.Log(EDbgCat.UI, "Hiding : " + gameObject.ToString());
 			}
 			else
 			{
@@ -119,7 +123,6 @@ namespace FFEngine
 		{
 			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
 			_state = EState.Hidden;
-			gameObject.SetActive(false);
 		}
 		#endregion
 	}

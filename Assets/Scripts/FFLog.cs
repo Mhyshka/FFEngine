@@ -7,7 +7,8 @@ internal enum EDbgCat
 {
 	Zeroconf,
 	Networking,
-	UI
+	UI,
+	Logic
 }
 
 internal class FFLog

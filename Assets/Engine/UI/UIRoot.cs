@@ -20,7 +20,7 @@ namespace FFEngine
 			
 			if(adaptToScreenRatio)
 			{
-				float ratio = Screen.width / Screen.height;
+				float ratio = (float)Screen.width / (float)Screen.height;
 				float multiplier = ratio * 3f / 4f;
 				SetWidthMultiplier(multiplier);
 			}

@@ -35,7 +35,7 @@ internal class InternetStatusManager
 		}
 	}
 
-	internal InternetStatusCallback onInternetStatusChanged;
+	internal InternetStatusCallback onInternetStatusChanged = null;
 	internal bool CanReachInternet
 	{
 		get
