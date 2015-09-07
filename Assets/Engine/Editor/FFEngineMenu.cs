@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.IO;
 
 public class FFEngineMenu : MonoBehaviour
 {
@@ -9,13 +10,13 @@ public class FFEngineMenu : MonoBehaviour
 		if(!EditorApplication.isPlayingOrWillChangePlaymode && EditorApplication.SaveCurrentSceneIfUserWantsTo())
 		{
 			Debug.Log("Custom Play");
+
+			StreamWriter writer = new StreamWriter("Assets/Editor/lastScene");
+			writer.WriteLine(EditorApplication.currentScene);
+			writer.Close();
+			AssetDatabase.SaveAssets();
 			
-			/*TextAsset text = new TextAsset();
-			AssetDatabase.CreateAsset(text, Application.dataPath + "/Editor/LastScene.txt");
-			text.text = EditorApplication.currentScene;
-			AssetDatabase.SaveAssets();*/
-			
-			EditorApplication.OpenScene("Assets/Scenes/Root.unity");
+			EditorApplication.OpenScene("Assets/Scenes/EntryPoint.unity");
 			EditorApplication.isPlaying = true;
 		}
 	}
@@ -23,11 +24,15 @@ public class FFEngineMenu : MonoBehaviour
 	[MenuItem ("FFMenu/QuickLoad %#k")]
 	static void QuickLoad ()
 	{
-		/*EditorApplication.isPlaying = false;
-		TextAsset lastScene = (TextAsset)AssetDatabase.LoadAssetAtPath(Application.dataPath + "/Editor/LastScene.txt",typeof(TextAsset));
-		if(lastScene != null)
+		Debug.Log("Custom Load");
+		
+		EditorApplication.isPlaying = false;
+		StreamReader reader = new StreamReader("Assets/Editor/lastScene");
+		string text = reader.ReadLine();
+		reader.Close();
+		if(!string.IsNullOrEmpty(text))
 		{
-			EditorApplication.OpenScene(lastScene.text);
-		}*/
+			EditorApplication.OpenScene(text);
+		}
 	}
 }
