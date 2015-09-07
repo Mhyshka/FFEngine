@@ -36,7 +36,7 @@ namespace FF.Networking
 				IPAddress ipv4 = null;
 				foreach(IPAddress each in ipAddresses)
 				{
-					if(each.AddressFamily == AddressFamily.InterNetwork &&!IPAddress.IsLoopback(each))
+					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
 					{
 						FFLog.Log(each.ToString());
 						ipv4 = each;

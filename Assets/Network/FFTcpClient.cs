@@ -58,8 +58,6 @@ namespace FF.Networking
 				FFLog.LogError(e.StackTrace);
 				return false;
 			}
-			
-			return false;
 		}
 	
 		internal void Close()
