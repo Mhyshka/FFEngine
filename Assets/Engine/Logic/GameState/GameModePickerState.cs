@@ -22,6 +22,12 @@ namespace FF
 		{
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker state enter.");
+
+			FFGameModePickerPanel lGameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
+			lGameModePickerPanel.setPlayerNameInputField (SystemInfo.deviceName);
+
+			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
+			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
 		}
 
 		internal override int Manage ()
