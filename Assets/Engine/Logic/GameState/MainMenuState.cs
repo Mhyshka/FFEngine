@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using FFNetworking;
 
 namespace FFEngine
 {
@@ -22,6 +23,7 @@ namespace FFEngine
 		{
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Main menu state enter.");
+			FFTcpServer server = new FFTcpServer();
 		}
 
 		internal override int Manage ()

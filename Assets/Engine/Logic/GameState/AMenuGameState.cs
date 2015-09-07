@@ -11,6 +11,7 @@ namespace FFEngine
 	
 		#region Properties
 		private bool isGoingBack = false;
+		private MenuGameMode mgm = null;
 		#endregion
 	
 		#region Methods
@@ -18,6 +19,7 @@ namespace FFEngine
 		{
 			base.Enter ();
 			isGoingBack = false;
+			mgm = _gameMode as MenuGameMode;
 		}
 		
 		internal override void Exit ()
@@ -25,7 +27,6 @@ namespace FFEngine
 			base.Exit ();
 			if(!isGoingBack)
 			{
-				MenuGameMode mgm = _gameMode as MenuGameMode;
 				if(mgm != null)
 				{
 					mgm.OnMenuStateExit(this);
@@ -39,9 +40,6 @@ namespace FFEngine
 			RequestState(a_id);
 		}
 		#endregion
-	
-		
-		
 		
 	}
 }
