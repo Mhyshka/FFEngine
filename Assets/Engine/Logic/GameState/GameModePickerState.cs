@@ -39,15 +39,15 @@ namespace FFEngine
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent ("onHostPressed", OnHostPressed);
-			FFEngine.Events.RegisterForEvent ("onJoinPressed", OnJoinPressed);
+			FFEngine.Events.RegisterForEvent ("OnHostPressed", OnHostPressed);
+			FFEngine.Events.RegisterForEvent ("OnJoinPressed", OnJoinPressed);
 		}
 
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent ("onHostPressed", OnHostPressed);
-			FFEngine.Events.UnregisterForEvent ("onJoinPressed", OnJoinPressed);
+			FFEngine.Events.UnregisterForEvent ("OnHostPressed", OnHostPressed);
+			FFEngine.Events.UnregisterForEvent ("OnJoinPressed", OnJoinPressed);
 		}
 
 		
