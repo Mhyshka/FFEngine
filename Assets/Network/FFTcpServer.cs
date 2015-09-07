@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 
-namespace FFNetworking
+namespace FF.Networking
 {
 	internal class FFTcpServer
 	{
@@ -39,6 +39,7 @@ namespace FFNetworking
 					if(each.AddressFamily == AddressFamily.InterNetwork &&!IPAddress.IsLoopback(each))
 					{
 						FFLog.Log(each.ToString());
+						ipv4 = each;
 					}
 				}
 				

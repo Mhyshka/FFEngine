@@ -23,7 +23,7 @@ namespace FF
 		{
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Main menu state enter.");
-			FFTcpServer server = new FFTcpServer();
+			//FFTcpServer server = new FFTcpServer();
 		}
 
 		internal override int Manage ()
