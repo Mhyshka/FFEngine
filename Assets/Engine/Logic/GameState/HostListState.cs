@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Zeroconf;
+using System.Collections.Generic;
+
+
 
 namespace FF
 {
@@ -8,8 +12,6 @@ namespace FF
 		#region Inspector Properties
 		#endregion
 
-		#region Properties
-		#endregion
 
 		#region States Methods
 		internal override int ID {
@@ -25,6 +27,11 @@ namespace FF
 
 			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
 			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
+
+			FFEngine.Network.StartLookingForGames ();
+			ZeroconfManager.Instance.Client.onRoomAdded += OnRoomAdded;
+			ZeroconfManager.Instance.Client.onRoomLost += OnRoomLost;
+
 		}
 
 		internal override int Manage ()
@@ -54,6 +61,19 @@ namespace FF
 		{
 			Debug.Log ("test event");
 			Debug.Log (a_args);
+		}
+
+
+		protected void OnRoomAdded (ZeroconfRoom aRoom)
+		{
+			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("FFHostListPanel") as FFHostListPanel;
+			lPanel.AddRoom (aRoom);
+		}
+
+		protected void OnRoomLost(ZeroconfRoom aRoom)
+		{
+			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("FFHostListPanel") as FFHostListPanel;
+			lPanel.RemoveRoom (aRoom);
 		}
 
 
