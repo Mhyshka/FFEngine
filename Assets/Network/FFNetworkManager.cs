@@ -65,6 +65,12 @@ namespace FF.Networking
 				return IPAddress.Loopback;
 			}
 		}
+		
+		internal bool IsConnectedToLan()
+		{
+			IPAddress ip = NetworkIP;
+			return !IPAddress.IsLoopback(ip);
+		}
 		#endregion
 		
 		
