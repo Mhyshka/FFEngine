@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using System.Net.Sockets;
 using System.Net;
+using System.Net.NetworkInformation;
 
 using Zeroconf;
 
@@ -11,6 +12,8 @@ namespace FF.Networking
 {
 	internal class FFNetworkManager
 	{
+		private static string GAME_NAME_PREFIX = "_pong.";
+		
 		#region Properties
 		protected FFTcpServer _server;
 		protected Dictionary<ZeroconfRoom,FFTcpClient> _clients;
@@ -24,20 +27,43 @@ namespace FF.Networking
 		{
 			_mainRoom = null;
 			_mainClient = null;
+			_clients = new Dictionary<ZeroconfRoom, FFTcpClient>();
 		}
 		
 		~FFNetworkManager()
 		{
-			_server.Close();
+			if(_server != null)
+				_server.Close();
+			
 			foreach(ZeroconfRoom room in _clients.Keys)
 			{
 				_clients[room].Close();
 			}
+			_clients.Clear();
 		}
 	
 		internal void DoUpdate()
 		{
 		
+		}
+		#endregion
+		
+		#region IP
+		internal IPAddress NetworkIP
+		{
+			get
+			{
+				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
+				foreach(IPAddress each in ipAddresses)
+				{
+					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
+					{
+						return each;
+					}
+				}
+				
+				return IPAddress.Loopback;
+			}
 		}
 		#endregion
 		
@@ -51,15 +77,33 @@ namespace FF.Networking
 			}
 		}
 		
-		internal void StartServer()
+		internal void StartServer(string a_roomName = "My Zeroconf Room")
 		{
 			if(_server == null)
 			{
 				_server = new FFTcpServer(NetworkIP);
+				ZeroconfManager.Instance.Host.StartAdvertising(GAME_NAME_PREFIX + "_tcp.", a_roomName, _server.Port);
+				ZeroconfManager.Instance.Host.onStartAdvertisingSuccess += OnStartAdvertisingSuccess;
+				ZeroconfManager.Instance.Host.onStartAdvertisingFailed += OnStartAdvertisingFailed;
 			}
 			else
 			{
 				FFLog.LogWarning(EDbgCat.Networking, "You're trying to start another server.");
+			}
+		}
+		
+		internal void StopBroadcastingGame()
+		{
+			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
+			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
+			if(_server != null)
+			{
+				ZeroconfManager.Instance.Host.StopAdvertising();
+
+			}
+			else
+			{
+				FFLog.LogWarning(EDbgCat.Networking, "Server wasn't running.");
 			}
 		}
 		
@@ -68,27 +112,42 @@ namespace FF.Networking
 			_server.Close();
 			_server = null;
 		}
-		
 		#endregion
 		
-		#region Clients
-		internal void JoinZeroconfRoom(ZeroconfRoom a_room)
+		#region Zeroconf Host
+		protected void OnStartAdvertisingSuccess()
 		{
-			
-			if(_clients.TryGetValue(a_room,out _mainClient))
-			{
-				_mainRoom = a_room;
-			}
-			else
-			{
-				LeaveRoom();
-			}
+			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
+			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
+			_server.StartAcceptingConnections();
+			FFLog.Log(EDbgCat.Networking, "Start advertising success. Awaiting connections.");
 		}
 		
-		internal void LeaveRoom()
+		protected void OnStartAdvertisingFailed()
 		{
-			_mainRoom = null;
-			_mainClient = null;
+			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
+			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
+			StopServer();
+			FFLog.LogWarning(EDbgCat.Networking, "Start advertising failed. Closing server.");
+		}
+		#endregion
+		
+		
+		#region Clients
+		internal void StartLookingForGames()
+		{
+			ZeroconfManager.Instance.Client.StartDiscovery(GAME_NAME_PREFIX + "_tcp.");
+			ZeroconfManager.Instance.Client.onStartDiscoverySuccess += OnStartDiscoverySuccess;
+			ZeroconfManager.Instance.Client.onStartDiscoveryFailed += OnStartDiscoveryFailed;
+		}
+		
+		internal void StopLookingForGames()
+		{
+			ZeroconfManager.Instance.Client.StopDiscovery();
+			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
+			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
+			ZeroconfManager.Instance.Client.onRoomAdded -= OnRoomAdded;
+			ZeroconfManager.Instance.Client.onRoomLost -= OnRoomLost;
 		}
 		
 		internal FFTcpClient MainClient
@@ -100,23 +159,64 @@ namespace FF.Networking
 		}
 		#endregion
 		
-		#region IP
-		internal IPAddress NetworkIP
+		#region Zeroconf Client
+		protected void OnStartDiscoverySuccess()
 		{
-			get
+			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
+			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
+			FFLog.Log(EDbgCat.Networking, "Start discovery success. Looking for rooms.");
+			
+			ZeroconfManager.Instance.Client.onRoomAdded += OnRoomAdded;
+			ZeroconfManager.Instance.Client.onRoomLost += OnRoomLost;
+		}
+		
+		protected void OnStartDiscoveryFailed()
+		{
+			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
+			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
+			FFLog.LogWarning(EDbgCat.Networking, "Start discovery failed.");
+		}
+		#endregion
+		
+		#region Room
+		internal void JoinZeroconfRoom(ZeroconfRoom a_room)
+		{
+			/*if(_clients.TryGetValue(a_room, out _mainClient))
 			{
-				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
-				IPAddress ipv4 = null;
-				foreach(IPAddress each in ipAddresses)
-				{
-					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
-					{
-						return each;
-					}
-				}
-				
-				return null;
+				_mainRoom = a_room;
 			}
+			else
+			{
+				LeaveCurrentRoom();
+			}*/
+		}
+		
+		internal void LeaveCurrentRoom()
+		{
+			_mainRoom = null;
+			_mainClient = null;
+		}
+		
+		protected FFTcpClient ContactRoom(ZeroconfRoom a_room)
+		{
+			FFTcpClient newClient = new FFTcpClient(new IPEndPoint(NetworkIP,0),
+			                                    	 a_room.EndPoint);
+			newClient.Connect();
+			newClient.StartWorkers();
+			return newClient;
+		}
+		
+		protected void OnRoomAdded(ZeroconfRoom a_room)
+		{
+			_clients.Add(a_room, ContactRoom(a_room));
+			FFLog.Log(EDbgCat.Networking, "New room : " + a_room.roomName.ToString() + " - " + a_room.EndPoint.ToString());
+		}
+		
+		protected void OnRoomLost(ZeroconfRoom a_room)
+		{
+			_clients[a_room].Close();
+			_clients.Remove(a_room);
+			FFLog.Log(EDbgCat.Networking, "Removing room : " + a_room.roomName.ToString());
 		}
 		#endregion
 	}

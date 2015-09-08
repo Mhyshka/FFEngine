@@ -31,7 +31,7 @@ namespace FF.Networking
 		/// </summary>
 		internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
 		{
-			_tcpClient = new TcpClient(new IPEndPoint(IPAddress.Loopback,0));
+			_tcpClient = new TcpClient(a_local);
 			_remote = a_remote;
 		}
 		
@@ -47,17 +47,17 @@ namespace FF.Networking
 		#region Connection
 		internal bool Connect()
 		{
-			try
-			{
+			/*try
+			{*/
 				_tcpClient.Connect(_remote);
 				return true;
-			}
+			/*}
 			catch (SocketException e) 
 			{
 				FFLog.LogError("Couldn't connect to server.");
 				FFLog.LogError(e.StackTrace);
 				return false;
-			}
+			}*/
 		}
 	
 		internal void Close()
@@ -71,7 +71,7 @@ namespace FF.Networking
 		
 		internal void StartWorkers()
 		{
-			if(_readerThread == null && !_readerThread.IsAlive)
+			if(_readerThread == null || !_readerThread.IsAlive)
 			{
 				_readerThread = new Thread(new ThreadStart(ReaderTask));
 				_readerThread.IsBackground = true;
@@ -148,12 +148,8 @@ namespace FF.Networking
 			{
 				FFLog.Log(EDbgCat.Networking, "Read");
 				object data = s_binaryFormatter.Deserialize(_tcpClient.GetStream());
-				FFLog.LogError(data.ToString());
-				FFMessage[] messages = data as FFMessage[];
-				foreach(FFMessage each in messages)
-				{
-					each.Read(_tcpClient);
-				}
+				FFMessage messages = data as FFMessage;
+				messages.Read(this);
 			}
 			catch(IOException e)
 			{

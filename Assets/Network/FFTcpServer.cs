@@ -98,6 +98,16 @@ namespace FF.Networking
 			}
 		}
 		
+		internal bool IsAcceptingConnections
+		{
+			get
+			{
+				return _isListening;
+			}
+		}
+		#endregion
+		
+		#region Listening Work
 		internal void ListeningTask()
 		{
 			while(_isListening)
@@ -120,15 +130,25 @@ namespace FF.Networking
 				Player player = new Player(newEp);
 				_clients.Add(player, newFFClient);
 				
+				FFLog.LogError(EDbgCat.Networking, "New Client");
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
 				WelcomeClient(newFFClient);
 			}
 		}
 		
 		protected void WelcomeClient(FFTcpClient a_newClient)
 		{
-			FFLog.LogError(EDbgCat.Networking, "New Client");
 			
-			FFResponseRoomInfo roomInfo = new FFResponseRoomInfo();
+			
+			FFMessageRoomInfo roomInfo = new FFMessageRoomInfo();
 			roomInfo.currentPlayerCount = 2;
 			roomInfo.maxPlayerCount = 3;
 			roomInfo.gameName = "My Game!";
