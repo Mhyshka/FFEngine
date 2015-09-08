@@ -26,33 +26,22 @@ namespace FF.Networking
 		}
 		#endregion
 		
-		internal FFTcpServer()
+		internal FFTcpServer(IPAddress a_ipv4)
 		{
-			/*try
-			{*/
+			try
+			{
 				_isListening = false;
-				
-				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
-				IPAddress ipv4 = null;
-				foreach(IPAddress each in ipAddresses)
-				{
-					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
-					{
-						FFLog.Log(each.ToString());
-						ipv4 = each;
-					}
-				}
-				
-				_tcpListener = new TcpListener(ipv4, 0);
+
+				_tcpListener = new TcpListener(a_ipv4, 0);
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 				_clients = new Dictionary<Player,FFTcpClient>();
 				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
-			/*}
+			}
 			catch(SocketException e)
 			{
 				FFLog.LogError(EDbgCat.Networking, "Couldn't create server TCPListener." + e.StackTrace);
-			}*/
+			}
 		}
 		
 		internal void Close()
@@ -109,6 +98,16 @@ namespace FF.Networking
 			}
 		}
 		
+		internal bool IsAcceptingConnections
+		{
+			get
+			{
+				return _isListening;
+			}
+		}
+		#endregion
+		
+		#region Listening Work
 		internal void ListeningTask()
 		{
 			while(_isListening)
@@ -131,15 +130,25 @@ namespace FF.Networking
 				Player player = new Player(newEp);
 				_clients.Add(player, newFFClient);
 				
+				FFLog.LogError(EDbgCat.Networking, "New Client");
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
+				WelcomeClient(newFFClient);
 				WelcomeClient(newFFClient);
 			}
 		}
 		
 		protected void WelcomeClient(FFTcpClient a_newClient)
 		{
-			FFLog.LogError(EDbgCat.Networking, "New Client");
 			
-			FFResponseRoomInfo roomInfo = new FFResponseRoomInfo();
+			
+			FFMessageRoomInfo roomInfo = new FFMessageRoomInfo();
 			roomInfo.currentPlayerCount = 2;
 			roomInfo.maxPlayerCount = 3;
 			roomInfo.gameName = "My Game!";

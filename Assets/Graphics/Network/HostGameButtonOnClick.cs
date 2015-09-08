@@ -15,7 +15,7 @@ namespace Zeroconf
 			
 			Debug.Log (manager);
 			Debug.Log (manager.Host);
-			manager.Host.StartAdvertising("_http._tcp.","My zeroconf room", 0);
+			manager.Host.StartAdvertising("_pong._tcp.local","My zeroconf room", 0);
 		}
 	}
 }

@@ -4,7 +4,8 @@ using System.Net.Sockets;
 using System.Net;
 
 namespace FF.Networking
-{
+{	
+	[System.Serializable]
 	internal class Player
 	{
 		#region Properties

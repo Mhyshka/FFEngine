@@ -11,7 +11,7 @@ namespace FF.Networking
 		#endregion
 		
 		#region Methods
-		internal abstract void Read(TcpClient a_tcpClient);
+		internal abstract void Read(FFTcpClient a_tcpClient);
 		#endregion
 	}
 }
