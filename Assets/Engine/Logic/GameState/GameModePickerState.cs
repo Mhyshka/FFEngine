@@ -74,7 +74,7 @@ namespace FF
 		internal void OnJoinPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnJoinPressed");
-			Debug.Log (a_args);
+			RequestState ((int)EMenuStateID.HostList);
 		}
 		#endregion
 
