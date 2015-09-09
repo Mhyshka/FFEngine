@@ -30,21 +30,31 @@ namespace FF
 
 		internal void AddRoom (ZeroconfRoom aRoom)
 		{
-			if (roomsCells [aRoom] == null) 
+			HostCell lCell;
+			Debug.Log ("host list panel AddRoom 123");
+			if (!roomsCells.TryGetValue (aRoom, out lCell)) 
 			{
+				Debug.Log ("roomsCells [aRoom] == null");
 				// Load a HostCell
 				GameObject lObject = GameObject.Instantiate (hostCellPrefab);
+				Debug.Log ("prefab instantiate");
 				HostCell lHostCell = lObject.GetComponent <HostCell>();
+				Debug.Log ("host cell created");
 
 				if (lHostCell != null)
 				{
+					Debug.Log ("lHostCell exist");
 					lHostCell.UpdateWithZeroconfRoom (aRoom);
+					Debug.Log ("UpdateWithZeroconfRoom");
 
 					roomsCells.Add (aRoom, lHostCell);
+					Debug.Log ("roomsCells");
 
-					lHostCell.transform.parent = verticalLayout.transform;
+					lHostCell.transform.SetParent (verticalLayout.transform);
+					Debug.Log ("verticalLayout.transform");
 				}
 			}
+			Debug.Log ("fin");
 		}
 
 

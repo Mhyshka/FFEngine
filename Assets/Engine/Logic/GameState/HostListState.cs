@@ -23,7 +23,7 @@ namespace FF
 		internal override void Enter ()
 		{
 			base.Enter ();
-			FFLog.Log(EDbgCat.Logic,"Host List state enter.");
+			FFLog.Log (EDbgCat.Logic, "Host List state enter.");
 
 			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
 			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
@@ -31,7 +31,6 @@ namespace FF
 			FFEngine.Network.StartLookingForGames ();
 			ZeroconfManager.Instance.Client.onRoomAdded += OnRoomAdded;
 			ZeroconfManager.Instance.Client.onRoomLost += OnRoomLost;
-
 		}
 
 		internal override int Manage ()
@@ -66,13 +65,15 @@ namespace FF
 
 		protected void OnRoomAdded (ZeroconfRoom aRoom)
 		{
-			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("FFHostListPanel") as FFHostListPanel;
+			Debug.Log ("OnRoomAdded" + aRoom.roomName);
+			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("HostListPanel") as FFHostListPanel;
+			Debug.Log ("host list panel get");
 			lPanel.AddRoom (aRoom);
 		}
 
 		protected void OnRoomLost(ZeroconfRoom aRoom)
 		{
-			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("FFHostListPanel") as FFHostListPanel;
+			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("HostListPanel") as FFHostListPanel;
 			lPanel.RemoveRoom (aRoom);
 		}
 

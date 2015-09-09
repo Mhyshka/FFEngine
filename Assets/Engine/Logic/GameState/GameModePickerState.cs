@@ -67,7 +67,10 @@ namespace FF
 		internal void OnHostPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnHostPressed");
-			Debug.Log (a_args);
+
+			FFGameModePickerPanel lGameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
+
+			FFEngine.Network.StartServer (lGameModePickerPanel.getPlayerNameInputField ());
 		}
 		
 		
