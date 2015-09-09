@@ -16,6 +16,8 @@ namespace FF
 		Main = 2000,
 		GameModePicker,
 		HostList,
+		GameRoomHost,
+		GameRoomClient,
 		Settings
 	}
 	
