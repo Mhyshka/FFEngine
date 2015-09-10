@@ -16,7 +16,7 @@ namespace FF.Networking
 		#region Methods
 		internal override void Read(FFTcpClient a_tcpClient)
 		{
-			FFLog.LogError("Je suis un message de room info.");
+			//FFLog.LogError("Je suis un message de room info.");
 			a_tcpClient.QueueMessage(new FFMessagePlayerInfo());
 		}	
 		#endregion

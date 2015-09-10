@@ -12,7 +12,7 @@ namespace FF.Networking
 {
 	internal class FFNetworkManager
 	{
-		private static string GAME_NAME_PREFIX = "_pong.";
+		private static string GAME_PROTOCOL = "_pong._tcp.";
 		
 		#region Properties
 		protected FFTcpServer _server;
@@ -30,10 +30,13 @@ namespace FF.Networking
 			_clients = new Dictionary<ZeroconfRoom, FFTcpClient>();
 		}
 		
-		~FFNetworkManager()
+		internal void Destroy()
 		{
-			if(_server != null)
-				_server.Close();
+			FFLog.LogError("Destroy Network Manager");
+	
+			StopBroadcastingGame();
+			StopLookingForGames();
+			StopServer();
 			
 			foreach(ZeroconfRoom room in _clients.Keys)
 			{
@@ -44,7 +47,13 @@ namespace FF.Networking
 	
 		internal void DoUpdate()
 		{
-		
+			foreach(FFTcpClient each in _clients.Values)
+			{
+				if(each != null)
+					each.DoUpdate();
+			}
+			if(_server != null)
+				_server.DoUpdate();
 		}
 		#endregion
 		
@@ -83,19 +92,21 @@ namespace FF.Networking
 			}
 		}
 		
-		internal void StartServer(string a_roomName = "My Zeroconf Room")
+		internal void StartBroadcastingGame(string a_roomName = "My Zeroconf Room")
 		{
 			if(_server == null)
 			{
 				_server = new FFTcpServer(NetworkIP);
-				ZeroconfManager.Instance.Host.StartAdvertising(GAME_NAME_PREFIX + "_tcp.", a_roomName, _server.Port);
+				ZeroconfManager.Instance.Host.StartAdvertising(GAME_PROTOCOL, a_roomName, _server.Port);
 				ZeroconfManager.Instance.Host.onStartAdvertisingSuccess += OnStartAdvertisingSuccess;
 				ZeroconfManager.Instance.Host.onStartAdvertisingFailed += OnStartAdvertisingFailed;
+				_server.StartAcceptingConnections();
 			}
 			else
 			{
 				FFLog.LogWarning(EDbgCat.Networking, "You're trying to start another server.");
 			}
+			
 		}
 		
 		internal void StopBroadcastingGame()
@@ -105,7 +116,6 @@ namespace FF.Networking
 			if(_server != null)
 			{
 				ZeroconfManager.Instance.Host.StopAdvertising();
-
 			}
 			else
 			{
@@ -115,8 +125,11 @@ namespace FF.Networking
 		
 		internal void StopServer()
 		{
-			_server.Close();
-			_server = null;
+			if(_server != null)
+			{
+				_server.Close();
+				_server = null;
+			}
 		}
 		#endregion
 		
@@ -142,7 +155,7 @@ namespace FF.Networking
 		#region Clients
 		internal void StartLookingForGames()
 		{
-			ZeroconfManager.Instance.Client.StartDiscovery(GAME_NAME_PREFIX + "_tcp.");
+			ZeroconfManager.Instance.Client.StartDiscovery(GAME_PROTOCOL);
 			ZeroconfManager.Instance.Client.onStartDiscoverySuccess += OnStartDiscoverySuccess;
 			ZeroconfManager.Instance.Client.onStartDiscoveryFailed += OnStartDiscoveryFailed;
 		}

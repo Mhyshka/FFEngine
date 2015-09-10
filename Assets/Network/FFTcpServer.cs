@@ -46,7 +46,7 @@ namespace FF.Networking
 		
 		internal void Close()
 		{
-			if(_isListening)
+			if(IsAcceptingConnections)
 			{
 				StopAcceptingConnections();
 			}
@@ -88,7 +88,6 @@ namespace FF.Networking
 		{
 			if(_isListening)
 			{
-				_listeningThread.Abort();
 				_isListening = false;
 				FFLog.Log(EDbgCat.Networking,"Stop thread");
 			}
@@ -110,11 +109,13 @@ namespace FF.Networking
 		#region Listening Work
 		internal void ListeningTask()
 		{
-			while(_isListening)
+			while(_tcpListener != null && _isListening)
 			{
 				HandlePendingConnections();
 				Thread.Sleep(50);
 			}
+			
+			FFLog.LogError(EDbgCat.Networking, "Stoping Listener Thread");
 		}
 		
 		internal void HandlePendingConnections()
@@ -156,5 +157,13 @@ namespace FF.Networking
 			a_newClient.QueueMessage(roomInfo);
 		}
 		#endregion
+		
+		internal void DoUpdate()
+		{
+			foreach(FFTcpClient each in _clients.Values)
+			{
+				each.DoUpdate();
+			}
+		}
 	}
 }
