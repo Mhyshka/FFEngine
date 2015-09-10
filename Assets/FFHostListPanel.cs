@@ -13,7 +13,7 @@ namespace FF
 		#region Properties
 		private Dictionary<ZeroconfRoom, HostCell> roomsCells = new Dictionary<ZeroconfRoom, HostCell>();
 		public GameObject hostCellPrefab = null;
-		public VerticalLayoutGroup verticalLayout;
+		public VerticalLayoutGroup verticalLayout = null;
 		#endregion
 
 

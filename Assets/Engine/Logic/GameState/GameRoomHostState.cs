@@ -29,7 +29,7 @@ namespace FF
 			lNavigationBarPanel.setTitle ("Youpoupidou");
 
 			NetworkMenuGameMode lGameMode = _gameMode as NetworkMenuGameMode;
-			FFEngine.Network.StartServer ("partie de " + lGameMode.playerName);
+			FFEngine.Network.StartBroadcastingGame ("Partie de " + lGameMode.playerName);
 		}
 		#endregion
 	}
