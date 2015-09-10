@@ -12,6 +12,17 @@ namespace FF.Networking
 		
 		#region Methods
 		internal abstract void Read(FFTcpClient a_tcpClient);
+		
+		/// <summary>
+		/// Should this message be send over & over until it's succesfully delivered.
+		/// </summary>
+		internal virtual bool IsMandatory
+		{
+			get
+			{
+				return true;
+			}
+		}
 		#endregion
 	}
 }

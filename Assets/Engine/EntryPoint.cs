@@ -21,5 +21,17 @@ namespace FF
 		{
 			_engine.DoUpdate();
 		}
+		
+		void OnApplicationQuit()
+		{
+			FFLog.LogError("Quit");
+		}
+		
+		void OnDestroy()
+		{
+			FFLog.LogError("Destroy EP");
+			_engine.Destroy();
+			_engine = null;
+		}
 	}
 }

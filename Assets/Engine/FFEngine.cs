@@ -48,6 +48,14 @@ namespace FF
 		internal void DoUpdate ()
 		{
 			//_inputManager.DoUpdate();
+			if(_networkManager != null)
+				_networkManager.DoUpdate();
+		}
+		
+		internal void Destroy()
+		{
+			_networkManager.Destroy();
+			s_instance = null;
 		}
 	}
 }

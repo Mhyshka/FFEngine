@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using System;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
@@ -16,13 +17,47 @@ namespace FF.Networking
 {
 	internal class FFTcpClient
 	{
-		protected static BinaryFormatter s_binaryFormatter = new BinaryFormatter();
-		
 		#region Properties
 		protected TcpClient _tcpClient;
+		internal TcpClient TcpClient
+		{
+			get
+			{
+				return _tcpClient;
+			}
+		}
+		
 		protected IPEndPoint _remote;
-		protected Thread _readerThread;
-		protected Thread _writerThread;
+		internal IPEndPoint Remote
+		{
+			get
+			{
+				return _remote;
+			}
+		}
+		
+		protected IPEndPoint _local;
+		internal IPEndPoint Local
+		{
+			get
+			{
+				
+				return _remote;
+			}
+		}
+		
+		protected FFTcpReader _reader;
+		protected FFTcpWriter _writer;
+		
+		protected Queue<FFMessage> _readMessages = new Queue<FFMessage>();
+		
+		internal void QueueReadMessage(FFMessage a_message)
+		{
+			lock(_readMessages)
+			{
+				_readMessages.Enqueue(a_message);
+			}
+		}
 		#endregion
 		
 		#region Constructors
@@ -32,7 +67,12 @@ namespace FF.Networking
 		internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
 		{
 			_tcpClient = new TcpClient(a_local);
+			_tcpClient.SendTimeout = 60000;
+			_tcpClient.ReceiveTimeout = 60000;
+			_local = a_local;
 			_remote = a_remote;
+			_reader = new FFTcpReader(this);
+			_writer = new FFTcpWriter(this);
 		}
 		
 		/// <summary>
@@ -41,23 +81,28 @@ namespace FF.Networking
 		internal FFTcpClient(TcpClient a_client)
 		{
 			_tcpClient = a_client;
+			_tcpClient.SendTimeout = 60000;
+			_tcpClient.ReceiveTimeout = 60000;
+			_local = _tcpClient.Client.LocalEndPoint as IPEndPoint;
+			_remote = _tcpClient.Client.RemoteEndPoint as IPEndPoint;
+			_reader = new FFTcpReader(this);
+			_writer = new FFTcpWriter(this);
 		}
 		#endregion
 		
 		#region Connection
 		internal bool Connect()
 		{
-			/*try
-			{*/
+			try
+			{
 				_tcpClient.Connect(_remote);
 				return true;
-			/*}
+			}
 			catch (SocketException e) 
 			{
-				FFLog.LogError("Couldn't connect to server.");
-				FFLog.LogError(e.StackTrace);
+				FFLog.LogError("Couldn't connect to server." + e.StackTrace);
 				return false;
-			}*/
+			}
 		}
 	
 		internal void Close()
@@ -67,106 +112,35 @@ namespace FF.Networking
 				_tcpClient.GetStream().Close();
 				_tcpClient.Close();
 			}
+			_reader.Stop();
+			_writer.Stop();
 		}
 		
 		internal void StartWorkers()
 		{
-			if(_readerThread == null || !_readerThread.IsAlive)
-			{
-				_readerThread = new Thread(new ThreadStart(ReaderTask));
-				_readerThread.IsBackground = true;
-				_readerThread.Start();
-			}
-			else
-			{
-				FFLog.LogError(EDbgCat.Networking, "Reader thread is already running.");
-			}
-			
-			if(_writerThread == null || !_writerThread.IsAlive)
-			{
-				_writerThread = new Thread(new ThreadStart(WriterTask));
-				_writerThread.IsBackground = true;
-				_writerThread.Start();
-			}
-			else
-			{
-				FFLog.LogError(EDbgCat.Networking, "Writer thread is already running.");
-			}
+			_reader.Start();
+			_writer.Start();
 		}
 		#endregion
 		
-		#region Writer		
 		internal void QueueMessage(FFMessage a_message)
 		{
-			lock(_toSendMessages)
-			{
-				FFLog.Log(EDbgCat.Networking,"Queue message");
-				_toSendMessages.Enqueue(a_message);
-			}
+			_writer.QueueMessage(a_message);
 		}
 		
-		protected Queue<FFMessage> _toSendMessages = new Queue<FFMessage>();
-		
-		protected void Write(FFMessage a_message)
+		internal void DoUpdate()
 		{
-			try
+			if(_readMessages.Count > 0)
 			{
-				FFLog.Log(EDbgCat.Networking, "Write");
-				MemoryStream stream = new MemoryStream();
-				s_binaryFormatter.Serialize(stream,a_message);
-				byte[] data = stream.ToArray();
-				_tcpClient.GetStream().Write(data,0,data.Length);
-				_toSendMessages.Dequeue();
-				
-				FFLog.LogError(EDbgCat.Networking, data.Length.ToString());
-			}
-			catch(IOException e)
-			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't write to stream." + e.StackTrace);
-			}
-		}
-		
-		protected void WriterTask()
-		{
-			while(_tcpClient != null && _tcpClient.Connected)
-			{
-				if(_tcpClient.GetStream().CanWrite && _toSendMessages.Count > 0)
+				lock(_readMessages)
 				{
-					lock(_toSendMessages)
+					while(_readMessages.Count > 0 )
 					{
-						Write (_toSendMessages.Peek());
+						FFLog.LogError("Reading from read messages");
+						_readMessages.Dequeue().Read (this);
 					}
 				}
 			}
 		}
-		#endregion
-		
-		#region Reader
-		protected void Read()
-		{
-			try
-			{
-				FFLog.Log(EDbgCat.Networking, "Read");
-				object data = s_binaryFormatter.Deserialize(_tcpClient.GetStream());
-				FFMessage messages = data as FFMessage;
-				messages.Read(this);
-			}
-			catch(IOException e)
-			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't read from stream." + e.StackTrace);
-			}
-		}
-		
-		protected void ReaderTask()
-		{
-			while(_tcpClient != null && _tcpClient.Connected)
-			{
-				if(_tcpClient.GetStream().CanRead && _tcpClient.GetStream().DataAvailable)
-				{
-					Read ();
-				}
-			}
-		}
-		#endregion
 	}
 }
