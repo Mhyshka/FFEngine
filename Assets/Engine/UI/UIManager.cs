@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FF
+namespace FF.UI
 {
 	internal class UIManager
 	{
@@ -135,6 +135,7 @@ namespace FF
 			
 			if(_panelsToLoadCount == 0 && _isLoading)
 			{
+				_isLoading = false;
 				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
 				FFLog.Log(EDbgCat.UI,"UI LOADING COMPLETE");
 			}
@@ -239,6 +240,22 @@ namespace FF
 			{
 				if(each.State != FFPanel.EState.Hidden && each.State != FFPanel.EState.Hidding)
 					each.Hide();
+			}
+		}
+		
+		internal bool IsTransitionning
+		{
+			get
+			{
+				if(_isLoading)
+					return true;
+					
+				foreach(FFPanel each in _panelsByName.Values)
+				{
+					if(each.IsTransitionning)
+						return true;
+				}
+				return false;
 			}
 		}
 		#endregion

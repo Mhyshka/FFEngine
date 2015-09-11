@@ -3,8 +3,6 @@ using System.Collections;
 using Zeroconf;
 using UnityEngine.UI;
 
-
-
 namespace FF
 {
 	public class HostCell : MonoBehaviour 

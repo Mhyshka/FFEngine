@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace FF
+namespace FF.UI
 {
 	internal class LoadingScreen : FFPanel
 	{

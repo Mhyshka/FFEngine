@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.UI;
 using FF.Networking;
+using FF.Input;
 
 namespace FF
 {
@@ -23,8 +25,8 @@ namespace FF
 		private UIManager _uiManager;
 		internal static UIManager UI{get{return s_instance._uiManager;}}
 		
-		/*private InputManager _inputManager;
-		internal static InputManager Inputs{get{return s_instance._inputManager;}}*/
+		private InputManager _inputManager;
+		internal static InputManager Inputs{get{return s_instance._inputManager;}}
 		
 		private FFNetworkManager _networkManager;
 		internal static FFNetworkManager Network{get{return s_instance._networkManager;}}
@@ -40,14 +42,15 @@ namespace FF
 			_uiManager = new UIManager();
 			_eventManager = new EventManager();
 			_networkManager = new FFNetworkManager();
-			//_inputManager = new InputManager();
+			_inputManager = new InputManager();
 		}
 	
 		
 		// Update is called once per frame
 		internal void DoUpdate ()
 		{
-			//_inputManager.DoUpdate();
+			if(_inputManager != null)
+				_inputManager.DoUpdate();
 			if(_networkManager != null)
 				_networkManager.DoUpdate();
 		}

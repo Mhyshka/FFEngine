@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace FF
+namespace FF.UI
 {
 	[RequireComponent(typeof(CanvasGroup))]
 	[RequireComponent(typeof(Animator))]
@@ -51,15 +51,9 @@ namespace FF
 			
 			if (!hideOnLoad)
 			{
-				_animator.SetInteger("StartingState", 1);
-				OnShown();
+				_animator.SetTrigger("Show");
 			}
-			else
-			{
-				_animator.SetInteger("StartingState", -1);
-				OnHidden();
-			}
-			
+
 			if(!debug && !(this is LoadingScreen))
 			{
 				FFEngine.UI.Register (gameObject.name, this);
@@ -76,12 +70,9 @@ namespace FF
 		{
 			if(_state == EState.Hidden || _state == EState.Hidding)
 			{
-				if(!gameObject.activeSelf)
-					gameObject.SetActive(true);
-					
-				_canvasGroup.interactable = true;
-				_canvasGroup.blocksRaycasts = true;
+				gameObject.SetActive(true);
 				_animator.SetTrigger("Show");
+					
 				_state = EState.Showing;
 				FFLog.Log(EDbgCat.UI, "Showing : " + gameObject.ToString());
 			}
@@ -125,8 +116,17 @@ namespace FF
 		{
 			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
 			_state = EState.Hidden;
-			_canvasGroup.interactable = false;
-			_canvasGroup.blocksRaycasts = false;
+			
+			if(gameObject.activeSelf)
+				gameObject.SetActive(false);
+		}
+		
+		internal bool IsTransitionning
+		{
+			get
+			{
+				return _state == EState.Showing || _state == EState.Hidding;
+			}
 		}
 		#endregion
 	}

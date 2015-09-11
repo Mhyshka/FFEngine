@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-namespace FF
+namespace FF.UI
 {/// <summary>
 /// Custom button to place over a Unity UI button. Called FFEngine.Event.FireEvent with the set event type or event key.
 /// </summary>
@@ -11,6 +11,8 @@ namespace FF
 	{
 		#region Inspector Properties
 		public bool debug = false;
+		
+		public bool canTriggerWhileTransitionning = false;
 		
 		[HideInInspector]
 		public EEventType eventType = EEventType.Next;
@@ -39,10 +41,13 @@ namespace FF
 				FFLog.LogError("Button clicked : " + gameObject.name + " with event : " + eventKey + " / " + eventType.ToString() );
 			}
 #endif
-			if(eventType == EEventType.Custom)
-				FFEngine.Events.FireEvent(eventKey);
-			else
-				FFEngine.Events.FireEvent(eventType);
+			if(canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
+			{
+				if(eventType == EEventType.Custom)
+					FFEngine.Events.FireEvent(eventKey);
+				else
+					FFEngine.Events.FireEvent(eventType);
+			}
 		}
 	}
 }

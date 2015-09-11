@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.UI;
+
 namespace FF
 {
 	// Custom editor

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+
+using FF.UI;
 using FF;
 
 [CustomEditor(typeof(FFButtonEvent), true)]

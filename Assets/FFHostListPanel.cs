@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 
 
-namespace FF 
+namespace FF.UI
 {
-	internal class FFHostListPanel : FFPanel 
+	internal class FFHostListPanel : FFPanel
 	{
 		#region Properties
 		private Dictionary<ZeroconfRoom, HostCell> roomsCells = new Dictionary<ZeroconfRoom, HostCell>();
