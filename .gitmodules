@@ -1,6 +1,3 @@
 [submodule "Assets/Addons/ffzeroconf"]
 	path = Assets/Addons/ffzeroconf
 	url = https://bitbucket.org/flamingfist/ffzeroconf
-[submodule "Assets/Addons/ffbackgroundtask_ios_cocoapod"]
-	path = Assets/Addons/ffbackgroundtask_ios_cocoapod
-	url = https://rapha_l_pinto@bitbucket.org/flamingfist/ffbackgroundtask_ios_cocoapod.git
