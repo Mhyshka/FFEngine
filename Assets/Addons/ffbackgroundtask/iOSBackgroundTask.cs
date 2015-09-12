@@ -14,7 +14,7 @@ public class iOSBackgroundTask
 
 
 	// Use this for initialization
-	static void ios_registerForPushNotification () 
+	internal static void ios_registerForPushNotification () 
 	{
 		#if UNITY_IOS && !UNITY_EDITOR
 		registerForPushNotification ();
@@ -22,7 +22,7 @@ public class iOSBackgroundTask
 	}
 	
 	// Update is called once per frame
-	static void ios_startBackgroundTask (string alertTitle, string alertBody, string alertAction, int deltaDealTime) 
+	internal static void ios_startBackgroundTask (string alertTitle, string alertBody, string alertAction, int deltaDealTime) 
 	{
 		#if UNITY_IOS && !UNITY_EDITOR
 		startBackgroundTask(alertTitle, alertBody, alertAction, deltaDealTime);

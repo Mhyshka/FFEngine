@@ -11,9 +11,21 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" /> // TV
+            </intent-filter>
         </activity>
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />  /*Zeroconf*/
+    
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" /> // TV
+    <uses-feature android:name="android.software.leanback" android:required="false" /> // TV
+    
+    <uses-feature android:name="android.hardware.gamepad" />
+    <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+
     
 </manifest>

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -17,7 +17,7 @@ namespace FF.UI
 			playerNameInputField.text = playerName;
 		}
 
-		internal string getPlayerNameInputField ()
+		internal string GetPlayerNameInputField ()
 		{
 			return playerNameInputField.text;
 		}

@@ -33,5 +33,10 @@ namespace FF
 			_engine.Destroy();
 			_engine = null;
 		}
+		
+		void OnApplicationPause(bool a_isPause)
+		{
+			_engine.OnApplicationPause(a_isPause);
+		}
 	}
 }

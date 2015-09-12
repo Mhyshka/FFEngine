@@ -133,9 +133,7 @@ namespace FF.Input
 		{
 			get
 			{
-				return true;
 				int length = UnityEngine.Input.GetJoystickNames().Length;
-				FFLog.LogError("Count : " + length.ToString());
 				return length > 0;
 			}
 		}
