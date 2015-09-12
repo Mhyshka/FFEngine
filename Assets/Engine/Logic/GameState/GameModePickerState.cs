@@ -5,12 +5,13 @@ using FF.UI;
 
 namespace FF
 {
-	internal class GameModePickerState : AMenuGameState
+	internal class GameModePickerState : ANavigationMenuState
 	{
 		#region Inspector Properties
 		#endregion
 
 		#region Properties
+		protected FFGameModePickerPanel _gameModePickerPanel;
 		#endregion
 
 		#region States Methods
@@ -25,11 +26,12 @@ namespace FF
 			base.Enter ();
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker state enter.");
 
-			FFGameModePickerPanel lGameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
-			lGameModePickerPanel.setPlayerNameInputField (SystemInfo.deviceName);
+			if(_gameModePickerPanel == null)
+				_gameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
+				
+			_gameModePickerPanel.setPlayerNameInputField (SystemInfo.deviceName);
 
-			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
-			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
+			_navigationPanel.setTitle ("Get Ready.");
 		}
 
 		internal override int Manage ()
@@ -40,15 +42,14 @@ namespace FF
 		internal override void Exit ()
 		{
 			base.Exit ();
+			SavePlayerUsername ();
 		}
 		#endregion
 
 		#region Internal Methods
-		protected void savePlayerUsername ()
+		protected void SavePlayerUsername ()
 		{	
-			FFGameModePickerPanel lGameModePickerPanel = FFEngine.UI.GetPanel ("GameModePickerPanel") as FFGameModePickerPanel;
-			NetworkMenuGameMode lGameMode = _gameMode as NetworkMenuGameMode;
-			lGameMode.playerName = lGameModePickerPanel.getPlayerNameInputField ();
+			_networkGameMode.playerName = _gameModePickerPanel.GetPlayerNameInputField ();
 		}
 		#endregion
 
@@ -67,20 +68,10 @@ namespace FF
 			FFEngine.Events.UnregisterForEvent ("OnJoinPressed", OnJoinPressed);
 		}
 
-		
-		internal void OnEvent(FFEventParameter a_args)
-		{
-			Debug.Log ("test event");
-			Debug.Log (a_args);
-		}
-
 
 		internal void OnHostPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnHostPressed");
-
-			savePlayerUsername ();
-
 			RequestState ((int)EMenuStateID.GameRoomHost);
 		}
 		
@@ -88,9 +79,6 @@ namespace FF
 		internal void OnJoinPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnJoinPressed");
-
-			savePlayerUsername ();
-
 			RequestState ((int)EMenuStateID.HostList);
 		}
 		#endregion

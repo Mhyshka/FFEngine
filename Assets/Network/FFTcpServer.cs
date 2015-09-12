@@ -14,7 +14,7 @@ namespace FF.Networking
 		protected IPEndPoint _endPoint;
 		protected TcpListener _tcpListener;
 		protected Thread _listeningThread;
-		protected Dictionary<Player,FFTcpClient> _clients;
+		protected Dictionary<IPEndPoint,FFTcpClient> _clients;
 		protected bool _isListening = false;
 		
 		internal int Port
@@ -35,7 +35,7 @@ namespace FF.Networking
 				_tcpListener = new TcpListener(a_ipv4, 0);
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
-				_clients = new Dictionary<Player,FFTcpClient>();
+				_clients = new Dictionary<IPEndPoint, FFTcpClient>();
 				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
 			}
 			catch(SocketException e)
@@ -118,7 +118,7 @@ namespace FF.Networking
 			FFLog.LogError(EDbgCat.Networking, "Stoping Listener Thread");
 		}
 		
-		internal void HandlePendingConnections()
+		protected void HandlePendingConnections()
 		{
 			if(_isListening && _tcpListener.Pending())
 			{
@@ -128,8 +128,7 @@ namespace FF.Networking
 				FFTcpClient newFFClient = new FFTcpClient(newClient);
 				newFFClient.StartWorkers();
 				IPEndPoint newEp = newClient.Client.RemoteEndPoint as IPEndPoint;
-				Player player = new Player(newEp);
-				_clients.Add(player, newFFClient);
+				_clients.Add(newEp, newFFClient);
 				
 				FFLog.LogError(EDbgCat.Networking, "New Client");
 				WelcomeClient(newFFClient);
@@ -147,8 +146,6 @@ namespace FF.Networking
 		
 		protected void WelcomeClient(FFTcpClient a_newClient)
 		{
-			
-			
 			FFMessageRoomInfo roomInfo = new FFMessageRoomInfo();
 			roomInfo.currentPlayerCount = 2;
 			roomInfo.maxPlayerCount = 3;
@@ -158,6 +155,7 @@ namespace FF.Networking
 		}
 		#endregion
 		
+		#region Client Management
 		internal void DoUpdate()
 		{
 			foreach(FFTcpClient each in _clients.Values)
@@ -165,5 +163,19 @@ namespace FF.Networking
 				each.DoUpdate();
 			}
 		}
+		
+		internal void BroadcastMessage(FFMessage a_message)
+		{
+			foreach(IPEndPoint endpoint in _clients.Keys)
+			{
+				SendMessageToClient(endpoint, a_message);
+			}
+		}
+		
+		internal void SendMessageToClient(IPEndPoint a_endpoint, FFMessage a_message)
+		{
+			_clients[a_endpoint].QueueMessage(a_message);
+		}
+		#endregion
 	}
 }

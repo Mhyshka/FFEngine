@@ -2,9 +2,11 @@
 using System.Collections;
 using System;
 
+using FF.Utils;
+
 internal delegate void InternetStatusCallback(bool a_canReachInternet);
 
-internal class InternetStatusManager
+internal class FFInternetStatusManager
 {
 	#region Properties
 	protected bool _canReachInternet = false;
@@ -14,7 +16,7 @@ internal class InternetStatusManager
 	#endregion
 
 	#region Constructor
-	internal InternetStatusManager()
+	internal FFInternetStatusManager()
 	{
 		_canReachInternet = false;
 		_timespan = new TimeSpan(0,0,UPDATE_TIMESPAN);
@@ -51,7 +53,23 @@ internal class InternetStatusManager
 
 	internal bool RefreshConnectionStatus()
 	{
+		#if UNITY_ANDROID && !UNITY_EDITOR
+		return FFAndroidUtils.HasInternetConnection();
+		#else
 		return Application.internetReachability != NetworkReachability.NotReachable;
+		#endif
+	}
+	
+	internal bool IsWifiInternetConnection
+	{
+		get
+		{
+			#if UNITY_ANDROID && !UNITY_EDITOR
+			return FFAndroidUtils.HasWifiInternetConnection();
+			#else
+			return Application.internetReachability != NetworkReachability.ReachableViaLocalAreaNetwork;
+			#endif
+		}
 	}
 	#endregion
 }

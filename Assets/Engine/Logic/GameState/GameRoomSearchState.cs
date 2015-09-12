@@ -7,12 +7,15 @@ using FF.UI;
 
 namespace FF
 {
-	internal class HostListState : AMenuGameState
+	internal class GameRoomSearchState : ANavigationMenuState
 	{
 		#region Inspector Properties
 		#endregion
-
-
+		
+		#region Properties
+		protected FFHostListPanel _hostListPanel;
+		#endregion
+		
 		#region States Methods
 		internal override int ID {
 			get {
@@ -24,13 +27,19 @@ namespace FF
 		{
 			base.Enter ();
 			FFLog.Log (EDbgCat.Logic, "Host List state enter.");
-
-			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
-			lNavigationBarPanel.setTitle ("Alex est un blaireaudoudou");
-
-			FFEngine.Network.StartLookingForGames ();
-			ZeroconfManager.Instance.Client.onRoomAdded += OnRoomAdded;
-			ZeroconfManager.Instance.Client.onRoomLost += OnRoomLost;
+			
+			if(_hostListPanel == null)
+				_hostListPanel = FFEngine.UI.GetPanel("HostListPanel") as FFHostListPanel;
+			
+			if(FFEngine.Network.IsConnectedToLan())
+			{
+				_navigationPanel.setTitle ("Looking for games");
+				FFEngine.Network.StartLookingForGames ();
+			}
+			else
+			{
+				_navigationPanel.setTitle ("No network");
+			}
 		}
 
 		internal override int Manage ()
@@ -41,6 +50,10 @@ namespace FF
 		internal override void Exit ()
 		{
 			base.Exit ();
+			
+			FFEngine.Network.StopLookingForGames ();
+			ZeroconfManager.Instance.Client.onRoomAdded -= OnRoomAdded;
+			ZeroconfManager.Instance.Client.onRoomLost -= OnRoomLost;
 		}
 		#endregion
 
@@ -55,26 +68,15 @@ namespace FF
 			base.UnregisterForEvent ();
 		}
 
-		
-		internal void OnEvent(FFEventParameter a_args)
-		{
-			Debug.Log ("test event");
-			Debug.Log (a_args);
-		}
-
-
 		protected void OnRoomAdded (ZeroconfRoom aRoom)
 		{
-			Debug.Log ("OnRoomAdded" + aRoom.roomName);
-			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("HostListPanel") as FFHostListPanel;
-			Debug.Log ("host list panel get");
-			lPanel.AddRoom (aRoom);
+			FFLog.LogError ("OnRoomAdded : " + aRoom.roomName);
+			_hostListPanel.AddRoom (aRoom);
 		}
 
 		protected void OnRoomLost(ZeroconfRoom aRoom)
 		{
-			FFHostListPanel lPanel = FFEngine.UI.GetPanel ("HostListPanel") as FFHostListPanel;
-			lPanel.RemoveRoom (aRoom);
+			_hostListPanel.RemoveRoom (aRoom);
 		}
 
 

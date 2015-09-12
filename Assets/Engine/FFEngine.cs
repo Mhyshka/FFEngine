@@ -4,6 +4,7 @@ using System.Collections;
 using FF.UI;
 using FF.Networking;
 using FF.Input;
+using FF.Multiscreen;
 
 namespace FF
 {
@@ -33,6 +34,9 @@ namespace FF
 		
 		private GameManager _gameManager;
 		internal static GameManager Game{get{return s_instance._gameManager;}}
+		
+		private FFMultiscreenManager _multiscreenManager;
+		internal static FFMultiscreenManager MultiScreen{get{return s_instance._multiscreenManager;}}
 		#endregion
 		
 		internal FFEngine()
@@ -43,8 +47,22 @@ namespace FF
 			_eventManager = new EventManager();
 			_networkManager = new FFNetworkManager();
 			_inputManager = new InputManager();
+			_multiscreenManager = new FFMultiscreenManager();
+			
+#if UNITY_iOS && !UNITY_EDITOR
+			iOSBackgroundTask.ios_registerForPushNotification();
+#endif
 		}
-	
+		
+		internal void OnApplicationPause(bool a_isPause)
+		{
+			if(a_isPause)
+			{
+#if UNITY_iOS && !UNITY_EDITOR
+				iOSBackgroundTask.ios_startBackgroundTask("Please kill me", "I don't wanna live anymore.", "Save me", 20);
+#endif
+			}
+		}
 		
 		// Update is called once per frame
 		internal void DoUpdate ()

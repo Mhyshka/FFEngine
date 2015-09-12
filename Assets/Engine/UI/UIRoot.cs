@@ -43,7 +43,7 @@ namespace FF.UI
 		internal void ConfigureEnabledInput()
 		{
 #if !UNITY_EDITOR
-			if(FFEngine.Inputs.HasJoystickConnected)
+			if(FFEngine.Inputs.HasJoystickConnected || FFEngine.MultiScreen.IsTV)
 			{
 				touchModule.enabled = false;
 				standaloneModule.enabled = true;

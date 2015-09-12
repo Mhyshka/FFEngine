@@ -14,7 +14,7 @@ namespace FF.UI
 		
 		public void RequestFocus()
 		{
-			if(FFEngine.Inputs.HasJoystickConnected)
+			if(FFEngine.Inputs.HasJoystickConnected || FFEngine.MultiScreen.IsTV)
 			{
 				Selectable selectable = GetComponent<Selectable>();
 				selectable.OnSelect(new BaseEventData(EventSystem.current));

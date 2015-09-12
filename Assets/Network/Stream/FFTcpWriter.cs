@@ -52,7 +52,7 @@ namespace FF.Networking
 			}
 			catch(IOException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't write from stream." + e.StackTrace);
+				FFLog.LogError(EDbgCat.Networking, "Couldn't write to stream." + e.StackTrace);
 				return false;
 			}
 		}

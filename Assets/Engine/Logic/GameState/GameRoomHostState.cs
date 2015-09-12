@@ -7,11 +7,15 @@ using FF.UI;
 
 namespace FF
 {
-	internal class GameRoomHostState : AMenuGameState
+	internal class GameRoomHostState : ANavigationMenuState
 	{
 		#region Inspector Properties
 		#endregion
-
+		
+		#region Properties
+		
+		#endregion
+		
 
 		#region States Methods
 		internal override int ID {
@@ -24,12 +28,22 @@ namespace FF
 		{
 			base.Enter ();
 			FFLog.Log (EDbgCat.Logic, "Game Room Host state enter.");
-
-			FFNavigationBarPanel lNavigationBarPanel = FFEngine.UI.GetPanel ("NavigationBarPanel") as FFNavigationBarPanel;
-			lNavigationBarPanel.setTitle ("Youpoupidou");
-
-			NetworkMenuGameMode lGameMode = _gameMode as NetworkMenuGameMode;
-			FFEngine.Network.StartBroadcastingGame ("Partie de " + lGameMode.playerName);
+			
+			if(FFEngine.Network.IsConnectedToLan())
+			{
+				_navigationPanel.setTitle ("Waiting for clients...");
+				FFEngine.Network.StartBroadcastingGame ("Partie de " + _networkGameMode.playerName);
+			}
+			else
+			{
+				_navigationPanel.setTitle ("No network");
+			}
+		}
+		
+		internal override void Exit ()
+		{
+			base.Exit ();
+			FFEngine.Network.StopBroadcastingGame();
 		}
 		#endregion
 	}
