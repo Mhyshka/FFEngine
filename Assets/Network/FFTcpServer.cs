@@ -128,7 +128,7 @@ namespace FF.Networking
 				FFTcpClient newFFClient = new FFTcpClient(newClient);
 				newFFClient.StartWorkers();
 				IPEndPoint newEp = newClient.Client.RemoteEndPoint as IPEndPoint;
-				Player player = new Player(newEp);
+				Player player = new Player(newEp, "");
 				_clients.Add(player, newFFClient);
 				
 				FFLog.LogError(EDbgCat.Networking, "New Client");
