@@ -205,6 +205,18 @@ namespace FF
 		{
 			CurrentState.OnResume();
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Focus Popup
+        internal virtual void OnLostFocus()
+        {
+            CurrentState.OnLostFocus();
+        }
+
+        internal virtual void OnGetFocus()
+        {
+            CurrentState.OnGetFocus();
+        }
+        #endregion
+    }
 }

@@ -62,8 +62,13 @@ namespace FF.Networking
             }
             return player;
 		}
-		
-		internal void SetPlayer (int a_teamIndex, int a_slotIndex, FFNetworkPlayer a_player)
+
+        internal FFNetworkPlayer GetPlayerForSlot(FFSlotRef a_ref)
+        {
+            return teams[a_ref.teamIndex].Slots[a_ref.slotIndex].netPlayer;
+        }
+
+        internal void SetPlayer (int a_teamIndex, int a_slotIndex, FFNetworkPlayer a_player)
 		{
             FFLog.Log(EDbgCat.Networking, "Adding player to room : " + a_player.ipEndPoint.ToString());
             players.Add(a_player.ipEndPoint, a_player);

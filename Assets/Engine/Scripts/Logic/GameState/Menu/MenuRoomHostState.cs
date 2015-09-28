@@ -90,13 +90,21 @@ namespace FF
 		#region Callback
 		internal void OnSlotSelected(FFEventParameter a_args)
 		{
-			FFSlotRef from = new FFSlotRef();
-			from.slotIndex = FFEngine.Network.Player.slot.slotIndex;
-			from.teamIndex = FFEngine.Network.Player.slot.team.teamIndex;
-			
-			FFSlotRef to = (FFSlotRef)a_args.data;
-			
-			FFEngine.Network.CurrentRoom.MovePlayer(from, to);
+            FFSlotRef selectedSlot = (FFSlotRef)a_args.data;
+
+            FFNetworkPlayer player = FFEngine.Network.CurrentRoom.GetPlayerForSlot(selectedSlot);
+            if (player != null)
+            {
+                FFSlotOptionPopup.RequestDisplay(player, OnPlayerOptionKick, OnPlayerOptionBan, OnPlayerOptionSwap, null);
+            }
+            else
+            {
+                FFSlotRef from = new FFSlotRef();
+                from.slotIndex = FFEngine.Network.Player.slot.slotIndex;
+                from.teamIndex = FFEngine.Network.Player.slot.team.teamIndex;
+
+                FFEngine.Network.CurrentRoom.MovePlayer(from, selectedSlot);
+            }
 		}
 		
 		protected void OnRoomUpdate(FFRoom a_room)
@@ -129,5 +137,44 @@ namespace FF
             FFEngine.Network.Server.BroadcastMessage(new FFMessageFarewell("Shuting down."));
             base.GoBack(a_id);
         }
+
+
+        #region Slot Options
+        internal void OnPlayerOptionKick(FFNetworkPlayer a_player)
+        {
+            FFLog.Log("On Player Kick");
+            if (!a_player.isDCed)
+            {
+                FFEngine.Network.Server.SendMessageToClient(a_player.ipEndPoint, new FFMessageKick());
+            }
+            else
+            {
+                FFEngine.Network.CurrentRoom.RemovePlayer(a_player.SlotRef);
+            }
+
+            FFEngine.UI.DismissCurrentPopup();
+        }
+
+        internal void OnPlayerOptionBan(FFNetworkPlayer a_player)
+        {
+            FFEngine.UI.DismissCurrentPopup();
+        }
+
+        internal void OnPlayerOptionSwap(FFNetworkPlayer a_player)
+        {
+            FFEngine.UI.DismissCurrentPopup();
+        }
+        #endregion
+
+        #region focus
+        internal override void OnGetFocus()
+        {
+            base.OnGetFocus();
+            if (FFEngine.Inputs.ShouldUseNavigation)
+            {
+                _roomPanel.TrySelectWidget();
+            }
+        }
+        #endregion
     }
 }

@@ -40,7 +40,7 @@ namespace FF
 			}
 
 			ResetState();
-		}
+        }
 
 		internal override int Manage ()
 		{
@@ -165,6 +165,17 @@ namespace FF
 		{
 			RequestState((int)EMenuStateID.GameRoomClient);
 		}
-		#endregion
-	}
+        #endregion
+
+        #region focus
+        internal override void OnGetFocus()
+        {
+            base.OnGetFocus();
+            if (FFEngine.Inputs.ShouldUseNavigation)
+            {
+                _navigationPanel.FocusBackButton();
+            }
+        }
+        #endregion
+    }
 }

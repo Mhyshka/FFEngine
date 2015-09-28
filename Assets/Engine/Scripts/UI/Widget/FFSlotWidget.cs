@@ -79,27 +79,30 @@ namespace FF.UI
 		{
             emptyName.text = "Empty";
 
-             _uiButton.targetGraphic = emptyBackground;
-             usedGO.SetActive(false);
-             emptyGO.SetActive(true);
-             dcedGO.SetActive(false);
+            _uiButton.targetGraphic = emptyBackground;
+            usedGO.SetActive(false);
+            emptyGO.SetActive(true);
+            dcedGO.SetActive(false);
 
-             rating.gameObject.SetActive(true);
-             rating.Value = 0;
+            rating.gameObject.SetActive(true);
+            rating.Value = 0;
         }
 
         internal void SetDCed(FFNetworkPlayer a_player)
         {
-            dcedName.text = a_player.player.username;
+            if (!dcedGO.activeSelf)
+            {
+                dcedName.text = a_player.player.username;
 
-            _uiButton.targetGraphic = dcedBackground;
-            usedGO.SetActive(false);
-            emptyGO.SetActive(false);
-            dcedGO.SetActive(true);
+                _uiButton.targetGraphic = dcedBackground;
+                usedGO.SetActive(false);
+                emptyGO.SetActive(false);
+                dcedGO.SetActive(true);
 
-            rating.gameObject.SetActive(false);
-            _dcedTimeElapsed = 0f;
-            SetTimeDCed();
+                rating.gameObject.SetActive(false);
+                _dcedTimeElapsed = 0f;
+                SetTimeDCed();
+            }
         }
 
         protected void Update()

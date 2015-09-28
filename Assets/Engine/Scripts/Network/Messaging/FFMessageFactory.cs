@@ -17,6 +17,10 @@ namespace FF.Networking
         MoveToSlotSuccess,
         MoveToSlotFail,
 
+        Kick,
+        Ban,
+        Swap,
+
         Farewell,
         LeavingRoom
     }
@@ -55,6 +59,10 @@ namespace FF.Networking
                     break;
                 case EMessageType.MoveToSlotFail:
                     message = new FFMoveToSlotFail();
+                    break;
+
+                case EMessageType.Kick:
+                    message = new FFMessageKick();
                     break;
 
                 case EMessageType.Farewell:

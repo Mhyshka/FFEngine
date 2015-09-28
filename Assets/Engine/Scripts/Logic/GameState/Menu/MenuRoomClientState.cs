@@ -33,7 +33,7 @@ namespace FF
 			_navigationPanel.setTitle ("Game Lobby");
 
             OnLanStatusChanged(FFEngine.NetworkStatus.IsConnectedToLan);
-		}
+        }
 		
 		internal override void Exit ()
 		{
@@ -53,7 +53,8 @@ namespace FF
             FFEngine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
             FFEngine.Network.MainClient.onConnectionSuccess += OnReconnection;
             FFEngine.Network.MainClient.onConnectionLost += OnConnectionLost;
-            FFEngine.Events.RegisterForEvent("CancelReconnection", OnCancelReconnection);
+
+            FFMessageKick.onKickReceived += OnKickReceived;
         }
 		
 		protected override void UnregisterForEvent ()
@@ -62,7 +63,8 @@ namespace FF
             FFEngine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
 
             FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
-            FFEngine.Events.UnregisterForEvent("CancelReconnection", OnCancelReconnection);
+
+            FFMessageKick.onKickReceived -= OnKickReceived;
         }
         #endregion
 
@@ -81,18 +83,18 @@ namespace FF
 
         protected void OnConnectionLost(FFTcpClient a_client)
         {
-            FFEngine.UI.RequestDisplay("ConnectionLostPanel");
+            FFConnectionLostPopup.RequestDisplay(OnErroPopupCancel);
         }
 
         protected void OnReconnection(FFTcpClient a_client)
         {
-            FFEngine.UI.HideSpecificPanel("ConnectionLostPanel");
+            FFEngine.UI.DismissCurrentPopup();
             _roomPanel.TrySelectWidget();
         }
 
-        protected void OnCancelReconnection(FFEventParameter a_args)
+        protected void OnErroPopupCancel()
         {
-            FFEngine.UI.HideSpecificPanel("ConnectionLostPanel");
+            FFEngine.UI.DismissCurrentPopup();
             FFEngine.Events.FireEvent(EEventType.Back);
         }
         #endregion
@@ -125,6 +127,7 @@ namespace FF
         protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
         {
             FFEngine.Events.FireEvent(EEventType.Back);
+            FFMessagePopup.RequestDisplay("Server's down : " + a_reason, "Ok", null);
         }
 
         protected void LeaveRoom()
@@ -136,6 +139,25 @@ namespace FF
                 FFEngine.Network.LeaveCurrentRoom();
             }
         }
-		#endregion
-	}
+        #endregion
+
+        #region Slot Options 
+        internal void OnKickReceived()
+        {
+            FFEngine.Events.FireEvent(EEventType.Back);
+            FFMessagePopup.RequestDisplay("Kicked by server.", "Sorry", null);
+        }
+        #endregion
+
+        #region focus
+        internal override void OnGetFocus()
+        {
+            base.OnGetFocus();
+            if (FFEngine.Inputs.ShouldUseNavigation)
+            {
+                _roomPanel.TrySelectWidget();
+            }
+        }
+        #endregion
+    }
 }

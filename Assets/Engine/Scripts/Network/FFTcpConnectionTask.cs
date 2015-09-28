@@ -64,7 +64,7 @@ namespace FF.Networking
                 success = false;
                 FFLog.LogError(EDbgCat.Networking, "Couldn't connect to server." + e.StackTrace);
             }
-
+            
             Thread.Sleep(100);
             if (_shouldRun)
             {

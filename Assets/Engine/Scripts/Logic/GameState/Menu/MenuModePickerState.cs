@@ -25,9 +25,9 @@ namespace FF
 		internal override void Enter ()
 		{
 			base.Enter ();
-			FFLog.Log(EDbgCat.Logic,"Game Mode Picker state enter.");
+            FFLog.Log(EDbgCat.Logic, "Game Mode Picker state enter.");
 
-			if(_gameModePickerPanel == null)
+            if (_gameModePickerPanel == null)
 				_gameModePickerPanel = FFEngine.UI.GetPanel ("MenuModePickerPanel") as FFMenuModePickerPanel;
 				
 			_gameModePickerPanel.setPlayerNameInputField (FFEngine.Game.player.username);
@@ -101,7 +101,17 @@ namespace FF
             FFEngine.Game.player.username = a_inputField.text;
             a_inputField.Select();
         }
-		#endregion
+        #endregion
 
-	}
+        #region focus
+        internal override void OnGetFocus()
+        {
+            base.OnGetFocus();
+            if (FFEngine.Inputs.ShouldUseNavigation)
+            {
+                _gameModePickerPanel.TrySelectWidget();
+            }
+        }
+        #endregion
+    }
 }

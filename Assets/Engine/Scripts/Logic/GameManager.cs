@@ -39,18 +39,21 @@ namespace FF
 			_currentGameMode = null;
 		}
 		
-		internal AGameMode CurrentGameMode()
+		internal AGameMode CurrentGameMode
 		{
-			if(_currentGameMode != null)
-			{
-				return _currentGameMode;
-			}
-			
-			Debug.LogError("No current game mode.");
-			return null;
+            get
+            {
+                if (_currentGameMode != null)
+                {
+                    return _currentGameMode;
+                }
+
+                Debug.LogError("No current game mode.");
+                return null;
+            }
 		}
 		
-		internal T CurrentGameMode<T>() where T : AGameMode
+		internal T GetCurrentGameMode<T>() where T : AGameMode
 		{
 			if(_currentGameMode != null)
 			{

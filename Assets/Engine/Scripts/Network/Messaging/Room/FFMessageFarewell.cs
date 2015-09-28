@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.UI;
+
 namespace FF.Networking
 {
 	internal class FFMessageFarewell : FFMessage
@@ -23,13 +25,13 @@ namespace FF.Networking
 		
 		internal FFMessageFarewell(string a_reason)
 		{
-		
+            reason = a_reason;
 		}
 		
 		internal override void Read (FFTcpClient a_tcpClient)
 		{
             a_tcpClient.EndConnection(reason);
-		}
+        }
 		
 		#region Serialization
 		public override void SerializeData (FFByteWriter stream)

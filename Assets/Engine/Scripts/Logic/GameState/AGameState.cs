@@ -106,6 +106,16 @@ namespace FF
 		{
 		
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Focus Popup
+        internal virtual void OnLostFocus()
+        {
+        }
+
+        internal virtual void OnGetFocus()
+        {
+        }
+        #endregion
+    }
 }

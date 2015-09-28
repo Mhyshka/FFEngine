@@ -77,6 +77,8 @@ namespace FF
 				_networkManager.DoUpdate();
             if (_networkStatusManager != null)
                 _networkStatusManager.DoUpdate();
+            if (_uiManager  != null)
+                _uiManager.DoUpdate();
         }
 		
 		internal void Destroy()

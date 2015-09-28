@@ -11,6 +11,8 @@ namespace FF.UI
 		private LoadingScreen _loadingScreen;
 		
 		private Dictionary<string, FFPanel> _panelsByName;
+        private Dictionary<string, FFPopup> _popupsByName;
+        private Stack<FFPopupData> _pendingPopups;
 		
 		private bool _isLoading = false;
 		private int _panelsToLoadCount = 0;
@@ -19,7 +21,17 @@ namespace FF.UI
 		internal UIManager()
 		{
 			_panelsByName = new Dictionary<string, FFPanel> ();
-		}
+            _popupsByName = new Dictionary<string, FFPopup>();
+            _pendingPopups = new Stack<FFPopupData>();
+        }
+
+        internal void DoUpdate()
+        {
+            if (_currentPopup == null && _pendingPopups.Count > 0)
+            {
+                DisplayNextPopup(_pendingPopups.Pop());
+            }
+        }
 		
 		#region Loading
 		internal void LoadPanelsSet(string[] a_panelList)
@@ -112,12 +124,26 @@ namespace FF.UI
 		internal void Register(string a_eventKey, FFPanel a_panel)
 		{
 			_panelsToLoadCount--;
-			if (!_panelsByName.ContainsKey (a_eventKey))
+            //POPUPS
+            if (a_panel is FFPopup && !_popupsByName.ContainsKey(a_eventKey))
+            {
+                _popupsByName.Add(a_eventKey, (FFPopup)a_panel);
+                if (a_panel.ShouldMoveToRoot)
+                {
+                    RectTransform parent = a_panel.transform as RectTransform;
+                    while (parent.parent != null)
+                    {
+                        parent = parent.parent as RectTransform;
+                    }
+                    parent.SetParent(_root.transform, false);
+                }
+            }
+            //PANELS
+			else if (!_panelsByName.ContainsKey (a_eventKey))
 			{
 				_panelsByName.Add (a_eventKey, a_panel);
 				if(a_panel.ShouldMoveToRoot)
 				{
-					RectTransform panel = a_panel.transform as RectTransform;
 					RectTransform parent = a_panel.transform as RectTransform;
 					while(parent.parent != null)
 					{
@@ -128,7 +154,7 @@ namespace FF.UI
 			}
 			else
 			{
-				FFLog.LogWarning(EDbgCat.UI,"Same panel registered twice.");
+				FFLog.LogWarning(EDbgCat.UI,"Same panel registered twice. : " + a_panel.gameObject.name);
 			}
 			
 			if(_panelsToLoadCount == 0 && _isLoading)
@@ -256,6 +282,62 @@ namespace FF.UI
 				return false;
 			}
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Popups
+        protected FFPopup _currentPopup;
+        internal FFPopup CurrentPopup
+        {
+            get
+            {
+                return _currentPopup;
+            }
+        }
+
+        internal void PushPopup(FFPopupData a_data)
+        {
+            if (_currentPopup != null)
+            {
+                _pendingPopups.Push(_currentPopup.currentData);
+            }
+            DismissCurrentPopup();
+
+            _pendingPopups.Push(a_data);
+        }
+
+        protected void DisplayNextPopup(FFPopupData a_data)
+        {
+            //FFPopupData data = _pendingPopups.Dequeue();
+            FFPopup popup = _popupsByName[a_data.popupName] as FFPopup;
+            popup.SetContent(a_data);
+            popup.Show();
+            _currentPopup = popup;
+
+            if (FFEngine.Game.CurrentGameMode != null)
+            {
+                FFEngine.Game.CurrentGameMode.OnLostFocus();
+            }
+        }
+
+        internal void DismissCurrentPopup()
+        {
+            if (_currentPopup != null)
+            {
+                _currentPopup.Hide();
+                _currentPopup.onHidden += OnPopupHidden;
+            }
+        }
+
+        internal void OnPopupHidden()
+        {
+            _currentPopup.onHidden -= OnPopupHidden;
+            _currentPopup = null;
+
+            if (FFEngine.Game.CurrentGameMode != null)
+            {
+                FFEngine.Game.CurrentGameMode.OnGetFocus();
+            }
+        }
+        #endregion
+    }
 }

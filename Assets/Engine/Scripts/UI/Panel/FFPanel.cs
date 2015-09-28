@@ -135,18 +135,23 @@ namespace FF.UI
             if (defaultSelectedWidget != null && (debug || FFEngine.Inputs.ShouldUseNavigation))
                 defaultSelectedWidget.Select();
         }
-		
-		#region Transition Events
-		/// <summary>
-		/// Callback from animator
-		/// </summary>
-		public virtual void OnShown()
+
+        #region Transition Events
+        internal SimpleCallback onShown = null;
+        /// <summary>
+        /// Callback from animator
+        /// </summary>
+        public virtual void OnShown()
 		{
 			FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
 			_state = EState.Shown;
             TrySelectWidget();
+
+            if (onShown != null)
+                onShown();
         }
-	
+
+        internal SimpleCallback onHidden = null;
 		/// <summary>
 		/// Callback from animator
 		/// </summary>
@@ -166,10 +171,13 @@ namespace FF.UI
 			
 			if(_raycaster != null)
 				_raycaster.enabled = false;
-				
-			/*if(gameObject.activeSelf)
+
+            /*if(gameObject.activeSelf)
 				gameObject.SetActive(false);*/
-		}
+
+            if (onHidden != null)
+                onHidden();
+        }
 		
 		internal bool IsTransitionning
 		{
