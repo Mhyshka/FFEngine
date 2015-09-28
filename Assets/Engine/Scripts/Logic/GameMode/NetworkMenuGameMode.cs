@@ -7,7 +7,6 @@ namespace FF
 	internal class NetworkMenuGameMode : MenuGameMode
 	{	
 		#region Properties
-		internal string playerName;
 		#endregion
 	}
 }

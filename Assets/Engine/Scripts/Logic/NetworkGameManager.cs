@@ -12,34 +12,17 @@ namespace FF
 	internal class NetworkGameManager : GameManager
 	{
 		#region Properties
-		protected FFRoom _currentRoom;
-		internal FFRoom CurrentRoom
-		{
-			set
-			{
-				_currentRoom = value;
-			}
-			get
-			{
-				return _currentRoom;
-			}
-		}
+		//Placeholder
+		internal FFPlayer player;
 		#endregion
 	
 		internal NetworkGameManager()
 		{
-		
+			player = new FFPlayer();
+			player.username = SystemInfo.deviceName;
 		}
 	
 		#region Game Mode Management
-		internal FFRoom PrepareRoom()
-		{
-			_currentRoom = new FFRoom();
-			_currentRoom.roomName = "Partie de " + ((NetworkMenuGameMode)CurrentGameMode()).playerName;
-			_currentRoom.AddTeam(1,"Left side");
-			_currentRoom.AddTeam(1,"Right side");
-			return _currentRoom;
-		}
 		#endregion
 	}
 }

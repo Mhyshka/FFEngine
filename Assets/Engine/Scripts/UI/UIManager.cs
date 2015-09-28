@@ -123,9 +123,7 @@ namespace FF.UI
 					{
 						parent = parent.parent as RectTransform;
 					}
-					panel.SetParent(_root.transform, false);
-					
-					GameObject.Destroy(parent.gameObject);
+                    parent.SetParent(_root.transform, false);
 				}
 			}
 			else
@@ -169,7 +167,7 @@ namespace FF.UI
 	
 	
 		#region Display
-		internal void SwitchToPanels(string[] a_panels)
+		internal void SwitchToPanels(string[] a_panels, bool a_isForward = true)
 		{
 			List<string> panelsToShow = new List<string>();
 			foreach(string each in a_panels)
@@ -182,23 +180,23 @@ namespace FF.UI
 				if(!panelsToShow.Contains(each) && 
 				   (_panelsByName[each].State == FFPanel.EState.Shown || _panelsByName[each].State == FFPanel.EState.Showing))
 				{
-					HideSpecificPanel(each);
+					HideSpecificPanel(each, a_isForward);
 				}
 				else if(panelsToShow.Contains(each) && 
 				        (_panelsByName[each].State == FFPanel.EState.Hidden || _panelsByName[each].State == FFPanel.EState.Hidding))
 				{
-					RequestDisplay(each);
+					RequestDisplay(each, a_isForward);
 				}
 			}
 		}
 		
-		internal void RequestDisplay(string[] a_panels)
+		internal void RequestDisplay(string[] a_panels, bool a_isForward = true)
 		{
 			foreach(string each in a_panels)
-				RequestDisplay(each);
+				RequestDisplay(each, a_isForward);
 		}
 		
-		internal void RequestDisplay(string a_panel)
+		internal void RequestDisplay(string a_panel, bool a_isForward = true)
 		{
 			if(!_panelsByName.ContainsKey(a_panel))
 			{
@@ -208,7 +206,7 @@ namespace FF.UI
 			
 			if(_panelsByName[a_panel].State == FFPanel.EState.Hidden || _panelsByName[a_panel].State == FFPanel.EState.Hidding)
 			{
-				_panelsByName[a_panel].Show();
+				_panelsByName[a_panel].Show(a_isForward);
 			}
 			else
 			{
@@ -216,7 +214,7 @@ namespace FF.UI
 			}
 		}
 		
-		internal void HideSpecificPanel(string a_panel)
+		internal void HideSpecificPanel(string a_panel, bool a_isForward = true)
 		{
 			if(!_panelsByName.ContainsKey(a_panel))
 			{
@@ -226,7 +224,7 @@ namespace FF.UI
 			
 			if(_panelsByName[a_panel].State == FFPanel.EState.Showing || _panelsByName[a_panel].State == FFPanel.EState.Shown)
 			{
-				_panelsByName[a_panel].Hide();
+				_panelsByName[a_panel].Hide(a_isForward);
 			}
 			else
 			{
@@ -234,12 +232,12 @@ namespace FF.UI
 			}
 		}
 		
-		internal void HideAllPanels()
+		internal void HideAllPanels(bool a_isForward = true)
 		{
 			foreach (FFPanel each in _panelsByName.Values)
 			{
 				if(each.State != FFPanel.EState.Hidden && each.State != FFPanel.EState.Hidding)
-					each.Hide();
+					each.Hide(a_isForward);
 			}
 		}
 		

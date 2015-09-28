@@ -11,27 +11,39 @@ internal enum EDbgCat
 	Logic
 }
 
+internal enum EDbgLevel
+{
+	Debug,
+	Warning,
+	Error
+}
+
 internal class FFLog
 {
+	internal static EDbgLevel DBG_LEVEL = EDbgLevel.Debug;
 	#region Log Debug
 	internal static void Log(EDbgCat a_cat, string a_text)
 	{
+	
 #if DEBUG_LOG
-		Debug.Log(a_cat.ToString() + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
+			Debug.Log(a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
 	internal static void Log(string a_tag, string a_text)
 	{
 #if DEBUG_LOG
-		Debug.Log(a_tag + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
+			Debug.Log(a_tag + " : " + a_text);
 #endif
 	}
 	
 	internal static void Log(string a_text)
 	{
 #if DEBUG_LOG
-		Debug.Log(a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
+			Debug.Log(a_text);
 #endif
 	}
 	#endregion
@@ -40,21 +52,24 @@ internal class FFLog
 	internal static void LogWarning(EDbgCat a_cat, string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogWarning(a_cat.ToString() + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
+			Debug.LogWarning(a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
 	internal static void LogWarning(string a_tag, string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogWarning(a_tag + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
+			Debug.LogWarning(a_tag + " : " + a_text);
 #endif
 	}
 	
 	internal static void LogWarning(string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogWarning(a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
+			Debug.LogWarning(a_text);
 #endif
 	}
 	#endregion
@@ -63,21 +78,24 @@ internal class FFLog
 	internal static void LogError(EDbgCat a_cat, string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogError(a_cat.ToString() + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
+			Debug.LogError(a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
 	internal static void LogError(string a_tag, string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogError(a_tag + " : " + a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
+			Debug.LogError(a_tag + " : " + a_text);
 #endif
 	}
 	
 	internal static void LogError(string a_text)
 	{
 #if DEBUG_LOG
-		Debug.LogError(a_text);
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
+			Debug.LogError(a_text);
 #endif
 	}
 	#endregion

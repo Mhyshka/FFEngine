@@ -14,6 +14,9 @@ namespace FF.UI
 		private Dictionary<FFRoom, FFRoomCellWidget> roomsCells = new Dictionary<FFRoom, FFRoomCellWidget>();
 		public GameObject hostCellPrefab = null;
 		public VerticalLayoutGroup verticalLayout = null;
+		
+		public GameObject list = null;
+		public GameObject loader = null;
 		#endregion
 
 
@@ -24,11 +27,20 @@ namespace FF.UI
 				Destroy (roomsCells[aRoom].gameObject);
 			}
 			roomsCells.Clear ();
+			
+			list.gameObject.SetActive(false);
+			loader.SetActive(true);
 		}
 
 
 		internal void AddRoom (FFRoom a_room)
 		{
+			if(roomsCells.Count <= 0)
+			{
+				list.gameObject.SetActive(true);
+				loader.SetActive(false);
+			}
+			
 			FFRoomCellWidget lCell;
 			if (!roomsCells.TryGetValue (a_room, out lCell)) 
 			{
@@ -40,6 +52,7 @@ namespace FF.UI
 					lHostCell.UpdateWithRoom (a_room);
 					roomsCells.Add (a_room, lHostCell);
 					lHostCell.transform.SetParent (verticalLayout.transform);
+					lHostCell.transform.localScale = Vector3.one;
 				}
 			}
 		}
@@ -48,11 +61,11 @@ namespace FF.UI
 		internal void RemoveRoom (FFRoom aRoom)
 		{
 			FFRoomCellWidget lCell = roomsCells [aRoom];
-			if (lCell != null)
-			{
-				Destroy (lCell);
-				roomsCells.Remove(aRoom);
-			}
+            if (lCell != null)
+            {
+                Destroy(lCell.gameObject);
+                roomsCells.Remove(aRoom);
+            }
 		}
 	}
 }

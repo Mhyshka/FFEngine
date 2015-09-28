@@ -14,21 +14,40 @@ namespace FF.Networking
 	{
 		#region Properties
 		protected Queue<FFMessage> _toSendMessages;
+		
+		protected double _heartbeatTimespan = 3000d;//in MS
+		protected DateTime _lastHeartbeatTimestamp;
 		#endregion
 		
 		internal FFTcpWriter(FFTcpClient a_ffClient) : base(a_ffClient)
 		{
 			_toSendMessages = new Queue<FFMessage>();
-		}
+        }
 		
 		#region Message
 		internal void QueueMessage(FFMessage a_message)
 		{
+			FFLog.Log(EDbgCat.Networking,"Queue message");
 			lock(_toSendMessages)
 			{
-				FFLog.Log(EDbgCat.Networking,"Queue message");
 				_toSendMessages.Enqueue(a_message);
 			}
+		}
+
+        internal void QueueFinalMessage(FFMessage a_message)
+        {
+            FFLog.Log(EDbgCat.Networking, "Queue message");
+            lock (_toSendMessages)
+            {
+                _toSendMessages.Clear();
+                _toSendMessages.Enqueue(a_message);
+            }
+        }
+
+        internal override void Start ()
+		{
+			base.Start ();
+			_lastHeartbeatTimestamp = DateTime.Now;
 		}
 		#endregion
 		
@@ -37,17 +56,14 @@ namespace FF.Networking
 		{
 			try
 			{
-				FFLog.Log(EDbgCat.Networking, "Writing");
-				byte[] messageData;
-				_memoryStream = new MemoryStream();
-				_binaryFormatter.Serialize(_memoryStream,a_message);
-				messageData = _memoryStream.ToArray();
+				//FFLog.Log(EDbgCat.Networking, "Start Writing : " + a_message.ToString() + " to " + _ffClient.Remote.ToString());
+				byte[] messageData = a_message.Serialize();
 				
-				_data = new FFByteData();
-				_data.Append(BitConverter.GetBytes(_memoryStream.Length));
-				_data.Append(messageData);
-				
-				_client.GetStream().Write(_data.Data, 0, _data.Length);
+				int length = messageData.Length;
+				messageData = messageData.Insert(BitConverter.GetBytes(length),0);
+
+                Client.GetStream().Write(messageData, 0, messageData.Length);
+				//FFLog.Log(EDbgCat.Networking, "End Writing : " + messageData.Length);
 				return true;
 			}
 			catch(IOException e)
@@ -59,23 +75,48 @@ namespace FF.Networking
 		
 		protected override void Task()
 		{
-			while(_client != null && _client.Connected && _shouldRun && _client.GetStream() != null)
+			while(_shouldRun && Client != null && Client.Connected && _stream != null && _stream.CanWrite)
 			{
-				if(_client.GetStream().CanWrite && _toSendMessages.Count > 0)
+                HandleHeartbeat();
+				
+				if(_shouldRun && _toSendMessages.Count > 0)
 				{
-					FFMessage toSend = _toSendMessages.Peek();
-					if(Write(toSend) || !toSend.IsMandatory)
+					FFMessage toSend;
+					lock(_toSendMessages)
 					{
-						_toSendMessages.Dequeue();
+						toSend = _toSendMessages.Peek();
 					}
-				}
+
+                    if (Write(toSend) || !toSend.IsMandatory)
+					{
+                        if(toSend is FFMessageFarewell)
+                        {
+                            _ffClient.EndConnection(((FFMessageFarewell)toSend).reason);
+                            break;
+                        }
+
+						lock(_toSendMessages)
+						{
+							_toSendMessages.Dequeue();
+						}
+					}
+                }
 				else
 				{
-					Thread.Sleep(10);
+					Thread.Sleep(3);
 				}
 			}
-			
 			FFLog.LogError(EDbgCat.Networking, "Stoping Writer Thread");
+		}
+		
+		protected void HandleHeartbeat()
+		{
+			TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
+			if(span.TotalMilliseconds > _heartbeatTimespan)
+			{
+				QueueMessage(new FFMessageHeartBeat());
+				_lastHeartbeatTimestamp = DateTime.Now;
+			}
 		}
 		#endregion
 	}

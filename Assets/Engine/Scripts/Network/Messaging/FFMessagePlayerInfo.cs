@@ -4,11 +4,10 @@ using System.Net.Sockets;
 
 namespace FF.Networking
 {
-	[System.Serializable]
 	internal class FFMessagePlayerInfo : FFMessage
 	{
 		#region Properties
-		public FFPlayer player = null;
+		public FFNetworkPlayer player = null;
 		#endregion
 		
 		#region Methods
@@ -17,5 +16,21 @@ namespace FF.Networking
 			FFLog.LogError("Player Infos read!");
 		}	
 		#endregion
+		
+		public override void SerializeData(FFByteWriter stream)
+		{
+		}
+		
+		public override void LoadFromData (FFByteReader stream)
+		{
+		}
+		
+		internal override EMessageType Type
+		{
+			get
+			{
+				return EMessageType.Heartbeat;
+			}
+		}
 	}
 }

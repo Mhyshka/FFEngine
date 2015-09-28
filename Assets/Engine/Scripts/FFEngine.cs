@@ -29,6 +29,9 @@ namespace FF
 		private InputManager _inputManager;
 		internal static InputManager Inputs{get{return s_instance._inputManager;}}
 		
+		private FFNetworkStatusManager _networkStatusManager;
+		internal static FFNetworkStatusManager NetworkStatus{get{return s_instance._networkStatusManager;}}
+		
 		private FFNetworkManager _networkManager;
 		internal static FFNetworkManager Network{get{return s_instance._networkManager;}}
 		
@@ -48,6 +51,7 @@ namespace FF
 			_networkManager = new FFNetworkManager();
 			_inputManager = new InputManager();
 			_multiscreenManager = new FFMultiscreenManager();
+			_networkStatusManager = new FFNetworkStatusManager();
 			
 #if UNITY_iOS && !UNITY_EDITOR
 			iOSBackgroundTask.ios_registerForPushNotification();
@@ -71,7 +75,9 @@ namespace FF
 				_inputManager.DoUpdate();
 			if(_networkManager != null)
 				_networkManager.DoUpdate();
-		}
+            if (_networkStatusManager != null)
+                _networkStatusManager.DoUpdate();
+        }
 		
 		internal void Destroy()
 		{

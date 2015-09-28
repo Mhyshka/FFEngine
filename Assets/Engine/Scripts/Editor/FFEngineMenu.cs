@@ -16,7 +16,7 @@ public class FFEngineMenu : MonoBehaviour
 			writer.Close();
 			AssetDatabase.SaveAssets();
 			
-			EditorApplication.OpenScene("Assets/Engine/Scenes/EntryPoint.unity");
+			EditorApplication.OpenScene("Assets/Scenes/EntryPoint.unity");
 			EditorApplication.isPlaying = true;
 		}
 	}

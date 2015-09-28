@@ -1,10 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using System;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace FF.UI
 {
-	[RequireComponent(typeof(CanvasGroup))]
-	[RequireComponent(typeof(Animator))]
 	internal class FFPanel : MonoBehaviour
 	{
 		internal enum EState
@@ -18,11 +19,14 @@ namespace FF.UI
 		#region Inspector Properties
 		public bool debug = false;
 		public bool hideOnLoad = true;
+        public Animator animator = null;
+        public Selectable defaultSelectedWidget = null;
 		#endregion
 	
 		#region Properties
-		protected CanvasGroup _canvasGroup = null;
-		protected Animator _animator = null;
+		protected GraphicRaycaster _raycaster = null;
+		protected Canvas _canvas = null;
+		protected Dictionary<Selectable, Navigation.Mode> _selectables = null;
 		internal virtual bool ShouldMoveToRoot
 		{
 			get
@@ -43,15 +47,26 @@ namespace FF.UI
 	
 		protected virtual void Awake()
 		{
-			#if RELEASE
+#if RELEASE
 			debug = false;	
-			#endif
-			_canvasGroup = GetComponent<CanvasGroup>();
-			_animator = GetComponent<Animator>();
+#endif
+            if (animator == null)
+            {
+                animator = GetComponent<Animator>();
+            }
+			_canvas = GetComponent<Canvas>();
+			_raycaster = GetComponent<GraphicRaycaster>();
+			
+			_selectables = new Dictionary<Selectable, Navigation.Mode>();
+			foreach(Selectable each in GetComponentsInChildren<Selectable>(true))
+			{
+				_selectables.Add(each, each.navigation.mode);
+			}
+			
 			
 			if (!hideOnLoad)
 			{
-				_animator.SetTrigger("Show");
+				animator.SetTrigger("Show");
 			}
 
 			if(!debug && !(this is LoadingScreen))
@@ -66,12 +81,27 @@ namespace FF.UI
 		}
 
 		#region Show
-		internal virtual void Show()
+		internal virtual void Show(bool a_isForward = true)
 		{
 			if(_state == EState.Hidden || _state == EState.Hidding)
 			{
-				gameObject.SetActive(true);
-				_animator.SetTrigger("Show");
+                if (!gameObject.activeSelf)
+                    gameObject.SetActive(true);
+
+                _canvas.enabled = true;
+				
+				foreach(KeyValuePair<Selectable, Navigation.Mode> keyVal in _selectables)
+				{
+					Navigation nav = keyVal.Key.navigation;
+					nav.mode = keyVal.Value;
+					keyVal.Key.navigation = nav;
+				}
+				
+				if(_raycaster != null)
+					_raycaster.enabled = true;
+					
+				animator.SetBool("Forward", a_isForward);
+				animator.SetTrigger("Show");
 					
 				_state = EState.Showing;
 				FFLog.Log(EDbgCat.UI, "Showing : " + gameObject.ToString());
@@ -84,11 +114,12 @@ namespace FF.UI
 		#endregion
 	
 		#region Hide
-		internal virtual void Hide()
+		internal virtual void Hide(bool a_isForward = true)
 		{
 			if(_state == EState.Shown || _state == EState.Showing)
 			{
-				_animator.SetTrigger("Hide");
+				animator.SetBool("Forward", a_isForward);
+				animator.SetTrigger("Hide");
 				_state = EState.Hidding;
 				FFLog.Log(EDbgCat.UI, "Hiding : " + gameObject.ToString());
 			}
@@ -97,7 +128,13 @@ namespace FF.UI
 				FFLog.LogWarning(EDbgCat.UI, "Already hidden / hiding");
 			}
 		}
-		#endregion
+        #endregion
+
+        internal void TrySelectWidget()
+        {
+            if (defaultSelectedWidget != null && (debug || FFEngine.Inputs.ShouldUseNavigation))
+                defaultSelectedWidget.Select();
+        }
 		
 		#region Transition Events
 		/// <summary>
@@ -107,7 +144,8 @@ namespace FF.UI
 		{
 			FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
 			_state = EState.Shown;
-		}
+            TrySelectWidget();
+        }
 	
 		/// <summary>
 		/// Callback from animator
@@ -117,8 +155,20 @@ namespace FF.UI
 			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
 			_state = EState.Hidden;
 			
-			if(gameObject.activeSelf)
-				gameObject.SetActive(false);
+			_canvas.enabled = false;
+			
+			foreach(Selectable each in _selectables.Keys)
+			{
+				Navigation nav = each.navigation;
+				nav.mode = Navigation.Mode.None;
+				each.navigation = nav;
+			}
+			
+			if(_raycaster != null)
+				_raycaster.enabled = false;
+				
+			/*if(gameObject.activeSelf)
+				gameObject.SetActive(false);*/
 		}
 		
 		internal bool IsTransitionning

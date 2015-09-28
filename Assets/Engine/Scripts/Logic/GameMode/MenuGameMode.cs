@@ -23,9 +23,10 @@ namespace FF
 		#region Methods
 		internal void GoBack(FFEventParameter a_args)
 		{
-			if(navigationHistory.Count > 0 && states[CurrentStateID] is AMenuGameState)
+			if(navigationHistory.Count > 0 && _states[CurrentStateID] is AMenuGameState)
 			{
-				AMenuGameState menuState = states[CurrentStateID] as AMenuGameState;
+				AMenuGameState menuState = _states[CurrentStateID] as AMenuGameState;
+				_isGoingBack = true;
 				menuState.GoBack(navigationHistory.Pop());
 			}
 		}

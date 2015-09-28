@@ -43,7 +43,7 @@ namespace FF
 			
 			if(panelsToShow != 0)
 			{
-				FFEngine.UI.SwitchToPanels(panelNamesToShow);
+				FFEngine.UI.SwitchToPanels(panelNamesToShow, !_gameMode.IsGoingBack);
 			}
 			                                                  	  
 			RegisterForEvent();

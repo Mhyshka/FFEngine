@@ -15,9 +15,11 @@ namespace FF
 		None = -1,
 		Main = 2000,
 		GameModePicker,
-		HostList,
+		SearchForRooms,
 		GameRoomHost,
 		GameRoomClient,
+		WifiCheck,
+		ShortLoading,
 		Settings
 	}
 	

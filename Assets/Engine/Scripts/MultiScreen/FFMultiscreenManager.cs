@@ -17,6 +17,9 @@ namespace FF.Multiscreen
 		}
 		
 		#region TV
+		/// <summary>
+		/// Returns yes if the device is a TV OS.
+		/// </summary>
 		internal bool IsTV
 		{
 			get
@@ -34,5 +37,29 @@ namespace FF.Multiscreen
 			#endif
 		}
 		#endregion
+		
+		#region Cast
+		/// <summary>
+		/// Returns yes if the device is currently casting on a screen. ( Chromecast / Airplay )
+		/// </summary>
+		internal bool IsCasting
+		{
+			get
+			{
+				return false;
+			}
+		}
+		#endregion
+		
+		/// <summary>
+		/// Returns yes if the device is either a TV or casting on a screen.
+		/// </summary>
+		internal bool UseTV
+		{
+			get
+			{
+				return IsTV || IsCasting;
+			}
+		}
 	}
 }

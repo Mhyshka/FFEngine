@@ -12,31 +12,36 @@ namespace FF.Networking
 	{
 		#region Properties
 		protected FFTcpClient _ffClient = null;
-		protected TcpClient _client = null;
-		protected MemoryStream _memoryStream = null;
-		protected BinaryFormatter _binaryFormatter = null;
-		protected Thread _thread = null;
+		protected TcpClient Client
+		{
+			get
+			{
+				return _ffClient.TcpClient;
+			}
+		}
+
+        protected NetworkStream _stream;
+
+        protected Thread _thread = null;
 		
-		protected FFByteData _data = null;
 		protected bool _shouldRun = false;
 		#endregion
 		
 		internal FFTcpStreamThread(FFTcpClient a_ffClient)
 		{
 			_ffClient = a_ffClient;
-			_client = a_ffClient.TcpClient;
 		}
 		
 		#region Start & Stop
-		internal void Start()
+		internal virtual void Start()
 		{
 			if(_thread == null || !_thread.IsAlive)
 			{
 				_thread = new Thread(new ThreadStart(Task));
 				_thread.IsBackground = true;
-				_binaryFormatter = new BinaryFormatter();
 				_shouldRun = true;
-				_thread.Start();
+                _stream = Client.GetStream();
+                _thread.Start();
 			}
 			else
 			{

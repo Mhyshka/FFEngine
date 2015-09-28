@@ -15,7 +15,13 @@ namespace FF
 		internal ExitState exit = null;
 		
 		protected int _currentID = -1;
-		protected Dictionary<int,AGameState> states = new Dictionary<int,AGameState>();
+		protected Dictionary<int,AGameState> _states = new Dictionary<int,AGameState>();
+        internal AGameState StateForId(int a_id)
+        {
+            AGameState state = null;
+            _states.TryGetValue(a_id, out state);
+            return state;
+        }
 		
 		// Loading
 		protected int _asyncLoadingCount = 0;
@@ -23,13 +29,22 @@ namespace FF
 		protected bool _isUILoaded = false;
 		internal virtual bool IsLoadingComplete{get{return _isGameModeLoaded && _isUILoaded;}}
 		
+		protected bool _isGoingBack = false;
+		internal bool IsGoingBack
+		{
+			get
+			{
+				return _isGoingBack;
+			}
+		}
+		
 		internal AGameState CurrentState
 		{
 			get
 			{
 				AGameState state = null;
 				if(_currentID != -1)
-					state = states[_currentID];
+					state = _states[_currentID];
 				return state;
 			}
 		}
@@ -40,13 +55,13 @@ namespace FF
 		{
 			foreach(AGameState each in GetComponents<AGameState>())
 			{
-				if(states.ContainsKey(each.ID))
+				if(_states.ContainsKey(each.ID))
 				{
 					Debug.LogError("States ID found twice : " + each.ID.ToString());
 				}
 				else
 				{
-					states.Add(each.ID, each);
+					_states.Add(each.ID, each);
 				}
 				
 				if(each is ExitState)
@@ -88,7 +103,7 @@ namespace FF
 		
 		protected virtual void Update ()
 		{
-			CurrentStateID = states[CurrentStateID].Manage();
+			CurrentStateID = _states[CurrentStateID].Manage();
 		}
 		
 		protected virtual void Exit()
@@ -116,9 +131,10 @@ namespace FF
 				if(value != _currentID)
 				{
 					if(_currentID != -1)
-						states[_currentID].Exit();
+						_states[_currentID].Exit();
 					_currentID = value;
-					states[_currentID].Enter();
+					_states[_currentID].Enter();
+					_isGoingBack = false;
 				}
 			}
 		}

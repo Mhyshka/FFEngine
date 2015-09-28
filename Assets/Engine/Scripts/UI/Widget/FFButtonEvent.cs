@@ -19,18 +19,20 @@ namespace FF.UI
 		
 		[HideInInspector]
 		public string eventKey = "";
+		
+		internal object Data = null;
 		#endregion
 
 		#region Properties
 		protected Button _button;
-		#endregion
+        #endregion
 
-		#region Methods
-		protected virtual void Start ()
-		{
-			_button = GetComponent<Button>();
-			_button.onClick.AddListener(() => OnClick());
-		}
+        #region Methods
+        protected virtual void Start()
+        {
+            _button = GetComponent<Button>();
+            _button.onClick.AddListener(() => OnClick());
+        }
 		#endregion
 		
 		public void OnClick()
@@ -43,10 +45,16 @@ namespace FF.UI
 #endif
 			if(canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
 			{
+				FFEventParameter args = new FFEventParameter();
+				if(Data != null)
+				{
+					args.data = Data;
+				}
+				
 				if(eventType == EEventType.Custom)
-					FFEngine.Events.FireEvent(eventKey);
+					FFEngine.Events.FireEvent(eventKey, args);
 				else
-					FFEngine.Events.FireEvent(eventType);
+					FFEngine.Events.FireEvent(eventType, args);
 			}
 		}
 	}

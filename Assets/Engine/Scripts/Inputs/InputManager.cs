@@ -40,7 +40,11 @@ namespace FF.Input
 		
 		internal void DoUpdate ()
 		{
-			/*foreach (AInputEvent each in keys.Values)
+			if(UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+			{
+				FFEngine.Events.FireEvent(EEventType.Back);
+			}
+			foreach (AInputEvent each in keys.Values)
 			{
 				each.DoUpdate();
 			}
@@ -57,7 +61,7 @@ namespace FF.Input
 			if(_isPollingAxis)
 			{
 				AxisPoll();
-			}*/
+			}
 		}
 		
 		internal void StartKeyPoll()
@@ -135,6 +139,14 @@ namespace FF.Input
 			{
 				int length = UnityEngine.Input.GetJoystickNames().Length;
 				return length > 0;
+			}
+		}
+		
+		internal bool ShouldUseNavigation
+		{
+			get
+			{
+				return FFEngine.MultiScreen.IsTV || HasJoystickConnected;
 			}
 		}
 		#endregion

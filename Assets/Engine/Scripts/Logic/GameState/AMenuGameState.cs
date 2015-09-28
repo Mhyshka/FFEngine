@@ -34,7 +34,7 @@ namespace FF
 			}	
 		}
 		
-		internal void GoBack(int a_id)
+		internal virtual void GoBack(int a_id)
 		{
 			isGoingBack = true;
 			RequestState(a_id);

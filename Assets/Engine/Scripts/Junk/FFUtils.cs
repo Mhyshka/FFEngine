@@ -17,13 +17,21 @@ namespace FF
 			for(int i = 0 ; i < allScenes.Length ; i++)
 			{
 				allScenes[i] = UnityEditor.EditorBuildSettings.scenes[i].path;
-				allScenes[i] = rootPath.Split(allScenes[i])[1];
-				if(!ui.IsMatch(allScenes[i]) || !UnityEditor.EditorBuildSettings.scenes[i].enabled || ((1 << size) & a_bitMask) != (1 << size))
+				string[] split = rootPath.Split(allScenes[i]);
+				if(split.Length > 1)
+				{
+					allScenes[i] = split[1];
+					if(!ui.IsMatch(allScenes[i]) || !UnityEditor.EditorBuildSettings.scenes[i].enabled || ((1 << size) & a_bitMask) != (1 << size))
+					{
+						allScenes[i] = null;
+					}
+					else
+						size++;
+				}
+				else
 				{
 					allScenes[i] = null;
 				}
-				else
-					size++;
 			}
 			
 			string[] scenes = new string[size];
