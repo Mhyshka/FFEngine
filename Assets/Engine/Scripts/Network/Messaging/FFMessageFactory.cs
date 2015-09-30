@@ -6,6 +6,7 @@ namespace FF.Networking
     internal enum EMessageType
     {
         Heartbeat,
+        NetworkID,
 
         RoomInfos,
 
@@ -17,7 +18,7 @@ namespace FF.Networking
         MoveToSlotSuccess,
         MoveToSlotFail,
 
-        Kick,
+        RemovedFromRoom,
         Ban,
         Swap,
 
@@ -35,6 +36,9 @@ namespace FF.Networking
             {
                 case EMessageType.Heartbeat:
                     message = new FFMessageHeartBeat();
+                    break;
+                case EMessageType.NetworkID:
+                    message = new FFMessageNetworkID();
                     break;
 
                 case EMessageType.RoomInfos:
@@ -61,8 +65,8 @@ namespace FF.Networking
                     message = new FFMoveToSlotFail();
                     break;
 
-                case EMessageType.Kick:
-                    message = new FFMessageKick();
+                case EMessageType.RemovedFromRoom:
+                    message = new FFMessageRemovedFromRoom();
                     break;
 
                 case EMessageType.Farewell:

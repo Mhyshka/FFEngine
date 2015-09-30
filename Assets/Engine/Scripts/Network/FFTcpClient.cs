@@ -50,6 +50,19 @@ namespace FF.Networking
 		
 		protected FFTcpReader _reader;
 		protected FFTcpWriter _writer;
+
+        protected int _networkID = -1;
+        internal int NetworkID
+        {
+            get
+            {
+                return _networkID;
+            }
+            set
+            {
+                _networkID = value;
+            }
+        }
         #endregion
 
         #region Message Read properties
@@ -81,8 +94,10 @@ namespace FF.Networking
         /// <summary>
         /// Called by the client
         /// </summary>
-        internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
+        internal FFTcpClient(int a_netId,IPEndPoint a_local, IPEndPoint a_remote)
 		{
+            _networkID = a_netId;
+
 			_requestIndex = 0;
 			_pendingRequest = new Dictionary<int, FFRequestMessage>();
             _requestToRemove = new List<int>();
@@ -281,6 +296,7 @@ namespace FF.Networking
 		/// Called when the TCPClient successfully connect with the server.
 		/// </summary>
 		internal FFTcpClientCallback onConnectionSuccess = null;
+        protected bool _didSendId = false;
 		internal void ConnectionSuccess()
 		{
             FFLog.Log(EDbgCat.Networking, "Connection Success.");
@@ -289,6 +305,12 @@ namespace FF.Networking
             _wasConnected = true;
             _local = _tcpClient.Client.LocalEndPoint as IPEndPoint;
             StartWorkers();
+
+            if (!_didSendId)
+            {
+                _didSendId = true;
+                QueueMessage(new FFMessageNetworkID(NetworkID));
+            }
 
             if (onConnectionSuccess != null)
                 onConnectionSuccess(this);

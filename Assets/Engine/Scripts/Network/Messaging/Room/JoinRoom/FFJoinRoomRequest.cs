@@ -28,22 +28,27 @@ namespace FF.Networking
 			if(FFEngine.Network.Server != null)
 			{
 				FFRoom room = FFEngine.Network.CurrentRoom;
-				if(room.IsFull)
-				{
+                if (room.IsFull)
+                {
                     FFJoinRoomFail answer = new FFJoinRoomFail("Room is full.");
-					answer.requestId = requestId;
-					a_tcpClient.QueueMessage(answer);
-				}
-				else
-				{
-
+                    answer.requestId = requestId;
+                    a_tcpClient.QueueMessage(answer);
+                }
+                else if (room.IsBanned(a_tcpClient.NetworkID))
+                {
+                    FFJoinRoomFail answer = new FFJoinRoomFail("You are banned from this room.");
+                    answer.requestId = requestId;
+                    a_tcpClient.QueueMessage(answer);
+                }
+                else
+                {
                     FFSlot nextSlot = room.NextAvailableSlot();
                     player.ipEndPoint = a_tcpClient.Remote;
                     FFEngine.Network.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, player);
                     FFJoinRoomSuccess answer = new FFJoinRoomSuccess();
                     answer.requestId = requestId;
-					a_tcpClient.QueueMessage(answer);
-				}
+                    a_tcpClient.QueueMessage(answer);
+                }
 			}
 		}
 		

@@ -12,7 +12,7 @@ namespace FF.Networking
 		internal bool isHost = false;
 		internal bool useTV = false;
         internal bool isDCed = false;
-		
+
 		internal FFSlot slot = null;
 		
 		internal FFSlotRef SlotRef
@@ -25,16 +25,26 @@ namespace FF.Networking
 				return slotRef;
 			}
 		}
-		#endregion
 
-		#region public methods
-		public FFNetworkPlayer() : base()
+        internal int _playerID = -1;
+        internal int ID
+        {
+            get
+            {
+                return _playerID;
+            }
+        }
+        #endregion
+
+        #region public methods
+        public FFNetworkPlayer() : base()
 		{
 		
 		}
 		
-		internal FFNetworkPlayer (IPEndPoint a_ep, FFPlayer a_player) : base(a_ep)
+		internal FFNetworkPlayer (int a_playerId , IPEndPoint a_ep, FFPlayer a_player) : base(a_ep)
 		{
+            _playerID = a_playerId;
 			player = a_player;
 		}
 		#endregion
@@ -46,6 +56,7 @@ namespace FF.Networking
 			stream.Write(isHost);
 			stream.Write(useTV);
             stream.Write(isDCed);
+            stream.Write(_playerID);
 		}
 		
 		public override void LoadFromData(FFByteReader stream)
@@ -54,7 +65,8 @@ namespace FF.Networking
 			isHost = stream.TryReadBool();
 			useTV = stream.TryReadBool();
             isDCed = stream.TryReadBool();
-		}
+            _playerID = stream.TryReadInt();
+        }
 		#endregion
 	}
 }

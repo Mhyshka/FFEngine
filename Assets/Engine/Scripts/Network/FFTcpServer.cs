@@ -9,14 +9,16 @@ using System.Threading;
 namespace FF.Networking
 {
 	internal delegate void TcpClientCallback(FFTcpClient a_ffclient);
-	
-	internal class FFTcpServer
+    internal delegate void IPEndPointCallback(IPEndPoint a_ep);
+
+    internal class FFTcpServer
 	{
 		#region Properties
 		protected IPEndPoint _endPoint;
 		protected TcpListener _tcpListener;
 		protected Thread _listeningThread;
 		protected Dictionary<IPEndPoint,FFTcpClient> _clients;
+        protected Dictionary<int, IPEndPoint> _idMapping;
 		protected bool _isListening = false;
 		
 		internal IPEndPoint LocalEndpoint
@@ -43,15 +45,19 @@ namespace FF.Networking
 				_isListening = false;
 				
 				_clients = new Dictionary<IPEndPoint, FFTcpClient>();
-				
-				_newClients = new List<FFTcpClient>();
+                _idMapping = new Dictionary<int, IPEndPoint>();
+
+                _newClients = new List<FFTcpClient>();
 				_reconnectedClients = new List<FFTcpClient>();
 				_removedClients = new List<FFTcpClient>();
 				_lostClients = new List<FFTcpClient>();
+                _replacedClients = new List<IPEndPoint>();
 				
 				_tcpListener = new TcpListener(a_ipv4, 0);
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
+
+                FFMessageNetworkID.onNetworkIdReceived += OnIdReceived;
 				
 				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
 			}
@@ -83,7 +89,9 @@ namespace FF.Networking
 					client.Close();
 			}
 			_clients.Clear();
-		}
+
+            FFMessageNetworkID.onNetworkIdReceived -= OnIdReceived;
+        }
 		
 		#region Client Acceptation
 		internal void StartAcceptingConnections()
@@ -142,62 +150,72 @@ namespace FF.Networking
 			{
 				FFLog.Log(EDbgCat.Networking, "Pending connection.");
 				TcpClient newClient = _tcpListener.AcceptTcpClient();
-				OnClientConnection(newClient);
+				ConnectClient(newClient);
 			}
 		}
-		#endregion
-		
-		#region Message Management
-		internal void DoUpdate()
+
+        protected void ConnectClient(TcpClient a_client)
+        {
+            FFTcpClient ffClient = new FFTcpClient(a_client);
+            ffClient.StartWorkers();
+            IPEndPoint newEp = a_client.Client.RemoteEndPoint as IPEndPoint;
+
+            if (_clients.ContainsKey(newEp))
+            {
+                ReconnectClient(ffClient);
+            }
+            else
+            {
+                AddNewClient(ffClient);
+            }
+        }
+        #endregion
+
+        #region Message Management
+        internal void DoUpdate()
 		{
 			while(_newClients.Count > 0)
-			{
-				FFTcpClient client = _newClients[0];
-				_newClients.RemoveAt(0);
-				_clients.Add(client.Remote, client);
-                RegisterClientCallback(client);
-                if (onClientAdded != null)
-					onClientAdded(client);
-			}
-			
-			while(_removedClients.Count > 0)
-			{
-				FFTcpClient client = _removedClients[0];
-				_removedClients.RemoveAt(0);
-				_clients.Remove(client.Remote);
-                UnregisterClientCallback(client);
-                client.Close();
-                if (onClientRemoved != null)
-					onClientRemoved(client);
-			}
-			
-			while(_lostClients.Count > 0)
-			{
-				FFTcpClient client = _lostClients[0];
-				_lostClients.RemoveAt(0);
-				_clients[client.Remote] = null;
-                UnregisterClientCallback(client);
-                client.Close();
-                if (onClientLost != null)
-					onClientLost(client);
-			}
-			
-			while(_reconnectedClients.Count > 0)
-			{
+            {
+                FFTcpClient client = _newClients[0];
+                _newClients.RemoveAt(0);
+                AddClientOnMt(client);
+            }
+
+            while (_removedClients.Count > 0)
+            {
+                FFTcpClient client = _removedClients[0];
+                _removedClients.RemoveAt(0);
+                DisconnectClientOnMt(client);
+            }
+
+            while (_lostClients.Count > 0)
+            {
+                FFTcpClient client = _lostClients[0];
+                _lostClients.RemoveAt(0);
+                ClientConnectionLostOnMt(client);
+            }
+
+            while (_reconnectedClients.Count > 0)
+            {
                 FFTcpClient client = _reconnectedClients[0];
-				_reconnectedClients.RemoveAt(0);
-				_clients[client.Remote] = client;
-                RegisterClientCallback(client);
-                if (onClientReconnection != null)
-					onClientReconnection(client);
-			}
-			
-			foreach(FFTcpClient each in _clients.Values)
-			{
-				if(each != null)
-					each.DoUpdate();
-			}
+                _reconnectedClients.RemoveAt(0);
+                ReconnectClientOnMt(client);
+            }
+
+            while (_replacedClients.Count > 0)
+            {
+                _clients.Remove(_replacedClients[0]);
+                _replacedClients.RemoveAt(0);
+            }
+
+            foreach (FFTcpClient each in _clients.Values)
+            {
+                if (each != null)
+                    each.DoUpdate();
+            }
 		}
+
+       
 
         internal void RegisterClientCallback(FFTcpClient a_client)
         {
@@ -229,25 +247,9 @@ namespace FF.Networking
             }
 		}
 		#endregion
-		
-		#region Client management
-		protected void OnClientConnection(TcpClient a_client)
-		{
-			FFTcpClient ffClient = new FFTcpClient(a_client);
-			ffClient.StartWorkers();
-			IPEndPoint newEp = a_client.Client.RemoteEndPoint as IPEndPoint;
-			
-			if(_clients.ContainsKey(newEp))
-			{
-				ReconnectClient(ffClient);
-			}
-			else
-			{
-				AddNewClient(ffClient);
-			}
-		}
-		
-		protected List<FFTcpClient> _lostClients;
+
+        #region Lost Connection Clients
+        protected List<FFTcpClient> _lostClients;
 		internal TcpClientCallback onClientLost = null;
 		protected void OnClientConnectionLost(FFTcpClient a_ffclient)
 		{
@@ -260,8 +262,19 @@ namespace FF.Networking
 			
 			FFLog.LogError(EDbgCat.Networking, "Connection lost with Client : " + a_ffclient.Remote.ToString());
 		}
-		
-		protected List<FFTcpClient> _removedClients;
+
+        private void ClientConnectionLostOnMt(FFTcpClient a_client)
+        {
+            _clients[a_client.Remote] = null;
+            UnregisterClientCallback(a_client);
+            a_client.Close();
+            if (onClientLost != null)
+                onClientLost(a_client);
+        }
+        #endregion
+
+        #region Disconnecting Client
+        protected List<FFTcpClient> _removedClients;
 		internal TcpClientCallback onClientRemoved = null;
 		internal void DisconnectClient(IPEndPoint a_endPoint)
 		{
@@ -278,8 +291,19 @@ namespace FF.Networking
         {
             DisconnectClient(a_client.Remote);
         }
-		
-		protected List<FFTcpClient> _newClients;
+
+        private void DisconnectClientOnMt(FFTcpClient a_client)
+        {
+            _clients.Remove(a_client.Remote);
+            UnregisterClientCallback(a_client);
+            a_client.Close();
+            if (onClientRemoved != null)
+                onClientRemoved(a_client);
+        }
+        #endregion
+
+        #region Adding Client
+        protected List<FFTcpClient> _newClients;
 		internal TcpClientCallback onClientAdded = null;
 		protected void AddNewClient(FFTcpClient a_ffclient)
 		{
@@ -292,8 +316,19 @@ namespace FF.Networking
 
             FFLog.LogError(EDbgCat.Networking, "Added Client : " + a_ffclient.Remote.ToString());
 		}
-		
-		protected List<FFTcpClient> _reconnectedClients;
+
+        private void AddClientOnMt(FFTcpClient a_client)
+        {
+            _clients.Add(a_client.Remote, a_client);
+            RegisterClientCallback(a_client);
+            if (onClientAdded != null)
+                onClientAdded(a_client);
+        }
+        #endregion
+
+
+        #region Reconnection Client
+        protected List<FFTcpClient> _reconnectedClients;
 		internal TcpClientCallback onClientReconnection = null;
 		protected void ReconnectClient(FFTcpClient a_ffclient)
 		{
@@ -306,6 +341,34 @@ namespace FF.Networking
 
             FFLog.LogError(EDbgCat.Networking, "Reconnected Client : " + a_ffclient.Remote.ToString());
 		}
-		#endregion
-	}
+
+        private void ReconnectClientOnMt(FFTcpClient a_client)
+        {
+            _clients[a_client.Remote] = a_client;
+            RegisterClientCallback(a_client);
+            if (onClientReconnection != null)
+                onClientReconnection(a_client);
+        }
+        #endregion
+
+        #region Replacing Client
+        protected List<IPEndPoint> _replacedClients;
+        //internal IPEndPointCallback onPlayerReplaced = null;
+        internal void OnIdReceived(FFTcpClient a_client)
+        {
+            if (_idMapping.ContainsKey(a_client.NetworkID))
+            {
+                IPEndPoint ep = _idMapping[a_client.NetworkID];
+                _replacedClients.Add(ep);
+                _idMapping[a_client.NetworkID] = a_client.Remote;
+                /*if(onPlayerReplaced != null)
+                    onPlayerReplaced(ep);*/
+            }
+            else
+            {
+                _idMapping.Add(a_client.NetworkID, a_client.Remote);
+            }
+        }
+        #endregion
+    }
 }

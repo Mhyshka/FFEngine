@@ -156,10 +156,10 @@ namespace FF
         #region Slot Options
         internal void OnPlayerOptionKick(FFNetworkPlayer a_player)
         {
-            FFLog.Log("On Player Kick");
+            FFLog.Log(EDbgCat.Logic, "On Player Kick");
             if (!a_player.isDCed)
             {
-                FFEngine.Network.Server.SendMessageToClient(a_player.ipEndPoint, new FFMessageKick());
+                FFEngine.Network.Server.SendMessageToClient(a_player.ipEndPoint, new FFMessageRemovedFromRoom(false));
             }
             else
             {
@@ -171,6 +171,18 @@ namespace FF
 
         internal void OnPlayerOptionBan(FFNetworkPlayer a_player)
         {
+            FFLog.Log(EDbgCat.Logic, "On Player Kick");
+            if (!a_player.isDCed)
+            {
+                FFEngine.Network.CurrentRoom.BanId(a_player.ID);
+                FFEngine.Network.Server.SendMessageToClient(a_player.ipEndPoint, new FFMessageRemovedFromRoom(true));
+            }
+            else
+            {
+                FFEngine.Network.CurrentRoom.BanId(a_player.ID);
+                FFEngine.Network.CurrentRoom.RemovePlayer(a_player.SlotRef);
+            }
+
             FFEngine.UI.DismissCurrentPopup();
         }
 

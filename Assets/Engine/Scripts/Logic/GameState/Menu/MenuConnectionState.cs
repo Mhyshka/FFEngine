@@ -26,7 +26,7 @@ namespace FF
             base.Enter();
             FFLog.Log(EDbgCat.Logic, "Waiting State enter.");
 
-            FFNetworkPlayer player = new FFNetworkPlayer(FFEngine.Network.MainClient.Local, FFEngine.Game.player);
+            FFNetworkPlayer player = FFEngine.Network.Player; 
             _request = new FFJoinRoomRequest(player);
             FFEngine.Network.MainClient.QueueMessage(_request);
             if (_request != null)
@@ -80,7 +80,7 @@ namespace FF
         {
             FFEngine.UI.DismissCurrentPopup();
             FFMessagePopup.RequestDisplay("Couldn't join room : Timedout", "Close", null);
-            FFEngine.Network.LeaveCurrentRoom();
+            FFEngine.Network.SetNoMainClient();
             FFEngine.Events.FireEvent(EEventType.Back);
         }
 
@@ -88,7 +88,7 @@ namespace FF
         {
             FFEngine.UI.DismissCurrentPopup();
             FFMessagePopup.RequestDisplay("Couldn't join room : " + a_message, "Close", null);
-            FFEngine.Network.LeaveCurrentRoom();
+            FFEngine.Network.SetNoMainClient();
             FFEngine.Events.FireEvent(EEventType.Back);
         }
 
@@ -103,7 +103,7 @@ namespace FF
         {
             FFEngine.UI.DismissCurrentPopup();
             _request.Cancel();
-            FFEngine.Network.LeaveCurrentRoom();
+            FFEngine.Network.SetNoMainClient();
             FFEngine.Events.FireEvent(EEventType.Back);
         }
         #endregion

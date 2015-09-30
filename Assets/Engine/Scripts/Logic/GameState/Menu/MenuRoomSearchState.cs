@@ -66,7 +66,7 @@ namespace FF
 				_navigationPanel.SetTitle ("Looking for games");
 				FFEngine.Network.StartLookingForGames ();
 				
-				FFEngine.Network.onRoomInfoReceived += OnRoomAdded;
+				FFEngine.Network.onNewRoomReceived += OnRoomAdded;
 				FFEngine.Network.onRoomLost += OnRoomLost;
 
                 _navigationPanel.ShowLoader("Searching");
@@ -101,7 +101,7 @@ namespace FF
 			base.UnregisterForEvent ();
 			FFEngine.Events.UnregisterForEvent(EEventType.Connect, OnConnectButtonPressed);
 			
-			FFEngine.Network.onRoomInfoReceived -= OnRoomAdded;
+			FFEngine.Network.onNewRoomReceived -= OnRoomAdded;
 			FFEngine.Network.onRoomLost -= OnRoomLost;
 
             FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;

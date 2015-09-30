@@ -54,7 +54,8 @@ namespace FF
             FFEngine.Network.MainClient.onConnectionSuccess += OnReconnection;
             FFEngine.Network.MainClient.onConnectionLost += OnConnectionLost;
 
-            FFMessageKick.onKickReceived += OnKickReceived;
+            FFMessageRemovedFromRoom.onKickReceived += OnKickReceived;
+            FFMessageRemovedFromRoom.onBanReceived += OnBanReceived;
         }
 		
 		protected override void UnregisterForEvent ()
@@ -64,7 +65,8 @@ namespace FF
 
             FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
 
-            FFMessageKick.onKickReceived -= OnKickReceived;
+            FFMessageRemovedFromRoom.onKickReceived -= OnKickReceived;
+            FFMessageRemovedFromRoom.onBanReceived -= OnBanReceived;
         }
         #endregion
 
@@ -136,7 +138,7 @@ namespace FF
             {
                 FFEngine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
                 FFEngine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
-                FFEngine.Network.LeaveCurrentRoom();
+                FFEngine.Network.SetNoMainClient();
             }
         }
         #endregion
@@ -146,6 +148,12 @@ namespace FF
         {
             FFEngine.Events.FireEvent(EEventType.Back);
             FFMessagePopup.RequestDisplay("Kicked by server.", "Sorry", null);
+        }
+
+        internal void OnBanReceived()
+        {
+            FFEngine.Events.FireEvent(EEventType.Back);
+            FFMessagePopup.RequestDisplay("Banned by server.", "Sorry", null);
         }
         #endregion
 

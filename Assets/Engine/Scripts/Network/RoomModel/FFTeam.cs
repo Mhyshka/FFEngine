@@ -10,6 +10,12 @@ namespace FF.Networking
 	{
 		internal int teamIndex;
 		internal int slotIndex;
+
+        public FFSlotRef(int a_teamId, int a_slotId)
+        {
+            teamIndex = a_teamId;
+            slotIndex = a_slotId;
+        }
 		
 		public void SerializeData(FFByteWriter stream)
 		{

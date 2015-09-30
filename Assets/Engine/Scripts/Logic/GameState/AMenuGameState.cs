@@ -36,8 +36,8 @@ namespace FF
 		
 		internal virtual void GoBack(int a_id)
 		{
-			isGoingBack = true;
-			RequestState(a_id);
+            isGoingBack = true;
+            RequestState(a_id);
 		}
 		#endregion
 		
