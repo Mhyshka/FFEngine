@@ -49,7 +49,7 @@ namespace FF.Networking
 			}
 			catch(IOException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't read from stream." + e.StackTrace);
+				FFLog.LogError(EDbgCat.Networking, "Couldn't read from stream." + e.Message);
 			}
 		}
 		

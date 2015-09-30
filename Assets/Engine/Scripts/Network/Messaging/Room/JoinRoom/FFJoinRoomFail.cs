@@ -32,8 +32,8 @@ namespace FF.Networking
 		internal override void Read(FFTcpClient a_tcpClient, FFRequestMessage a_request)
 		{
 			FFJoinRoomRequest req = a_request as FFJoinRoomRequest;
-			if(req.onFail != null)
-				req.onFail(errorMessage);
+			if(req.onDeny != null)
+				req.onDeny(errorMessage);
 		}
 		#endregion
 		

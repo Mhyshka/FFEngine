@@ -307,16 +307,12 @@ namespace FF.Networking
 		#endregion
 		
 		#region Rooms Join Update & Quit
-		internal FFJoinRoomRequest JoinGame(FFRoom a_room)
+		internal FFJoinRoomRequest SetMainClient(FFRoom a_room)
 		{
 			FFLog.LogError("Trying to join room : " + a_room.roomName);
 			if(_clients.TryGetValue(a_room.serverEndPoint, out _mainClient))
 			{
 				_currentRoom = a_room;
-				FFNetworkPlayer player = new FFNetworkPlayer(_mainClient.Local, FFEngine.Game.player);
-				FFJoinRoomRequest joinRequest = new FFJoinRoomRequest(player);
-				_mainClient.QueueMessage(joinRequest);
-				return joinRequest;
 			}
 			else
 			{

@@ -296,7 +296,7 @@ namespace FF.UI
 
         internal void PushPopup(FFPopupData a_data)
         {
-            if (_currentPopup != null)
+            if (_currentPopup != null && (_currentPopup.State != FFPanel.EState.Hidden && _currentPopup.State != FFPanel.EState.Hidding))
             {
                 _pendingPopups.Push(_currentPopup.currentData);
             }
@@ -328,9 +328,9 @@ namespace FF.UI
             }
         }
 
-        internal void OnPopupHidden()
+        internal void OnPopupHidden(FFPanel a_panel)
         {
-            _currentPopup.onHidden -= OnPopupHidden;
+            a_panel.onHidden -= OnPopupHidden;
             _currentPopup = null;
 
             if (FFEngine.Game.CurrentGameMode != null)

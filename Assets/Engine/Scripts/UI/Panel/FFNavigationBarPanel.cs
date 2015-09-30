@@ -11,11 +11,15 @@ namespace FF.UI
 		public GameObject backButton = null;
 		public Text title = null;
         public Animator wifiWarningAnimator = null;
+        public Animator loaderAnimator = null;
+        public Text loaderText = null;
+
+        protected bool _loaderIsShown = false;
 
         protected bool _wifiWarningIsShown = false;
 		#endregion
 
-		internal void setTitle (string newTitle)
+		internal void SetTitle (string newTitle)
 		{
 			title.text = newTitle;
 		}
@@ -42,5 +46,24 @@ namespace FF.UI
                 _wifiWarningIsShown = false;
             }
         }
-	}
+
+        internal void ShowLoader(string a_message)
+        {
+            if (!_loaderIsShown)
+            {
+                loaderAnimator.SetTrigger("Show");
+                _loaderIsShown = true;
+                loaderText.text = a_message;
+            }
+        }
+
+        internal void HideLoader()
+        {
+            if (_loaderIsShown)
+            {
+                loaderAnimator.SetTrigger("Hide");
+                _loaderIsShown = false;
+            }
+        }
+    }
 }

@@ -13,10 +13,14 @@ namespace FF.Networking
 
     internal class FFTcpClient
 	{
-		#region Properties
-		protected int _requestIndex;
+        #region Request Properties
+        protected int _requestIndex;
 		protected Dictionary<int, FFRequestMessage> _pendingRequest;
-		protected TcpClient _tcpClient;
+        protected List<int> _requestToRemove;
+        #endregion
+
+        #region TCP Properties
+        protected TcpClient _tcpClient;
 		internal TcpClient TcpClient
 		{
 			get
@@ -46,8 +50,10 @@ namespace FF.Networking
 		
 		protected FFTcpReader _reader;
 		protected FFTcpWriter _writer;
-		
-		protected Queue<FFMessage> _readMessages = new Queue<FFMessage>();
+        #endregion
+
+        #region Message Read properties
+        protected Queue<FFMessage> _readMessages = new Queue<FFMessage>();
 		
 		internal void QueueReadMessage(FFMessage a_message)
 		{
@@ -57,7 +63,9 @@ namespace FF.Networking
 				_readMessages.Enqueue(a_message);
 			}
 		}
+        #endregion
 
+        #region Connection Properties
         protected FFTcpConnectionTask _connectionTask;
         protected bool _isConnecting = false;
 
@@ -65,23 +73,24 @@ namespace FF.Networking
 
         protected const int MAX_CONNECTION_TRY = 10;
         protected int _connectionTryCount = 0;
+
+        protected bool _autoRetryConnection;
         #endregion
 
         #region Constructors
-        internal bool autoRetryConnection;
-
-		/// <summary>
-		/// Called by the client
-		/// </summary>
-		internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
+        /// <summary>
+        /// Called by the client
+        /// </summary>
+        internal FFTcpClient(IPEndPoint a_local, IPEndPoint a_remote)
 		{
 			_requestIndex = 0;
 			_pendingRequest = new Dictionary<int, FFRequestMessage>();
-			
-			_local = a_local;
+            _requestToRemove = new List<int>();
+
+            _local = a_local;
 			_remote = a_remote;
 			_wasConnected = false;
-			autoRetryConnection = false;
+			_autoRetryConnection = false;
 
             _connectionTask = new FFTcpConnectionTask(this);
             _reader = new FFTcpReader(this);
@@ -94,8 +103,12 @@ namespace FF.Networking
 		internal FFTcpClient(TcpClient a_client)
 		{
 			FFLog.LogError("Connected? : " + a_client.Connected.ToString());
-			_wasConnected = true;
-			autoRetryConnection = false;
+            _requestIndex = 0;
+            _pendingRequest = new Dictionary<int, FFRequestMessage>();
+            _requestToRemove = new List<int>();
+
+            _wasConnected = true;
+			_autoRetryConnection = false;
 			
 			_tcpClient = a_client;
             _tcpClient.SendTimeout = 0;
@@ -134,7 +147,7 @@ namespace FF.Networking
 		{
             FFLog.Log(EDbgCat.Networking, "Closing Client");
             Stop ();
-			autoRetryConnection = false;
+			_autoRetryConnection = false;
 		}
 		
 		internal void StartWorkers()
@@ -160,11 +173,16 @@ namespace FF.Networking
         {
             _writer.QueueFinalMessage(a_message);
         }
+
+        internal bool CancelRequest(int a_requestId)
+        {
+            return  _pendingRequest.Remove(a_requestId);
+        }
         #endregion
         internal void DoUpdate()
 		{
             
-			if(!_wasConnected && !_isConnecting && autoRetryConnection)
+			if(!_wasConnected && !_isConnecting && _autoRetryConnection)
 			{
                 if (!Connect())
                     ConnectionFailed();
@@ -177,8 +195,21 @@ namespace FF.Networking
 					ConnectionLost();
 				}
 			}
-			
-			while(_readMessages.Count > 0 )
+
+            
+            foreach (int id in _pendingRequest.Keys)
+            {
+                if (_pendingRequest[id].CheckForTimeout())
+                    _requestToRemove.Add(id);
+            }
+
+            foreach (int id in _requestToRemove)
+            {
+                _pendingRequest.Remove(id);
+            }
+            _requestToRemove.Clear();
+
+            while (_readMessages.Count > 0 )
 			{
 				FFMessage messageRead = null;
 				lock(_readMessages)
@@ -197,6 +228,7 @@ namespace FF.Networking
 					{
 						isRead = true;
 						response.Read(this,req);
+                        _pendingRequest.Remove(response.requestId);
 					}
 				}
 				
@@ -235,7 +267,7 @@ namespace FF.Networking
                 }
                 catch (SocketException e)
                 {
-                    FFLog.LogError("Couldn't connect to server." + e.StackTrace);
+                    FFLog.LogError("Couldn't connect to server." + e.Message);
                 }
             }
             else
@@ -260,7 +292,7 @@ namespace FF.Networking
 
             if (onConnectionSuccess != null)
                 onConnectionSuccess(this);
-            autoRetryConnection = true;
+            _autoRetryConnection = true;
 		}
 
         internal void ConnectionFailed()
@@ -275,7 +307,7 @@ namespace FF.Networking
             }
             else
             {
-                autoRetryConnection = true;
+                _autoRetryConnection = true;
             }
         }
 		

@@ -19,7 +19,7 @@ namespace FF
 		GameRoomHost,
 		GameRoomClient,
 		WifiCheck,
-		ShortLoading,
+        Connecting,
 		Settings
 	}
 	

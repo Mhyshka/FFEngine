@@ -60,26 +60,31 @@ namespace FF
 		{
 			_joinRequest = null;
 			_hostListPanel.ClearRoomsCells();
-			
-			if(FFEngine.NetworkStatus.IsConnectedToLan)
+
+            if (FFEngine.NetworkStatus.IsConnectedToLan)
 			{
-				_navigationPanel.setTitle ("Looking for games");
+				_navigationPanel.SetTitle ("Looking for games");
 				FFEngine.Network.StartLookingForGames ();
 				
 				FFEngine.Network.onRoomInfoReceived += OnRoomAdded;
 				FFEngine.Network.onRoomLost += OnRoomLost;
-			}
+
+                _navigationPanel.ShowLoader("Searching");
+                _navigationPanel.HideWifiWarning();
+            }
 			else
 			{
-				_navigationPanel.setTitle ("No network");
-			}
+                _navigationPanel.HideLoader();
+                _navigationPanel.ShowWifiWarning();
+            }
 		}
 		
 		protected void TearDown()
 		{
             _hostListPanel.ClearRoomsCells();
             FFEngine.Network.StopLookingForGames ();
-		}
+            _navigationPanel.HideLoader();
+        }
 		#endregion
 
 		#region Event Management
@@ -105,15 +110,16 @@ namespace FF
 		internal void OnConnectButtonPressed(FFEventParameter a_args)
 		{
 			FFLog.LogError("Connect Callback");
-			if(a_args.data == null)
-				FFLog.LogError("Room is null");
+            if (a_args.data == null)
+            {
+                FFLog.LogError("Room is null");
+                return;
+            }
+
 			FFRoom selectedRoom = a_args.data as FFRoom;
-			_joinRequest = FFEngine.Network.JoinGame(selectedRoom);
-			if(_joinRequest != null)
-			{
-				_joinRequest.onFail += OnJoinFail;
-				_joinRequest.onSuccess += OnJoinSuccess;
-			}
+            FFEngine.Network.SetMainClient(selectedRoom);
+
+            RequestState(outState.ID);
 		}
 		#endregion
 		
@@ -137,6 +143,7 @@ namespace FF
             else
             {
                 TearDown();
+                _navigationPanel.ShowWifiWarning();
             }
         }
 		#endregion
@@ -154,18 +161,6 @@ namespace FF
 			ResetState();
 		}
 		#endregion
-		
-		#region Joining
-		internal void OnJoinFail(string a_errorMessage)
-		{
-			
-		}
-		
-		internal void OnJoinSuccess()
-		{
-			RequestState((int)EMenuStateID.GameRoomClient);
-		}
-        #endregion
 
         #region focus
         internal override void OnGetFocus()

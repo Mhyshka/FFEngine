@@ -8,10 +8,12 @@ using FF.UI;
 
 namespace FF
 {
-	public class FFRoomCellWidget : MonoBehaviour 
+    internal delegate void RoomCellCallback(FFRoomCellWidget a_widget);
+
+    internal class FFRoomCellWidget : MonoBehaviour 
 	{
-		#region Inspector Properties
-		public Sprite deviceSprite = null;
+        #region Inspector Properties
+        public Sprite deviceSprite = null;
 		public Sprite tvSprite = null;
 		
 		public Text gameNameLabel = null;
@@ -20,11 +22,22 @@ namespace FF
 		public Image deviceImage = null;
 		
 		public FFRoomSelectionButton button = null;
-		#endregion
+
+        public FFTween deathTween = null;
+        #endregion
 
 
-		#region Properties
-		private FFRoom _room;
+        #region Properties
+        //internal RoomCellCallback onDestroy;
+
+        private FFRoom _room;
+        internal FFRoom Room
+        {
+            get
+            {
+                return _room;
+            }
+        }
 		#endregion
 
 		internal void UpdateWithRoom (FFRoom aRoom)
@@ -50,5 +63,20 @@ namespace FF
 				
 			latencyLabel.text = latency.ToString("0.") + " ms";
 		}
-	}
+
+        #region Destroy
+        internal void Destroy()
+        {
+            button.enabled = false;
+            deathTween.onTransitionForwardComplete += OnHidden;
+            deathTween.PlayForward();
+        }
+
+        public void OnHidden()
+        {
+            deathTween.onTransitionForwardComplete -= OnHidden;
+            Destroy(gameObject);
+        }
+        #endregion
+    }
 }

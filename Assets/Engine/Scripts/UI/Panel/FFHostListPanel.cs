@@ -16,7 +16,6 @@ namespace FF.UI
 		public VerticalLayoutGroup verticalLayout = null;
 		
 		public GameObject list = null;
-		public GameObject loader = null;
 		#endregion
 
 
@@ -27,20 +26,11 @@ namespace FF.UI
 				Destroy (roomsCells[aRoom].gameObject);
 			}
 			roomsCells.Clear ();
-			
-			list.gameObject.SetActive(false);
-			loader.SetActive(true);
 		}
 
 
 		internal void AddRoom (FFRoom a_room)
 		{
-			if(roomsCells.Count <= 0)
-			{
-				list.gameObject.SetActive(true);
-				loader.SetActive(false);
-			}
-			
 			FFRoomCellWidget lCell;
 			if (!roomsCells.TryGetValue (a_room, out lCell)) 
 			{
@@ -63,7 +53,7 @@ namespace FF.UI
 			FFRoomCellWidget lCell = roomsCells [aRoom];
             if (lCell != null)
             {
-                Destroy(lCell.gameObject);
+                lCell.Destroy();
                 roomsCells.Remove(aRoom);
             }
 		}

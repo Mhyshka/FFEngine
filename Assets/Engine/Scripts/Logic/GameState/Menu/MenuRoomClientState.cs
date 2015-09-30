@@ -30,7 +30,7 @@ namespace FF
 			
 			_roomPanel = FFEngine.UI.GetPanel("MenuRoomPanel") as FFMenuRoomPanel;
 			_roomPanel.UpdateWithRoom(FFEngine.Network.CurrentRoom);
-			_navigationPanel.setTitle ("Game Lobby");
+			_navigationPanel.SetTitle ("Game Lobby");
 
             OnLanStatusChanged(FFEngine.NetworkStatus.IsConnectedToLan);
         }
@@ -71,14 +71,14 @@ namespace FF
         #region ConnectionLost
         protected void OnLanStatusChanged(bool a_state)
         {
-            /*if (a_state)
+            if (a_state)
             {
-                FFEngine.UI.HideSpecificPanel("MenuWifiCheckPanel");
+                _navigationPanel.HideWifiWarning();
             }
             else
             {
-                FFEngine.UI.RequestDisplay("MenuWifiCheckPanel");
-            }*/
+                _navigationPanel.ShowWifiWarning();
+            }
         }
 
         protected void OnConnectionLost(FFTcpClient a_client)

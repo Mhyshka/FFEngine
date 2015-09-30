@@ -57,7 +57,7 @@ namespace FF.Networking
 			}
 			catch(SocketException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't create server TCPListener." + e.StackTrace);
+				FFLog.LogError(EDbgCat.Networking, "Couldn't create server TCPListener." + e.Message);
 			}
 		}
 		
@@ -74,7 +74,7 @@ namespace FF.Networking
 			}
 			catch(SocketException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't Stop server." + e.StackTrace);
+				FFLog.LogError(EDbgCat.Networking, "Couldn't Stop server." + e.Message);
 			}
 			
 			foreach(FFTcpClient client in _clients.Values)

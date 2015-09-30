@@ -37,7 +37,7 @@ namespace FF
 			
 			if(FFEngine.NetworkStatus.IsConnectedToLan)
 			{
-				_navigationPanel.setTitle ("Waiting for clients...");
+				_navigationPanel.SetTitle ("Waiting for clients...");
 
 				FFEngine.Network.StartBroadcastingGame ("Partie de " + FFEngine.Game.player.username);
 				
@@ -50,7 +50,7 @@ namespace FF
 			}
 			else
 			{
-				_navigationPanel.setTitle ("No network");
+				_navigationPanel.SetTitle ("No network");
 			}
 		}
 		
@@ -67,14 +67,16 @@ namespace FF
 		{
 			base.RegisterForEvent ();
 			FFEngine.Events.RegisterForEvent("SlotSelected", OnSlotSelected);
+            FFEngine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
 		}
 		
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
 			FFEngine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
+            FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
 
-			if(FFEngine.Network.CurrentRoom != null)
+            if (FFEngine.Network.CurrentRoom != null)
 			{
 				FFEngine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
 			}
@@ -85,10 +87,22 @@ namespace FF
 				FFEngine.Network.Server.onClientRemoved -= OnClientRemoved;
 			}
 		}
-		#endregion
-		
-		#region Callback
-		internal void OnSlotSelected(FFEventParameter a_args)
+        #endregion
+
+        #region Callback
+        protected void OnLanStatusChanged(bool a_state)
+        {
+            if (a_state)
+            {
+                _navigationPanel.HideWifiWarning();
+            }
+            else
+            {
+                _navigationPanel.ShowWifiWarning();
+            }
+        }
+
+        internal void OnSlotSelected(FFEventParameter a_args)
 		{
             FFSlotRef selectedSlot = (FFSlotRef)a_args.data;
 

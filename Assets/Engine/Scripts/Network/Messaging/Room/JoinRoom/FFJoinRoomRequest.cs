@@ -8,9 +8,9 @@ namespace FF.Networking
 	{
 		#region Properties
 		public FFNetworkPlayer player = null;
-		#endregion
-		
-		internal StringCallback onFail;
+        #endregion
+
+		internal StringCallback onDeny;
 		internal SimpleCallback onSuccess;
 		
 		public FFJoinRoomRequest()

@@ -11,18 +11,24 @@ namespace FF
 			Loop,
 			PingPong
 		}
-		
-		public AnimationCurve curve = null;
+
+        #region Inspector Properties
+        public AnimationCurve curve = null;
 		public float duration = 1f;
 		public EFFTweenMode mode = EFFTweenMode.Loop;
 		public bool randomStartOffset = false;
 		public float startOffset = 0f;
-		
-		protected bool _isForward = true;
-		
+        #endregion
+
+        #region Properties
+        protected bool _isForward = true;
 		protected float _timeElapsed = 0f;
-		
-		protected virtual void Awake()
+
+        internal SimpleCallback onTransitionForwardComplete = null;
+        internal SimpleCallback onTransitionBackwardComplete = null;
+        #endregion
+
+        protected virtual void Awake()
 		{
 			if(randomStartOffset)
 				_timeElapsed = Random.Range(0, duration);
@@ -56,16 +62,46 @@ namespace FF
 					
 					case EFFTweenMode.Once:
 					enabled = false;
-					break;
+                    if (_isForward && onTransitionForwardComplete != null)
+                        onTransitionForwardComplete();
+
+                    if (!_isForward && onTransitionBackwardComplete != null)
+                        onTransitionBackwardComplete();
+                    break;
 				}
-				
+
+                
 			}
 			float ratio = _timeElapsed / duration;
 			float _factor = curve.Evaluate(ratio);
 			
 			Tween (_factor);
 		}
+
+        internal virtual void PlayForward(bool a_reset = false)
+        {
+            if (a_reset)
+                _timeElapsed = 0f;
+
+            _isForward = true;
+
+            enabled = true;
+        }
+
+        internal virtual void PlayReverse(bool a_reset = false)
+        {
+            if (a_reset)
+                _timeElapsed = 0f;
+
+            _isForward = false;
+
+            enabled = true;
+        }
 		
 		protected abstract void Tween(float a_factor);
-	}
+
+        
+        #region Callbacks
+        #endregion
+    }
 }

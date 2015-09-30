@@ -32,18 +32,21 @@ namespace FF.UI
 		
 		public void OnClick()
 		{
+            if (enabled)
+            {
 #if !RELEASE
-			if(debug)
-			{
-				FFLog.LogError("Button room connect : " + room.roomName );
-			}
+                if (debug)
+                {
+                    FFLog.LogError("Button room connect : " + room.roomName);
+                }
 #endif
-			if(canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
-			{
-				FFEventParameter args = new FFEventParameter();
-				args.data = room;
-				FFEngine.Events.FireEvent(EEventType.Connect, args);
-			}
+                if (canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
+                {
+                    FFEventParameter args = new FFEventParameter();
+                    args.data = room;
+                    FFEngine.Events.FireEvent(EEventType.Connect, args);
+                }
+            }
 		}
 	}
 }

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 namespace FF.UI
 {
+    internal delegate void PanelCallback(FFPanel a_panel);
 	internal class FFPanel : MonoBehaviour
 	{
 		internal enum EState
@@ -137,7 +138,7 @@ namespace FF.UI
         }
 
         #region Transition Events
-        internal SimpleCallback onShown = null;
+        internal PanelCallback onShown = null;
         /// <summary>
         /// Callback from animator
         /// </summary>
@@ -148,10 +149,10 @@ namespace FF.UI
             TrySelectWidget();
 
             if (onShown != null)
-                onShown();
+                onShown(this);
         }
 
-        internal SimpleCallback onHidden = null;
+        internal PanelCallback onHidden = null;
 		/// <summary>
 		/// Callback from animator
 		/// </summary>
@@ -176,7 +177,7 @@ namespace FF.UI
 				gameObject.SetActive(false);*/
 
             if (onHidden != null)
-                onHidden();
+                onHidden(this);
         }
 		
 		internal bool IsTransitionning

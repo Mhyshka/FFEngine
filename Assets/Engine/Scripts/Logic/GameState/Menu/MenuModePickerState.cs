@@ -33,7 +33,8 @@ namespace FF
 			_gameModePickerPanel.setPlayerNameInputField (FFEngine.Game.player.username);
             _gameModePickerPanel.playerNameInputField.onEndEdit.AddListener(delegate { OnEndEdit(_gameModePickerPanel.playerNameInputField); });
 
-            _navigationPanel.setTitle ("Get Ready.");
+            _navigationPanel.SetTitle ("Get Ready.");
+            _navigationPanel.HideWifiWarning();
 		}
 
 		internal override int Manage ()
