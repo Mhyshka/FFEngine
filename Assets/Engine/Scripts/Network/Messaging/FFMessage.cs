@@ -11,10 +11,37 @@ namespace FF.Networking
 	internal abstract class FFMessage : IByteStreamSerialized
 	{
 		#region properties
-		#endregion
-		
-		#region Methods
-		internal abstract void Read(FFTcpClient a_tcpClient);
+        internal virtual bool HandleByMock
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        protected FFTcpClient _client;
+        internal FFTcpClient Client
+        {
+            set
+            {
+                _client = value;
+            }
+        }
+        #endregion
+
+        #region Methods
+        internal abstract void Read();
+
+        internal SimpleCallback onMessageSent;
+        //Return true if writer thread should stop after writing.
+        internal virtual bool PostWrite()
+        {
+            if (onMessageSent != null)
+                onMessageSent();
+
+            onMessageSent = null;
+            return false;
+        }
 		
 		/// <summary>
 		/// Should this message be send over & over until it's succesfully delivered.

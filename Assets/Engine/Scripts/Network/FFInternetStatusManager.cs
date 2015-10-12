@@ -32,7 +32,8 @@ internal class FFNetworkStatusManager
 			bool newState = IsConnectedToLan;
 			if(previousState != newState)
 			{
-				onLanStatusChanged(newState);
+                FFLog.LogError("Wifi state changed.");
+                onLanStatusChanged(newState);
 			}
 		}
 	}

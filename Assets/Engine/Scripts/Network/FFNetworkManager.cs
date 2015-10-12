@@ -15,8 +15,6 @@ namespace FF.Networking
 		private static string GAME_PROTOCOL = "_pong._tcp.";
 
         #region Server Properties
-       
-
 		protected FFTcpServer _server;
 		internal FFTcpServer Server
 		{
@@ -75,9 +73,8 @@ namespace FF.Networking
 			{
                 if (_player == null)// Not created by the server
                 {
-                    _player = new FFNetworkPlayer(NetworkID, MainClient.Local, FFEngine.Game.player);
+                    _player = new FFNetworkPlayer(NetworkID, FFEngine.Game.player);
                     _player.useTV = FFEngine.MultiScreen.UseTV;
-                    _player.isHost = false;
                 }
                 return _player;
 			}
@@ -165,9 +162,7 @@ namespace FF.Networking
 			{
 				_server = new FFTcpServer(NetworkIP);
 
-                _player = new FFNetworkPlayer(NetworkID, _server.LocalEndpoint, FFEngine.Game.player);
-                _player.useTV = FFEngine.MultiScreen.UseTV;
-                _player.isHost = true;
+                Player.SetEP(_server.LocalEndpoint);
 				
 				_currentRoom = PrepareRoom(a_roomName);
 				ZeroconfManager.Instance.Host.onStartAdvertisingSuccess += OnStartAdvertisingSuccess;
@@ -226,9 +221,9 @@ namespace FF.Networking
         #region Client
         internal FFJoinRoomRequest SetMainClient(FFRoom a_room)
         {
-            FFLog.LogError("Trying to join room : " + a_room.roomName);
             if (_clients.TryGetValue(a_room.serverEndPoint, out _mainClient))
             {
+                Player.SetEP(_mainClient.Local);
                 _currentRoom = a_room;
             }
             else
@@ -239,9 +234,17 @@ namespace FF.Networking
             return null;
         }
 
+        internal void CloseMainClient()
+        {
+            if (_mainClient != null)
+                _mainClient.Close();
+            SetNoMainClient();
+        }
+
         internal void SetNoMainClient()
         {
             _mainClient = null;
+            _currentRoom.TearDown();
             _currentRoom = null;
         }
 
@@ -265,16 +268,27 @@ namespace FF.Networking
         #endregion
 
         #region Zeroconf Clients
+        protected bool _isLookingForRoom;
+        internal bool IsLookingForRoom
+        {
+            get
+            {
+                return _isLookingForRoom;
+            }
+        }
+
         internal void StartLookingForGames()
 		{
 			ZeroconfManager.Instance.Client.onStartDiscoverySuccess += OnStartDiscoverySuccess;
 			ZeroconfManager.Instance.Client.onStartDiscoveryFailed += OnStartDiscoveryFailed;
 			ZeroconfManager.Instance.Client.StartDiscovery(GAME_PROTOCOL);
-		}
+            _isLookingForRoom = true;
+        }
 		
 		internal void StopLookingForGames()
 		{
-			ZeroconfManager.Instance.Client.StopDiscovery();
+            _isLookingForRoom = false;
+            ZeroconfManager.Instance.Client.StopDiscovery();
 			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
 			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
 			ZeroconfManager.Instance.Client.onRoomAdded -= OnRoomAdded;
@@ -381,6 +395,10 @@ namespace FF.Networking
 					onNewRoomReceived(a_room);
 			}
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Message Handlers
+
+        #endregion
+    }
 }

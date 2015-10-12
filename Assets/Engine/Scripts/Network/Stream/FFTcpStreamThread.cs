@@ -49,10 +49,14 @@ namespace FF.Networking
 			}
 		}
 		
-		internal void Stop()
+		internal virtual void Stop()
 		{
 			_shouldRun = false;
 		}
+
+        internal virtual void Close()
+        {
+        }
 		#endregion
 		
 		#region Task

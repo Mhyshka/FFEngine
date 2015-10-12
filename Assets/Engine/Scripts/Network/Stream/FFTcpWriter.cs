@@ -49,10 +49,10 @@ namespace FF.Networking
 			base.Start ();
 			_lastHeartbeatTimestamp = DateTime.Now;
 		}
-		#endregion
-		
-		#region Read
-		protected bool Write(FFMessage a_message)
+        #endregion
+
+        #region Read
+        protected bool Write(FFMessage a_message)
 		{
 			try
 			{
@@ -89,11 +89,8 @@ namespace FF.Networking
 
                     if (Write(toSend) || !toSend.IsMandatory)
 					{
-                        if(toSend is FFMessageFarewell)
-                        {
-                            _ffClient.EndConnection(((FFMessageFarewell)toSend).reason);
+                        if(toSend.PostWrite())
                             break;
-                        }
 
 						lock(_toSendMessages)
 						{

@@ -17,7 +17,7 @@ namespace FF.Networking
 		}
 		
 		#region Methods
-		internal override void Read(FFTcpClient a_tcpClient)
+		internal override void Read()
 		{
 			long spanTick = DateTime.Now.Ticks - timeSent;
 			TimeSpan span = TimeSpan.FromTicks(spanTick);

@@ -13,15 +13,25 @@ namespace FF.Networking
 
     internal class FFTcpServer
 	{
-		#region Properties
-		protected IPEndPoint _endPoint;
+        static internal IPEndPoint s_MockEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
+        #region Properties
+        protected IPEndPoint _endPoint;
 		protected TcpListener _tcpListener;
 		protected Thread _listeningThread;
 		protected Dictionary<IPEndPoint,FFTcpClient> _clients;
         protected Dictionary<int, IPEndPoint> _idMapping;
-		protected bool _isListening = false;
-		
-		internal IPEndPoint LocalEndpoint
+        protected Dictionary<IPEndPoint, int> _endPointMapping;
+        protected bool _isListening = false;
+        protected FFMockTcpClient _loopbackClient;
+        internal FFMockTcpClient LoopbackClient
+        {
+            get
+            {
+                return _loopbackClient;
+            }
+        }
+
+        internal IPEndPoint LocalEndpoint
 		{
 			get
 			{
@@ -36,9 +46,16 @@ namespace FF.Networking
 				return _endPoint.Port;
 			}
 		}
-		#endregion
-		
-		internal FFTcpServer(IPAddress a_ipv4)
+
+        internal FFTcpClient ClientForEP(IPEndPoint a_endpoint)
+        {
+            FFTcpClient client = null;
+            _clients.TryGetValue(a_endpoint, out client);
+            return client;
+        }
+        #endregion
+
+        internal FFTcpServer(IPAddress a_ipv4)
 		{
 			try
 			{
@@ -46,6 +63,7 @@ namespace FF.Networking
 				
 				_clients = new Dictionary<IPEndPoint, FFTcpClient>();
                 _idMapping = new Dictionary<int, IPEndPoint>();
+                _endPointMapping = new Dictionary<IPEndPoint, int>();
 
                 _newClients = new List<FFTcpClient>();
 				_reconnectedClients = new List<FFTcpClient>();
@@ -58,6 +76,10 @@ namespace FF.Networking
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 
                 FFMessageNetworkID.onNetworkIdReceived += OnIdReceived;
+
+                _loopbackClient = new FFMockTcpClient(FFEngine.Network.NetworkID, _endPoint, s_MockEP);
+                _loopbackClient.GenereateMirror();
+                AddNewClient(_loopbackClient);
 				
 				FFLog.Log(EDbgCat.Networking, "Server started on address : " + _endPoint.Address + " & port : " + _endPoint.Port);
 			}
@@ -215,8 +237,6 @@ namespace FF.Networking
             }
 		}
 
-       
-
         internal void RegisterClientCallback(FFTcpClient a_client)
         {
             a_client.onConnectionEnded += OnClientDisconnection;
@@ -229,22 +249,29 @@ namespace FF.Networking
         #endregion
 
         #region Sending Message
-        internal void BroadcastMessage(FFMessage a_message)
+        internal int BroadcastMessage(FFMessage a_message)
 		{
+            int count = 0;
 			foreach(IPEndPoint endpoint in _clients.Keys)
 			{
-                SendMessageToClient(endpoint, a_message);
-			}
+                if (SendMessageToClient(endpoint, a_message))
+                    count++;
+            }
+            return count;
 		}
 		
-		internal void SendMessageToClient(IPEndPoint a_endpoint, FFMessage a_message)
+		internal bool SendMessageToClient(IPEndPoint a_endpoint, FFMessage a_message)
 		{
             FFTcpClient target = null;
             if(_clients.TryGetValue(a_endpoint, out target))
             {
-                if(target != null)
+                if (target != null)
+                {
                     target.QueueMessage(a_message);
+                    return true;
+                }
             }
+            return false;
 		}
 		#endregion
 
@@ -344,6 +371,7 @@ namespace FF.Networking
 
         private void ReconnectClientOnMt(FFTcpClient a_client)
         {
+            a_client.NetworkID = _endPointMapping[a_client.Remote];
             _clients[a_client.Remote] = a_client;
             RegisterClientCallback(a_client);
             if (onClientReconnection != null)
@@ -361,12 +389,14 @@ namespace FF.Networking
                 IPEndPoint ep = _idMapping[a_client.NetworkID];
                 _replacedClients.Add(ep);
                 _idMapping[a_client.NetworkID] = a_client.Remote;
+                _endPointMapping[a_client.Remote] = a_client.NetworkID;
                 /*if(onPlayerReplaced != null)
                     onPlayerReplaced(ep);*/
             }
             else
             {
                 _idMapping.Add(a_client.NetworkID, a_client.Remote);
+                _endPointMapping.Add(a_client.Remote, a_client.NetworkID);
             }
         }
         #endregion

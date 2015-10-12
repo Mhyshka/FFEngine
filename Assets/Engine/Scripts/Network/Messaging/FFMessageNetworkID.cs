@@ -28,11 +28,11 @@ namespace FF.Networking
             id = a_id;
         }
 
-        internal override void Read(FFTcpClient a_tcpClient)
+        internal override void Read()
         {
-            a_tcpClient.NetworkID = id;
+            _client.NetworkID = id;
             if (onNetworkIdReceived != null)
-                onNetworkIdReceived(a_tcpClient);
+                onNetworkIdReceived(_client);
         }
 
         public override void LoadFromData(FFByteReader stream)

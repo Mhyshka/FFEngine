@@ -22,9 +22,9 @@ namespace FF.Networking
 		}
 		
 		#region Methods
-		internal override void Read(FFTcpClient a_tcpClient)
+		internal override void Read()
 		{
-			room.serverEndPoint = a_tcpClient.Remote;
+			room.serverEndPoint = _client.Remote;
 			FFEngine.Network.OnRoomInfosReceived(room);
 		}	
 		#endregion

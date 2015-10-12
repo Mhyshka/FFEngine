@@ -9,23 +9,22 @@ namespace FF.UI
 {
     internal delegate void NetPlayerCallback(FFNetworkPlayer a_player);
 
-    internal class FFSlotOptionPopupData : FFPopupData
+    internal class FFClientSlotOptionPopupData : FFPopupData
     {
         internal FFNetworkPlayer player = null;
 
-        internal NetPlayerCallback onKickPressed = null;
-        internal NetPlayerCallback onBanPressed = null;
         internal NetPlayerCallback onSwapPressed = null;
         internal SimpleCallback onCancelPressed = null;
     }
 
-    internal class FFSlotOptionPopup : FFPopup
+    internal class FFClientSlotOptionPopup : FFPopup
     {
         #region Inspector Properties
+        public Button swapButton = null;
         public Text playerLabel = null;
+        #endregion
 
-        protected NetPlayerCallback _onKickPressed = null;
-        protected NetPlayerCallback _onBanPressed = null;
+        #region Properties
         protected NetPlayerCallback _onSwapPressed = null;
         protected SimpleCallback _onCancelPressed = null;
 
@@ -35,40 +34,24 @@ namespace FF.UI
         internal override void SetContent(FFPopupData a_data)
         {
             base.SetContent(a_data);
-            FFSlotOptionPopupData data = a_data as FFSlotOptionPopupData;
+            FFClientSlotOptionPopupData data = a_data as FFClientSlotOptionPopupData;
 
             playerLabel.text = data.player.player.username;
 
             _player = data.player;
 
-            _onKickPressed = data.onKickPressed;
-            _onBanPressed = data.onBanPressed;
+            swapButton.enabled = !data.player.isDCed;
             _onSwapPressed = data.onSwapPressed;
             _onCancelPressed = data.onCancelPressed;
         }
 
+        #region Callback
         public void OnSwapPressed()
         {
             if (_onSwapPressed != null)
                 _onSwapPressed(_player);
             else
-                FFEngine.UI.DismissCurrentPopup();
-        }
-
-        public void OnKickPressed()
-        {
-            if (_onKickPressed != null)
-                _onKickPressed(_player);
-            else
-                FFEngine.UI.DismissCurrentPopup();
-        }
-
-        public void OnBanPressed()
-        {
-            if (_onBanPressed != null)
-                _onBanPressed(_player);
-            else
-                FFEngine.UI.DismissCurrentPopup();
+                FFEngine.UI.DismissPopup(currentData.id);
         }
 
         public void OnCancelPressed()
@@ -76,21 +59,22 @@ namespace FF.UI
             if (_onCancelPressed != null)
                 _onCancelPressed();
             else
-                FFEngine.UI.DismissCurrentPopup();
+                FFEngine.UI.DismissPopup(currentData.id);
         }
+        #endregion
 
-        internal static void RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_kickCallback, NetPlayerCallback a_banCallback, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback)
+        internal static int RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback)
         {
-            FFSlotOptionPopupData data = new FFSlotOptionPopupData();
-            data.popupName = "SlotOptionPopup";
+            FFClientSlotOptionPopupData data = new FFClientSlotOptionPopupData();
+            data.popupName = "ClientSlotOptionPopup";
             data.player = a_player;
 
-            data.onKickPressed = a_kickCallback;
-            data.onBanPressed = a_banCallback;
             data.onSwapPressed = a_swapCallback;
             data.onCancelPressed = a_cancelCallback;
 
             FFEngine.UI.PushPopup(data);
+
+            return data.id;
         }
     }
 }

@@ -21,14 +21,21 @@ namespace FF.Networking
         {
         }
 
-        internal override void Read(FFTcpClient a_tcpClient)
+        internal override void Read()
         {
             FFLog.Log(EDbgCat.Networking, "Reading leaving room message");
             if (FFEngine.Network.IsServer)
             {
-                FFNetworkPlayer player = FFEngine.Network.CurrentRoom.GetPlayerForEndpoint(a_tcpClient.Remote);
-                FFEngine.Network.CurrentRoom.RemovePlayer(player.SlotRef);
-                a_tcpClient.EndConnection("Leaving room");
+                FFEngine.Network.CurrentRoom.RemovePlayer(_client.NetworkID);
+                _client.EndConnection("Leaving room");
+            }
+        }
+
+        internal override bool IsMandatory
+        {
+            get
+            {
+                return false;
             }
         }
 

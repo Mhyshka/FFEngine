@@ -28,9 +28,8 @@ namespace FF.Networking
             isBan = a_isBan;
         }
 
-        internal override void Read(FFTcpClient a_tcpClient)
+        internal override void Read()
         {
-            FFLog.Log(EDbgCat.Networking, "Removed From Room message received.");
             if (!isBan && onKickReceived != null)
             {
                 onKickReceived();

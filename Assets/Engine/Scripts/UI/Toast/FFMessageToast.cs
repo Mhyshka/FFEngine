@@ -1,0 +1,43 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+using System;
+
+namespace FF.UI
+{
+    internal class FFMessageToastData : FFToastData
+    {
+        internal string messageContent = null;
+        internal float duration = 0f;
+    }
+
+    internal class FFMessageToast : FFToast
+    {
+        public Text messageLabel = null;
+
+        protected override float Duration
+        {
+            get
+            {
+                FFMessageToastData data = currentData as FFMessageToastData;
+                return data.duration;
+            }
+        }
+
+        internal override void SetContent(FFToastData a_data)
+        {
+            base.SetContent(a_data);
+            FFMessageToastData data = a_data as FFMessageToastData;
+            messageLabel.text = data.messageContent;
+        }
+
+        internal static void RequestDisplay(string a_message, float a_duration = 3f)
+        {
+            FFMessageToastData data = new FFMessageToastData();
+            data.toastName = "MessageToast";
+            data.duration = a_duration;
+            data.messageContent = a_message;
+            FFEngine.UI.PushToast(data);
+        }
+    }
+}

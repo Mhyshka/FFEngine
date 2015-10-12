@@ -100,6 +100,16 @@ namespace FF
 		
 		protected abstract void Tween(float a_factor);
 
+        internal virtual void Reset()
+        {
+            Sample(0f);
+        }
+
+        internal virtual void Sample(float a_factor)
+        {
+            float _factor = curve.Evaluate(a_factor);
+            Tween(_factor);
+        }
         
         #region Callbacks
         #endregion

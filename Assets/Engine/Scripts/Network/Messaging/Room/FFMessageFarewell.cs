@@ -7,8 +7,8 @@ namespace FF.Networking
 {
 	internal class FFMessageFarewell : FFMessage
 	{
-		#region Properties
-		public string reason = null;
+        #region Properties
+        public string reason = null;
 		
 	 	internal override EMessageType Type
 	 	{
@@ -17,9 +17,17 @@ namespace FF.Networking
 				return EMessageType.Farewell;
 			}
 		}
-		#endregion
-		
-		public FFMessageFarewell()
+
+        internal override bool HandleByMock
+        {
+            get
+            {
+                return true;
+            }
+        }
+        #endregion
+
+        public FFMessageFarewell()
 		{
 		}
 		
@@ -28,13 +36,28 @@ namespace FF.Networking
             reason = a_reason;
 		}
 		
-		internal override void Read (FFTcpClient a_tcpClient)
+		internal override void Read ()
 		{
-            a_tcpClient.EndConnection(reason);
+            _client.EndConnection(reason);
         }
-		
-		#region Serialization
-		public override void SerializeData (FFByteWriter stream)
+
+        internal override bool PostWrite()
+        {
+            base.PostWrite();
+            _client.EndConnection("The server closed this room.");
+            return true;
+        }
+
+        internal override bool IsMandatory
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        #region Serialization
+        public override void SerializeData (FFByteWriter stream)
 		{
 			stream.Write(reason);
 		}

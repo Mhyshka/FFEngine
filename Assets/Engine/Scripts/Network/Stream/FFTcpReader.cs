@@ -68,7 +68,11 @@ namespace FF.Networking
                     if (span.TotalMilliseconds > _timeoutDuration)
                     {
                         FFLog.Log(EDbgCat.Networking, "Connection timedout.");
-                        _ffClient.ConnectionLost();
+                        if (_ffClient.IsConnected && _ffClient.WasConnected)
+                        {
+                            _ffClient.ConnectionLost();
+                            break;
+                        }
                     }
                     else
                     {

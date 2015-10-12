@@ -44,8 +44,9 @@ namespace FF.Networking
             } 
         }
 
-        ~FFRoom()
+        internal void TearDown()
         {
+            onRoomUpdated = null;
             if (FFEngine.Network.IsServer)
             {
                 FFEngine.Network.Server.onClientLost -= OnClientConnectionLost;
@@ -60,7 +61,7 @@ namespace FF.Networking
             FFNetworkPlayer player = null;
             foreach (FFNetworkPlayer each in players.Values)
             {
-                if (each.ipEndPoint == a_endpoint)
+                if (each.IpEndPoint == a_endpoint)
                 {
                     player = each;
                     break;
@@ -86,7 +87,7 @@ namespace FF.Networking
 
         internal FFNetworkPlayer GetPlayerForSlot(FFSlotRef a_ref)
         {
-            return SlotForRef(a_ref).netPlayer;
+            return GetSlotForRef(a_ref).netPlayer;
         }
 
         internal bool IsBanned(int a_id)
@@ -113,7 +114,7 @@ namespace FF.Networking
 
         internal void SetPlayer (int a_teamIndex, int a_slotIndex, FFNetworkPlayer a_player)
 		{
-            FFLog.Log(EDbgCat.Networking, "Adding player to room : " + a_player.ipEndPoint.ToString() + " id : " + a_player.ID.ToString());
+            FFLog.Log(EDbgCat.Networking, "Adding player to room : " + a_player.IpEndPoint.ToString() + " id : " + a_player.ID.ToString());
             players.Add(a_player.ID, a_player);
 
             teams[a_teamIndex].Slots[a_slotIndex].SetPlayer(a_player);
@@ -165,18 +166,53 @@ namespace FF.Networking
 				if(teams[from.teamIndex].Slots[from.slotIndex].netPlayer != null)
 				{
 					FFNetworkPlayer player = teams[from.teamIndex].Slots[from.slotIndex].netPlayer;
-                    SlotForRef(to).SetPlayer(player);
-                    SlotForRef(from).netPlayer = null;
+                    GetSlotForRef(to).SetPlayer(player);
+                    GetSlotForRef(from).netPlayer = null;
 					if(onRoomUpdated != null)
 						onRoomUpdated(this);
 				}
 				
 			}
 		}
-		#endregion
-		
-		#region Teams Management
-		internal void AddTeam(FFTeam a_teamToAdd)
+
+        internal void SwapPlayers(FFSlotRef a_firstPlayer, FFSlotRef a_secondPlayer)
+        {
+            FFSlot firstSlot = GetSlotForRef(a_firstPlayer);
+            FFSlot secondSlot = GetSlotForRef(a_secondPlayer);
+            if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
+            {
+                FFNetworkPlayer tmp = firstSlot.netPlayer;
+                firstSlot.SetPlayer(secondSlot.netPlayer);
+                secondSlot.SetPlayer(tmp);
+
+                if (onRoomUpdated != null)
+                    onRoomUpdated(this);
+            }
+        }
+
+        internal void SwapPlayers(int a_firstPlayer, int a_secondPlayer)
+        {
+            FFNetworkPlayer firstPlayer = GetPlayerForId(a_firstPlayer);
+            FFNetworkPlayer secondPlayer = GetPlayerForId(a_secondPlayer);
+            if (firstPlayer != null && secondPlayer != null)
+            {
+                FFSlot firstSlot = firstPlayer.slot;
+                FFSlot secondSlot = secondPlayer.slot;
+
+                if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
+                {
+                    firstSlot.SetPlayer(firstPlayer);
+                    secondSlot.SetPlayer(secondPlayer);
+
+                    if (onRoomUpdated != null)
+                        onRoomUpdated(this);
+                }
+            }
+        }
+        #endregion
+
+        #region Teams Management
+        internal void AddTeam(FFTeam a_teamToAdd)
 		{
 			teams.Add(a_teamToAdd);
 			a_teamToAdd.teamIndex = teams.Count-1;
@@ -241,7 +277,7 @@ namespace FF.Networking
 			return slot;	
 		}
 
-        internal FFSlot SlotForRef(FFSlotRef a_ref)
+        internal FFSlot GetSlotForRef(FFSlotRef a_ref)
         {
             return teams[a_ref.teamIndex].Slots[a_ref.slotIndex];
         }

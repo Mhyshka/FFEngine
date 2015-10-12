@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Zeroconf;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 using FF.Networking;
 
@@ -23,7 +24,8 @@ namespace FF.UI
 		{
 			foreach (FFRoom aRoom in roomsCells.Keys) 
 			{
-				Destroy (roomsCells[aRoom].gameObject);
+                aRoom.onRoomUpdated -= roomsCells[aRoom].UpdateWithRoom;
+                Destroy (roomsCells[aRoom].gameObject);
 			}
 			roomsCells.Clear ();
 		}
@@ -40,7 +42,8 @@ namespace FF.UI
 				if (lHostCell != null)
 				{
 					lHostCell.UpdateWithRoom (a_room);
-					roomsCells.Add (a_room, lHostCell);
+                    a_room.onRoomUpdated += lHostCell.UpdateWithRoom;
+                    roomsCells.Add (a_room, lHostCell);
 					lHostCell.transform.SetParent (verticalLayout.transform);
 					lHostCell.transform.localScale = Vector3.one;
 				}
@@ -48,13 +51,17 @@ namespace FF.UI
 		}
 
 
-		internal void RemoveRoom (FFRoom aRoom)
+		internal void RemoveRoom (FFRoom a_room)
 		{
-			FFRoomCellWidget lCell = roomsCells [aRoom];
+			FFRoomCellWidget lCell = roomsCells [a_room];
             if (lCell != null)
             {
+                if (EventSystem.current.currentSelectedGameObject == lCell.button.gameObject)
+                    TrySelectWidget();
+
+                a_room.onRoomUpdated -= lCell.UpdateWithRoom;
                 lCell.Destroy();
-                roomsCells.Remove(aRoom);
+                roomsCells.Remove(a_room);
             }
 		}
 	}

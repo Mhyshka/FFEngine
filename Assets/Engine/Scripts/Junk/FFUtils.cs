@@ -6,11 +6,61 @@ namespace FF
 {
 	public class FFUtils
 	{
+        public static string[] UiScenes()
+        {
+#if UNITY_EDITOR
+            Regex rootPath = new Regex(Regex.Escape("Assets/Scenes/")); /*+ Regex.Unescape(".+$")*/
+            Regex ui = new Regex(".+(Panel)|(Toast)|(Popup)|(Screen)\\.unity");
+
+            int size = 0;
+            string[] allScenes = new string[UnityEditor.EditorBuildSettings.scenes.GetLength(0)];
+            for (int i = 0; i < allScenes.Length; i++)
+            {
+                allScenes[i] = UnityEditor.EditorBuildSettings.scenes[i].path;
+                string[] split = rootPath.Split(allScenes[i]);
+                if (split.Length > 1)
+                {
+                    allScenes[i] = split[1];
+                    if (!ui.IsMatch(allScenes[i]) || !UnityEditor.EditorBuildSettings.scenes[i].enabled)
+                    {
+                        allScenes[i] = null;
+                    }
+                    else
+                        size++;
+                }
+                else
+                {
+                    allScenes[i] = null;
+                }
+            }
+
+            string[] scenes = new string[size];
+            int j = 0;
+            for (int i = 0; i < allScenes.Length; i++)
+            {
+                if (allScenes[i] != null)
+                {
+                    string[] split = allScenes[i].Split('/');
+                    string scene = split[split.Length - 1];
+                    string[] test = { "." };
+                    scene = scene.Split(test, System.StringSplitOptions.RemoveEmptyEntries)[0];
+                    scenes[j] = scene;
+                    j++;
+                }
+            }
+
+            return scenes;
+#else
+            return null;
+#endif
+        }
+
+
 		public static string[] BitMaskToUiScenes(int a_bitMask)
 		{
 	#if UNITY_EDITOR
 			Regex rootPath = new Regex(Regex.Escape("Assets/Scenes/")); /*+ Regex.Unescape(".+$")*/
-			Regex ui = new Regex(".+(Panel)|(Popup)|(Screen)\\.unity");
+			Regex ui = new Regex(".+(Panel)|(Toast)|(Popup)|(Screen)\\.unity");
 			
 			int size = 0;
 			string[] allScenes = new string[UnityEditor.EditorBuildSettings.scenes.GetLength(0)];

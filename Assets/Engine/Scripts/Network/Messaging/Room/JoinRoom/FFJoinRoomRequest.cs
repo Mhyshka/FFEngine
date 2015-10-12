@@ -1,19 +1,41 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Net.Sockets;
+using System;
 
 namespace FF.Networking
 {
 	internal class FFJoinRoomRequest : FFRequestMessage
 	{
+        internal enum EErrorCode
+        {
+            UserCanceled,
+            PlayerDisconnected,
+            ServerOnly,
+            RoomIsFull,
+            Banned
+        }
 		#region Properties
-		public FFNetworkPlayer player = null;
+		internal FFNetworkPlayer player = null;
+
+        internal override EMessageType Type
+        {
+            get
+            {
+                return EMessageType.JoinRoomRequest;
+            }
+        }
+
+        protected override int DisconnectErrorCode
+        {
+            get
+            {
+                return (int)EErrorCode.PlayerDisconnected;
+            }
+        }
         #endregion
 
-		internal StringCallback onDeny;
-		internal SimpleCallback onSuccess;
-		
-		public FFJoinRoomRequest()
+        public FFJoinRoomRequest()
 		{
 		}
 		
@@ -21,47 +43,49 @@ namespace FF.Networking
 		{
 			player = a_player;
 		}
-		
-		#region Methods
-		internal override void Read(FFTcpClient a_tcpClient)
+
+        #region Methods
+        internal override void Read()
 		{
-			if(FFEngine.Network.Server != null)
-			{
-				FFRoom room = FFEngine.Network.CurrentRoom;
-                if (room.IsFull)
-                {
-                    FFJoinRoomFail answer = new FFJoinRoomFail("Room is full.");
-                    answer.requestId = requestId;
-                    a_tcpClient.QueueMessage(answer);
-                }
-                else if (room.IsBanned(a_tcpClient.NetworkID))
-                {
-                    FFJoinRoomFail answer = new FFJoinRoomFail("You are banned from this room.");
-                    answer.requestId = requestId;
-                    a_tcpClient.QueueMessage(answer);
-                }
-                else
-                {
-                    FFSlot nextSlot = room.NextAvailableSlot();
-                    player.ipEndPoint = a_tcpClient.Remote;
-                    FFEngine.Network.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, player);
-                    FFJoinRoomSuccess answer = new FFJoinRoomSuccess();
-                    answer.requestId = requestId;
-                    a_tcpClient.QueueMessage(answer);
-                }
-			}
-		}
-		
-		internal override EMessageType Type
-		{
-			get
-			{
-				return EMessageType.JoinRoomRequest;
-			}
-		}
-		#endregion
-		
-		public override void SerializeData(FFByteWriter stream)
+            FFResponseMessage answer = null;
+            int errorCode = -1;
+            FFRoom room = FFEngine.Network.CurrentRoom;
+
+            if (!_client.IsConnected)
+            {
+                errorCode = (int)EErrorCode.PlayerDisconnected;
+                answer = new FFRequestFail(errorCode);
+            }
+            else if (FFEngine.Network.Server == null)
+            {
+                errorCode = (int)EErrorCode.ServerOnly;
+                answer = new FFRequestFail(errorCode);
+            }
+            else if (room.IsBanned(_client.NetworkID))
+            {
+                errorCode = (int)EErrorCode.Banned;
+                answer = new FFRequestFail(errorCode);
+            }
+            else if (room.IsFull)
+            {
+                errorCode = (int)EErrorCode.RoomIsFull;
+                answer = new FFRequestFail(errorCode);
+            }
+            else
+            {
+                FFSlot nextSlot = room.NextAvailableSlot();
+                player.IpEndPoint = _client.Remote;
+                FFEngine.Network.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, player);
+                answer = new FFRequestSuccess();
+            }
+
+            answer.requestId = requestId;
+            _client.QueueMessage(answer);
+        }
+        #endregion
+
+        #region Serialization
+        public override void SerializeData(FFByteWriter stream)
 		{
 			base.SerializeData(stream);
 			stream.Write(player);
@@ -72,5 +96,41 @@ namespace FF.Networking
 			base.LoadFromData(stream);
 			player = stream.TryReadObject<FFNetworkPlayer>();
 		}
-	}
+        #endregion
+
+        internal static string MessageForCode(int a_errorCode)
+        {
+            string errorMessage = "";
+
+            if (a_errorCode == -2)
+                errorMessage = "Unkown";
+            else if (a_errorCode == -1)
+                errorMessage = "Timedout";
+            else
+            {
+                EErrorCode errorCode = (EErrorCode)a_errorCode;
+
+                switch (errorCode)
+                {
+                    case EErrorCode.PlayerDisconnected:
+                        errorMessage = "Player disconnected.";
+                        break;
+
+                    case EErrorCode.ServerOnly:
+                        errorMessage = "Invalid request.";
+                        break;
+
+                    case EErrorCode.Banned:
+                        errorMessage = "You're banned from this room.";
+                        break;
+
+                    case EErrorCode.RoomIsFull:
+                        errorMessage = "Room is full.";
+                        break;
+                }
+            }
+
+            return errorMessage;
+        }
+    }
 }

@@ -31,8 +31,10 @@ namespace FF.UI
 
         internal void ShowWifiWarning()
         {
+            FFLog.LogError("Try Show wifi warning");
             if (!_wifiWarningIsShown)
             {
+                FFLog.LogError("Showing wifi warning");
                 wifiWarningAnimator.SetTrigger("Show");
                 _wifiWarningIsShown = true;
             }
@@ -40,8 +42,10 @@ namespace FF.UI
 
         internal void HideWifiWarning()
         {
+            FFLog.LogError("Try Hide wifi warning");
             if (_wifiWarningIsShown)
             {
+                FFLog.LogError("Hiding wifi warning");
                 wifiWarningAnimator.SetTrigger("Hide");
                 _wifiWarningIsShown = false;
             }

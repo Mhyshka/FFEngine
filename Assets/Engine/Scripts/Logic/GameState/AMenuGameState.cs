@@ -34,11 +34,19 @@ namespace FF
 			}	
 		}
 		
-		internal virtual void GoBack(int a_id)
+        /// <summary>
+        /// Called by the game mode. Do not call it yourself.
+        /// </summary>
+		internal void GoBack(int a_id)
 		{
             isGoingBack = true;
             RequestState(a_id);
 		}
+
+        internal virtual void GoBack()
+        {
+            mgm.GoBack();
+        }
 		#endregion
 		
 	}

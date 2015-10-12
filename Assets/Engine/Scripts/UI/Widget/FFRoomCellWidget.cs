@@ -28,7 +28,6 @@ namespace FF
 
 
         #region Properties
-        //internal RoomCellCallback onDestroy;
 
         private FFRoom _room;
         internal FFRoom Room

@@ -18,10 +18,16 @@ namespace FF
 			}
 		}
 		Stack<int> navigationHistory = new Stack<int>();
-		#endregion
-		
-		#region Methods
-		internal void GoBack(FFEventParameter a_args)
+        #endregion
+
+        #region Methods
+        protected virtual void OnBackPressed()
+        {
+            AMenuGameState state = CurrentState as AMenuGameState;
+            state.GoBack();
+        }
+
+		internal void GoBack()
 		{
 			if(navigationHistory.Count > 0 && _states[CurrentStateID] is AMenuGameState)
 			{
@@ -44,14 +50,14 @@ namespace FF
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent(EEventType.Back, GoBack);
+			FFEngine.Inputs.PushOnBackCallback(OnBackPressed);
 		}
 	
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent(EEventType.Back, GoBack);
-		}
+            FFEngine.Inputs.PopOnBackCallback();
+        }
 		#endregion
 	}
 }

@@ -117,9 +117,9 @@ namespace FF.UI
 		#region Hide
 		internal virtual void Hide(bool a_isForward = true)
 		{
-			if(_state == EState.Shown || _state == EState.Showing)
+            if (_state == EState.Shown || _state == EState.Showing)
 			{
-				animator.SetBool("Forward", a_isForward);
+                animator.SetBool("Forward", a_isForward);
 				animator.SetTrigger("Hide");
 				_state = EState.Hidding;
 				FFLog.Log(EDbgCat.UI, "Hiding : " + gameObject.ToString());
@@ -158,23 +158,28 @@ namespace FF.UI
 		/// </summary>
 		public virtual void OnHidden()
 		{
-			FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
-			_state = EState.Hidden;
-			
-			_canvas.enabled = false;
-			
-			foreach(Selectable each in _selectables.Keys)
-			{
-				Navigation nav = each.navigation;
-				nav.mode = Navigation.Mode.None;
-				each.navigation = nav;
-			}
-			
-			if(_raycaster != null)
-				_raycaster.enabled = false;
+            if (animator.GetBool("Show"))
+            {
+                return;
+            }
+
+            FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
+            _state = EState.Hidden;
+
+            _canvas.enabled = false;
+
+            foreach (Selectable each in _selectables.Keys)
+            {
+                Navigation nav = each.navigation;
+                nav.mode = Navigation.Mode.None;
+                each.navigation = nav;
+            }
+
+            if (_raycaster != null)
+                _raycaster.enabled = false;
 
             /*if(gameObject.activeSelf)
-				gameObject.SetActive(false);*/
+                gameObject.SetActive(false);*/
 
             if (onHidden != null)
                 onHidden(this);

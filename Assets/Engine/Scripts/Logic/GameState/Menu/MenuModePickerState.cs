@@ -68,6 +68,7 @@ namespace FF
 		internal void OnHostPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnHostPressed");
+            FFEngine.Network.Player.isHost = true;
             if (FFEngine.NetworkStatus.IsConnectedToLan)
             {
                 RequestState((int)EMenuStateID.GameRoomHost);
@@ -84,7 +85,8 @@ namespace FF
 		internal void OnJoinPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Game Mode Picker - OnJoinPressed");
-            if(FFEngine.NetworkStatus.IsConnectedToLan)
+            FFEngine.Network.Player.isHost = false;
+            if (FFEngine.NetworkStatus.IsConnectedToLan)
             {
                 RequestState((int)EMenuStateID.SearchForRooms);
             }

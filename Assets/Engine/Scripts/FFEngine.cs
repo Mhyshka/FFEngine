@@ -34,8 +34,11 @@ namespace FF
 		
 		private FFNetworkManager _networkManager;
 		internal static FFNetworkManager Network{get{return s_instance._networkManager;}}
-		
-		private NetworkGameManager _gameManager;
+
+        private FFHandlerManager _handlerManager;
+        internal static FFHandlerManager Handler { get { return s_instance._handlerManager; } }
+
+        private NetworkGameManager _gameManager;
 		internal static NetworkGameManager Game{get{return s_instance._gameManager;}}
 		
 		private FFMultiscreenManager _multiscreenManager;
@@ -52,6 +55,7 @@ namespace FF
 			_inputManager = new InputManager();
 			_multiscreenManager = new FFMultiscreenManager();
 			_networkStatusManager = new FFNetworkStatusManager();
+            _handlerManager = new FFHandlerManager();
 			
 #if UNITY_iOS && !UNITY_EDITOR
 			iOSBackgroundTask.ios_registerForPushNotification();
@@ -79,6 +83,8 @@ namespace FF
                 _networkStatusManager.DoUpdate();
             if (_uiManager  != null)
                 _uiManager.DoUpdate();
+            if (_handlerManager != null)
+                _handlerManager.DoUpdate();
         }
 		
 		internal void Destroy()

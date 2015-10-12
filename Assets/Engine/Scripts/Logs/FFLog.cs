@@ -7,6 +7,8 @@ internal enum EDbgCat
 {
 	Zeroconf,
 	Networking,
+    Message,
+    Handler,
 	UI,
 	Logic
 }
@@ -21,12 +23,32 @@ internal enum EDbgLevel
 internal class FFLog
 {
 	internal static EDbgLevel DBG_LEVEL = EDbgLevel.Debug;
-	#region Log Debug
-	internal static void Log(EDbgCat a_cat, string a_text)
+    internal static EDbgCat[] DBG_CAT = new EDbgCat[]
+    { 
+        /*EDbgCat.Zeroconf,
+        EDbgCat.Networking,
+        EDbgCat.Message,
+        EDbgCat.Handler,
+        */ EDbgCat.UI/*,
+        EDbgCat.Logic*/
+    };
+
+    internal static bool HasCatEnable(EDbgCat a_cat)
+    {
+        foreach (EDbgCat each in DBG_CAT)
+        {
+            if (each == a_cat)
+                return true;
+        }
+        return false;
+    }
+
+    #region Log Debug
+    internal static void Log(EDbgCat a_cat, string a_text)
 	{
 	
 #if DEBUG_LOG
-		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug && HasCatEnable(a_cat))
 			Debug.Log(a_cat.ToString() + " : " + a_text);
 #endif
 	}
@@ -52,7 +74,7 @@ internal class FFLog
 	internal static void LogWarning(EDbgCat a_cat, string a_text)
 	{
 #if DEBUG_LOG
-		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning && HasCatEnable(a_cat))
 			Debug.LogWarning(a_cat.ToString() + " : " + a_text);
 #endif
 	}
@@ -78,7 +100,7 @@ internal class FFLog
 	internal static void LogError(EDbgCat a_cat, string a_text)
 	{
 #if DEBUG_LOG
-		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
+		if((int)DBG_LEVEL <= (int)EDbgLevel.Error && HasCatEnable(a_cat))
 			Debug.LogError(a_cat.ToString() + " : " + a_text);
 #endif
 	}

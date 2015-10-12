@@ -62,7 +62,7 @@ namespace FF.Networking
             catch (SocketException e)
             {
                 success = false;
-                FFLog.LogError(EDbgCat.Networking, "Couldn't connect to server." + e.Message);
+                FFLog.LogWarning(EDbgCat.Networking, "Couldn't connect to server." + e.Message);
             }
             
             Thread.Sleep(100);

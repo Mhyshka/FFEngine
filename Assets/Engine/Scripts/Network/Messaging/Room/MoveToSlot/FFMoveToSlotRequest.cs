@@ -5,6 +5,12 @@ namespace FF.Networking
 {
 	internal class FFMoveToSlotRequest : FFRequestMessage
 	{
+        internal enum EErrorCode
+        {
+            PlayerNotfound,
+            PlayerDisconnected,
+            SlotIsUsed
+        }
 		#region Properties
 		internal FFSlotRef slotRef;
 		
@@ -15,9 +21,18 @@ namespace FF.Networking
 				return EMessageType.MoveToSlotRequest;
 			}
 		}
-		#endregion
-		
-		public FFMoveToSlotRequest()
+
+        protected override int DisconnectErrorCode
+        {
+            get
+            {
+                return (int)EErrorCode.PlayerDisconnected;
+            }
+        }
+        #endregion
+
+        #region Constructors
+        public FFMoveToSlotRequest()
 		{
 		
 		}
@@ -26,38 +41,42 @@ namespace FF.Networking
 		{
 			slotRef = a_slotRef;
 		}
+        #endregion
 
-        internal override void Read(FFTcpClient a_tcpClient)
+        internal override void Read()
         {
-            FFNetworkPlayer player = FFEngine.Network.CurrentRoom.GetPlayerForEndpoint(a_tcpClient.Remote);
-            string errorMessage = null;
-            if (player != null)
+            FFResponseMessage answer = null;
+            FFNetworkPlayer source = FFEngine.Network.CurrentRoom.GetPlayerForId(_client.NetworkID);
+
+            int errorCode = -1;
+
+            if (!_client.IsConnected)
             {
-                if (FFEngine.Network.CurrentRoom.teams[slotRef.teamIndex].Slots[slotRef.slotIndex].netPlayer == null)
-                {
-                    FFEngine.Network.CurrentRoom.MovePlayer(player.SlotRef, slotRef);
-                    FFMoveToSlotSuccess success = new FFMoveToSlotSuccess();
-                    success.requestId = requestId;
-                    a_tcpClient.QueueMessage(success);
-                    return;
-                }
-                else
-                {
-                    errorMessage = "Slot is used.";
-                }
+                errorCode = (int)EErrorCode.PlayerDisconnected;
+                answer = new FFRequestFail(errorCode);
+            }
+            else if(source == null)
+            {
+                errorCode = (int)EErrorCode.PlayerNotfound;
+                answer = new FFRequestFail(errorCode);
+            }
+            else if (FFEngine.Network.CurrentRoom.teams[slotRef.teamIndex].Slots[slotRef.slotIndex].netPlayer != null)
+            {
+                errorCode = (int)EErrorCode.SlotIsUsed;
+                answer = new FFRequestFail(errorCode);
             }
             else
             {
-                errorMessage = "Player not found.";
+                FFEngine.Network.CurrentRoom.MovePlayer(source.SlotRef, slotRef);
+                answer = new FFRequestSuccess();
             }
 
-            FFMoveToSlotFail answer = new FFMoveToSlotFail(errorMessage);
             answer.requestId = requestId;
-            a_tcpClient.QueueMessage(answer);
+            _client.QueueMessage(answer);
         }
-	
-		#region Serialization
-		public override void SerializeData (FFByteWriter stream)
+
+        #region Serialization
+        public override void SerializeData (FFByteWriter stream)
 		{
 			base.SerializeData (stream);
 			stream.Write(slotRef);
@@ -68,9 +87,36 @@ namespace FF.Networking
 			base.LoadFromData (stream);
 			slotRef = stream.TryReadObject<FFSlotRef>();
 		}
-		#endregion
-		
-		internal SimpleCallback onSuccess = null;
-		internal StringCallback onFail = null;
+        #endregion
+
+        internal static string MessageForCode(int a_errorCode)
+        {
+            string errorMessage = "";
+
+            if (a_errorCode == -2)
+                errorMessage = "Unkown";
+            else if (a_errorCode == -1)
+                errorMessage = "Timedout";
+            else
+            {
+                EErrorCode errorCode = (EErrorCode)a_errorCode;
+
+                switch (errorCode)
+                {
+                    case EErrorCode.SlotIsUsed:
+                        errorMessage = "Slot is used.";
+                        break;
+
+                    case EErrorCode.PlayerNotfound:
+                        errorMessage = "Player not found.";
+                        break;
+
+                    case EErrorCode.PlayerDisconnected:
+                        errorMessage = "Player disconnected.";
+                        break;
+                }
+            }
+            return errorMessage;
+        }
 	}
 }

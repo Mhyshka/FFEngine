@@ -10,17 +10,18 @@ namespace FF.Networking
 
         RoomInfos,
 
-        JoinRoomRequest,
-        JoinRoomFail,
-        JoinRoomSuccess,
-
-        MoveToSlotRequest,
-        MoveToSlotSuccess,
-        MoveToSlotFail,
-
         RemovedFromRoom,
         Ban,
-        Swap,
+
+        RequestSuccess,
+        RequestFail,
+        RequestCancel,
+
+        JoinRoomRequest,
+        MoveToSlotRequest,
+        SwapSlotClientRequest,
+        SwapSlotServerRequest,
+        SwapConfirmRequest,
 
         Farewell,
         LeavingRoom
@@ -45,24 +46,28 @@ namespace FF.Networking
                     message = new FFMessageRoomInfo();
                     break;
 
+                case EMessageType.RequestSuccess:
+                    message = new FFRequestSuccess();
+                    break;
+                case EMessageType.RequestFail:
+                    message = new FFRequestFail();
+                    break;
+                case EMessageType.RequestCancel:
+                    message = new FFRequestCancel();
+                    break;
+
                 case EMessageType.JoinRoomRequest:
                     message = new FFJoinRoomRequest();
                     break;
-                case EMessageType.JoinRoomSuccess:
-                    message = new FFJoinRoomSuccess();
-                    break;
-                case EMessageType.JoinRoomFail:
-                    message = new FFJoinRoomFail();
-                    break;
-
                 case EMessageType.MoveToSlotRequest:
                     message = new FFMoveToSlotRequest();
                     break;
-                case EMessageType.MoveToSlotSuccess:
-                    message = new FFMoveToSlotSuccess();
+
+                case EMessageType.SwapSlotClientRequest:
+                    message = new FFSlotSwapRequest();
                     break;
-                case EMessageType.MoveToSlotFail:
-                    message = new FFMoveToSlotFail();
+                case EMessageType.SwapConfirmRequest:
+                    message = new FFConfirmSwapRequest();
                     break;
 
                 case EMessageType.RemovedFromRoom:

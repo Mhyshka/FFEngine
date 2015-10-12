@@ -5,15 +5,24 @@ using System.Net;
 
 namespace FF.Networking
 {	
-	internal class FFNetworkPlayer : FFPeer
+	internal class FFNetworkPlayer : IByteStreamSerialized
 	{
-		#region properties
-		internal FFPlayer player = null;
+        #region properties
+        internal FFPlayer player = null;
 		internal bool isHost = false;
 		internal bool useTV = false;
         internal bool isDCed = false;
 
 		internal FFSlot slot = null;
+
+        internal int busyCount = 0;
+        internal bool IsBusy
+        {
+            get
+            {
+                return busyCount > 0;
+            }
+        }
 		
 		internal FFSlotRef SlotRef
 		{
@@ -25,6 +34,22 @@ namespace FF.Networking
 				return slotRef;
 			}
 		}
+
+        protected IPEndPoint _ipEndPoint;
+        internal IPEndPoint IpEndPoint
+        {
+            get
+            {
+                if (FFEngine.Network.IsServer && ID == FFEngine.Network.NetworkID)
+                    return FFTcpServer.s_MockEP;
+                else
+                    return _ipEndPoint;
+            }
+            set
+            {
+                _ipEndPoint = value;
+            }
+        }
 
         internal int _playerID = -1;
         internal int ID
@@ -42,15 +67,20 @@ namespace FF.Networking
 		
 		}
 		
-		internal FFNetworkPlayer (int a_playerId , IPEndPoint a_ep, FFPlayer a_player) : base(a_ep)
+		internal FFNetworkPlayer (int a_playerId, FFPlayer a_player)
 		{
             _playerID = a_playerId;
 			player = a_player;
 		}
+
+        internal void SetEP(IPEndPoint a_ep)
+        {
+            _ipEndPoint = a_ep;
+        }
 		#endregion
 		
 		#region Serialization
-		public override void SerializeData(FFByteWriter stream)
+		public virtual void SerializeData(FFByteWriter stream)
 		{
 			stream.Write(player);
 			stream.Write(isHost);
@@ -59,7 +89,7 @@ namespace FF.Networking
             stream.Write(_playerID);
 		}
 		
-		public override void LoadFromData(FFByteReader stream)
+		public virtual void LoadFromData(FFByteReader stream)
 		{
 			player = stream.TryReadObject<FFPlayer>();
 			isHost = stream.TryReadBool();
@@ -67,6 +97,23 @@ namespace FF.Networking
             isDCed = stream.TryReadBool();
             _playerID = stream.TryReadInt();
         }
-		#endregion
-	}
+        #endregion
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is FFNetworkPlayer)
+            {
+                FFNetworkPlayer other = obj as FFNetworkPlayer;
+                return other.ID.Equals(ID);
+            }
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ID.GetHashCode();
+        }
+    }
 }

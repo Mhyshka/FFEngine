@@ -17,12 +17,12 @@ namespace FF.Networking
 			requestId = stream.TryReadInt();
 		}
 		
-		internal sealed override void Read (FFTcpClient a_tcpClient)
+		internal sealed override void Read ()
 		{
 			FFLog.LogError(EDbgCat.Networking, "Called read on a response message. You should call the Read that takes a request as parameter.");
 			throw new NotImplementedException ();
 		}
 		
-		internal abstract void Read(FFTcpClient a_tcpClient, FFRequestMessage a_request);
+		internal abstract void Read(FFRequestMessage a_request);
 	}
 }

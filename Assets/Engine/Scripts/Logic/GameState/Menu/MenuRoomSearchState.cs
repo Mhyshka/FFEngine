@@ -9,6 +9,7 @@ using FF.Networking;
 
 namespace FF
 {
+    //HostList
 	internal class MenuRoomSearchState : ANavigationMenuState
 	{
 		#region Inspector Properties
@@ -16,12 +17,13 @@ namespace FF
 		
 		#region Properties
 		protected FFHostListPanel _hostListPanel;
-		protected FFJoinRoomRequest _joinRequest;
 		#endregion
 		
 		#region States Methods
-		internal override int ID {
-			get {
+		internal override int ID
+        {
+			get
+            {
 				return (int)EMenuStateID.SearchForRooms;
 			}
 		}
@@ -58,16 +60,18 @@ namespace FF
 		#region Init & TearDown
 		protected void ResetState()
 		{
-			_joinRequest = null;
-			_hostListPanel.ClearRoomsCells();
-
             if (FFEngine.NetworkStatus.IsConnectedToLan)
 			{
 				_navigationPanel.SetTitle ("Looking for games");
-				FFEngine.Network.StartLookingForGames ();
-				
-				FFEngine.Network.onNewRoomReceived += OnRoomAdded;
-				FFEngine.Network.onRoomLost += OnRoomLost;
+
+                if (!FFEngine.Network.IsLookingForRoom)// Not yet looking for room.
+                {
+                    _hostListPanel.ClearRoomsCells();
+                    FFEngine.Network.StartLookingForGames();
+
+                    FFEngine.Network.onNewRoomReceived += OnRoomAdded;
+                    FFEngine.Network.onRoomLost += OnRoomLost;
+                }
 
                 _navigationPanel.ShowLoader("Searching");
                 _navigationPanel.HideWifiWarning();
@@ -78,12 +82,23 @@ namespace FF
                 _navigationPanel.ShowWifiWarning();
             }
 		}
-		
-		protected void TearDown()
+
+        internal override void GoBack()
+        {
+            FFEngine.Network.StopLookingForGames();
+            base.GoBack();
+        }
+
+        protected void TearDown()
 		{
-            _hostListPanel.ClearRoomsCells();
-            FFEngine.Network.StopLookingForGames ();
             _navigationPanel.HideLoader();
+
+            if (!FFEngine.Network.IsLookingForRoom)// Not looking for room anymore.
+            {
+                _hostListPanel.ClearRoomsCells();
+                FFEngine.Network.onNewRoomReceived -= OnRoomAdded;
+                FFEngine.Network.onRoomLost -= OnRoomLost;
+            }
         }
 		#endregion
 
@@ -100,16 +115,12 @@ namespace FF
 		{
 			base.UnregisterForEvent ();
 			FFEngine.Events.UnregisterForEvent(EEventType.Connect, OnConnectButtonPressed);
-			
-			FFEngine.Network.onNewRoomReceived -= OnRoomAdded;
-			FFEngine.Network.onRoomLost -= OnRoomLost;
 
             FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
         }
 		
 		internal void OnConnectButtonPressed(FFEventParameter a_args)
 		{
-			FFLog.LogError("Connect Callback");
             if (a_args.data == null)
             {
                 FFLog.LogError("Room is null");

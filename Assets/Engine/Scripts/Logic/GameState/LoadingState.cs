@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace FF
 {
@@ -8,18 +9,12 @@ namespace FF
 	{
 	#region Inspector Properties
 		public string[] additionalRequiredScenes = null;
-		
-		[BitMaskUIScenesAttribute]
-		public int panelsToLoad = 0;
-		
-		[HideInInspector]
-		public string[] panelNamesToLoad = null;
-	#endregion
-	
-	#region Properties
-		internal string[] loadedPanelsScenes;
-	
-		protected float POST_LOADING_DURATION = 0.1f;
+
+        public string[] panelsToLoad = null;
+        #endregion
+
+        #region Properties
+        protected float POST_LOADING_DURATION = 0.1f;
 		protected float _postLoadTimeElapsed = 0f;
 	#endregion
 	
@@ -43,7 +38,7 @@ namespace FF
 				_gameMode.LoadAsyncScene(each);
 			}
 			
-			FFEngine.UI.LoadPanelsSet(panelNamesToLoad);
+			FFEngine.UI.LoadPanelsSet(panelsToLoad);
 		}
 	
 		internal override int Manage ()
