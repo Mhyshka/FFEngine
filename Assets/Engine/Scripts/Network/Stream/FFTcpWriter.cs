@@ -27,7 +27,7 @@ namespace FF.Networking
 		#region Message
 		internal void QueueMessage(FFMessage a_message)
 		{
-			FFLog.Log(EDbgCat.Networking,"Queue message");
+			FFLog.Log(EDbgCat.Socket,"Queue message");
 			lock(_toSendMessages)
 			{
 				_toSendMessages.Enqueue(a_message);
@@ -36,7 +36,7 @@ namespace FF.Networking
 
         internal void QueueFinalMessage(FFMessage a_message)
         {
-            FFLog.Log(EDbgCat.Networking, "Queue message");
+            FFLog.Log(EDbgCat.Socket, "Queue message");
             lock (_toSendMessages)
             {
                 _toSendMessages.Clear();
@@ -68,7 +68,7 @@ namespace FF.Networking
 			}
 			catch(IOException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't write to stream." + e.Message);
+				FFLog.LogError(EDbgCat.Socket, "Couldn't write to stream." + e.Message);
 				return false;
 			}
 		}
@@ -103,7 +103,7 @@ namespace FF.Networking
 					Thread.Sleep(3);
 				}
 			}
-			FFLog.LogError(EDbgCat.Networking, "Stoping Writer Thread");
+			FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
 		}
 		
 		protected void HandleHeartbeat()

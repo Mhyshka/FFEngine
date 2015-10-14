@@ -381,6 +381,10 @@ namespace FF.Networking
 			{
 				FFLog.Log(EDbgCat.Networking, "Updating main room infos");
 				_currentRoom.UpdateWithRoom(a_room);
+                if (_currentRoom.GetPlayerForId(NetworkID) == null)
+                {
+                    _mainClient.EndConnection("Removed from room");
+                }
 			}
 			else if(_rooms.ContainsKey(a_room.serverEndPoint))//A room in the list was updated
 			{

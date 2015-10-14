@@ -49,7 +49,7 @@ namespace FF.Networking
 			}
 			catch(IOException e)
 			{
-				FFLog.LogError(EDbgCat.Networking, "Couldn't read from stream." + e.Message);
+				FFLog.LogError(EDbgCat.Socket, "Couldn't read from stream." + e.Message);
 			}
 		}
 		
@@ -67,7 +67,7 @@ namespace FF.Networking
                     TimeSpan span = new TimeSpan(DateTime.Now.Ticks - _lastMessageTimestamp);
                     if (span.TotalMilliseconds > _timeoutDuration)
                     {
-                        FFLog.Log(EDbgCat.Networking, "Connection timedout.");
+                        FFLog.Log(EDbgCat.Socket, "Connection timedout.");
                         if (_ffClient.IsConnected && _ffClient.WasConnected)
                         {
                             _ffClient.ConnectionLost();
@@ -80,7 +80,7 @@ namespace FF.Networking
                     }
 				}
 			}
-			FFLog.LogError(EDbgCat.Networking, "Stoping Reader Thread");
+			FFLog.LogError(EDbgCat.Socket, "Stoping Reader Thread");
 		}
 		
 		protected void DeserializeData()
@@ -99,7 +99,10 @@ namespace FF.Networking
 					_currentMessageSize = -1;
 					
 					FFMessage message = FFMessage.Deserialize(messageData);
-					_ffClient.QueueReadMessage(message);
+                    if(message is FFJoinRoomRequest)
+                        FFLog.LogError("Pre queueing join request");
+
+                    _ffClient.QueueReadMessage(message);
 				}
 			}
 		}

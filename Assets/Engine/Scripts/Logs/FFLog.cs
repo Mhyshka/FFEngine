@@ -7,6 +7,8 @@ internal enum EDbgCat
 {
 	Zeroconf,
 	Networking,
+    Socket,
+    Serialization,
     Message,
     Handler,
 	UI,
@@ -26,10 +28,12 @@ internal class FFLog
     internal static EDbgCat[] DBG_CAT = new EDbgCat[]
     { 
         /*EDbgCat.Zeroconf,
-        EDbgCat.Networking,
+        */EDbgCat.Networking,/*
+        EDbgCat.Serialization,
+        EDbgCat.Socket,
         EDbgCat.Message,
         EDbgCat.Handler,
-        */ EDbgCat.UI/*,
+        */EDbgCat.UI/*,
         EDbgCat.Logic*/
     };
 

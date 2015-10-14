@@ -93,6 +93,7 @@ namespace FF.Networking
 		
 		public override void LoadFromData (FFByteReader stream)
 		{
+            FFLog.LogError("Join request load");
 			base.LoadFromData(stream);
 			player = stream.TryReadObject<FFNetworkPlayer>();
 		}

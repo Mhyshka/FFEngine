@@ -191,6 +191,22 @@ namespace FF.Networking
             onConnectionLost = null;
             onConnectionSuccess = null;
             _autoRetryConnection = false;
+
+            foreach (FFRequestMessage each in _pendingReadRequest.Values)
+            {
+                each.Cancel(false);
+            }
+            _pendingReadRequest.Clear();
+
+            foreach (FFRequestMessage each in _pendingSentRequest.Values)
+            {
+                each.ForceFail();
+            }
+            _pendingSentRequest.Clear();
+
+            TryReadMessages();
+
+            _readMessages.Clear();
         }
 
         internal virtual void StartWorkers()
@@ -238,13 +254,11 @@ namespace FF.Networking
 
         internal virtual bool CancelReadRequest(int a_requestId)
         {
-            //FFLog.LogError("Cancelling read request");
             return _pendingReadRequest.Remove(a_requestId);
         }
 
         internal virtual bool CancelSentRequest(int a_requestId)
         {
-            //FFLog.LogError("Cancelling Sent request");
             return _pendingSentRequest.Remove(a_requestId);
         }
         #endregion
@@ -481,6 +495,8 @@ namespace FF.Networking
         internal void EndConnectionOnMt()
         {
             _didEndConnection = false;
+            if (onConnectionLost != null)
+                onConnectionLost(this);
             if (onConnectionEnded != null)
                 onConnectionEnded(this, _endReason);
             Close();

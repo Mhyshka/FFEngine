@@ -182,6 +182,8 @@ namespace FF.Networking
             ffClient.StartWorkers();
             IPEndPoint newEp = a_client.Client.RemoteEndPoint as IPEndPoint;
 
+            FFMessageRoomInfo infos = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom);
+            ffClient.QueueMessage(infos);
             if (_clients.ContainsKey(newEp))
             {
                 ReconnectClient(ffClient);

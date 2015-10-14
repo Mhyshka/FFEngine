@@ -141,8 +141,8 @@ namespace FF
         #region Client Callbacks
         protected void OnClientAdded(FFTcpClient a_newClient)
         {
-            FFMessageRoomInfo roomInfo = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom);
-            a_newClient.QueueMessage(roomInfo);
+            /*FFMessageRoomInfo roomInfo = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom);
+            a_newClient.QueueMessage(roomInfo);*/
         }
 
         protected void OnClientReconnected(FFTcpClient a_recoClient)

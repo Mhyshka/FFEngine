@@ -286,10 +286,27 @@ namespace FF.Networking
 		internal void UpdateWithRoom(FFRoom a_room)
 		{
 			teams = a_room.teams;
-			
-			if(onRoomUpdated != null)
+            UpdatePlayers();
+
+            if (onRoomUpdated != null)
 				onRoomUpdated(this);
 		}
+
+        internal void UpdatePlayers()
+        {
+            players.Clear();
+            foreach (FFTeam aTeam in teams)
+            {
+                foreach (FFSlot aSlot in aTeam.Slots)
+                {
+                    FFNetworkPlayer curPlayer = aSlot.netPlayer;
+                    if (curPlayer != null)
+                    {
+                        players.Add(curPlayer.ID, curPlayer);
+                    }
+                }
+            }
+        }
 		
 		#region Serialization
 		public void SerializeData(FFByteWriter stream)

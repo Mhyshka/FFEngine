@@ -147,16 +147,14 @@ namespace FF
 		{
 			FFSlotRef selectedSlot = (FFSlotRef)a_args.data;
             FFNetworkPlayer player = FFEngine.Network.CurrentRoom.GetPlayerForSlot(selectedSlot);
-            if (player != FFEngine.Network.Player)
+            if (player != null)
             {
-                if (player != null)
-                {
+                if(player.ID != FFEngine.Network.Player.ID)
                     _slotOptionPopupId = FFClientSlotOptionPopup.RequestDisplay(player, OnPlayerOptionSwap, null);
-                }
-                else
-                {
-                    new FFMoveToSlotHandler(FFEngine.Network.MainClient, selectedSlot, OnMoveToSlotSuccess, OnMoveToSlotFailed);
-                }
+            }
+            else
+            {
+                new FFMoveToSlotHandler(FFEngine.Network.MainClient, selectedSlot, OnMoveToSlotSuccess, OnMoveToSlotFailed);
             }
         }
         #endregion

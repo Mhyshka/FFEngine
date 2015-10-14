@@ -21,7 +21,7 @@ namespace FF.Networking
 		{
 			long spanTick = DateTime.Now.Ticks - timeSent;
 			TimeSpan span = TimeSpan.FromTicks(spanTick);
-			FFLog.Log(EDbgCat.Networking, "Heartbeat " + span.TotalMilliseconds.ToString("0.") + "ms");
+			//FFLog.Log(EDbgCat.Networking, "Heartbeat " + span.TotalMilliseconds.ToString("0.") + "ms");
 		}	
 		
 		internal override bool IsMandatory

@@ -153,6 +153,7 @@ namespace FF
             }
             else
             {
+                FFEngine.Network.StopLookingForGames();
                 TearDown();
                 _navigationPanel.ShowWifiWarning();
             }
@@ -163,13 +164,15 @@ namespace FF
 		internal override void OnPause ()
 		{
 			base.OnPause ();
-			TearDown();
+            FFEngine.Network.StopLookingForGames();
+            TearDown();
 		}
 		
 		internal override void OnResume ()
 		{
 			base.OnResume ();
-			ResetState();
+
+            ResetState();
 		}
 		#endregion
 

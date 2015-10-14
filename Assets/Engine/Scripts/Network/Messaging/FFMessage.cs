@@ -68,7 +68,7 @@ namespace FF.Networking
 			stream.Write((short)Type);
 			SerializeData(stream);
 			stream.Close();
-			FFLog.Log(EDbgCat.Networking, "Serializing Request type : " + Type.ToString());
+			FFLog.Log(EDbgCat.Serialization, "Serializing Request type : " + Type.ToString());
 			return stream.Data;
 		}
 		
@@ -79,13 +79,13 @@ namespace FF.Networking
 			FFByteReader stream = new FFByteReader(a_data);
 			short value = stream.TryReadShort();
 			EMessageType type = (EMessageType)value;
-			FFLog.Log(EDbgCat.Networking, "Deserializing Request type : " + type.ToString());
+			FFLog.Log(EDbgCat.Serialization, "Deserializing Request type : " + type.ToString());
 			
 			FFMessage message = FFMessageFactory.CreateMessage(type);
 			if(message != null)
 				message.LoadFromData(stream);
 			else
-				FFLog.LogError(EDbgCat.Networking, "Unkown message type : " + type);
+				FFLog.LogError(EDbgCat.Serialization, "Unkown message type : " + type);
 				
 			stream.Close();
 			return message;

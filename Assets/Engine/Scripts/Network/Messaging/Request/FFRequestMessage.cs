@@ -77,6 +77,12 @@ namespace FF.Networking
                 onCancel();
         }
 
+        internal void ForceFail()
+        {
+            // Queueing fail message.
+            OnConnectionLost(_client);
+        }
+
         #region Serialization
         public override void SerializeData (FFByteWriter stream)
 		{
