@@ -1,30 +1,30 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
-namespace FF
+namespace FF.Logic
 {
 	/// <summary>
 	/// Basic Game Manager that handles loading of GameModes.
 	/// </summary>
-	internal class GameManager
+	internal class GameManager : BaseManager
 	{
 		#region Properties
 		protected AGameMode _currentGameMode = null;
 		protected string _currentSceneName = "";
-		#endregion
-	
-		internal GameManager()
-		{
-		
-		}
-	
-		#region Game Mode Management
-		internal void RegisterGameMode(AGameMode a_gameMode)
+        protected AsyncOperation _mainSceneLoading = null;
+        #endregion
+
+        #region Manager
+        #endregion
+
+        #region Game Mode Management
+        internal void RegisterGameMode(AGameMode a_gameMode)
 		{
 			if(_currentGameMode != null)
 			{
-				Debug.LogError("Two game modes are registered at the same time.");
+                FFLog.LogError(EDbgCat.Logic, "Two game modes are registered at the same time.");
 			}
 			
 			_currentGameMode = a_gameMode;
@@ -34,7 +34,7 @@ namespace FF
 		{
 			if(_currentGameMode == null)
 			{
-				Debug.LogError("No Game Mode to release.");
+                FFLog.LogError(EDbgCat.Logic, "No Game Mode to release.");
 			}
 			_currentGameMode = null;
 		}
@@ -48,7 +48,7 @@ namespace FF
                     return _currentGameMode;
                 }
 
-                Debug.LogError("No current game mode.");
+                FFLog.LogError(EDbgCat.Logic,"No current game mode.");
                 return null;
             }
 		}
@@ -59,8 +59,8 @@ namespace FF
 			{
 				return _currentGameMode as T;
 			}
-			
-			Debug.LogError("No current game mode.");
+
+            FFLog.LogError(EDbgCat.Logic, "No current game mode.");
 			return null;
 		}
 		
@@ -82,8 +82,24 @@ namespace FF
 		#region Loading
 		internal virtual void RequestGameMode(string a_sceneName)
 		{
-			Application.LoadLevelAsync (a_sceneName);
+            if (CurrentGameMode != null)
+            {
+                CurrentGameMode.TearDown();
+            }
+            _currentSceneName = a_sceneName;
+            _mainSceneLoading = SceneManager.LoadSceneAsync (a_sceneName, LoadSceneMode.Single);
 		}
+
+        internal float MainSceneLoadingProgress
+        {
+            get
+            {
+                if (_mainSceneLoading != null)
+                    return _mainSceneLoading.progress;
+
+                return 0f;
+            }
+        }
 		#endregion
 	}
 }

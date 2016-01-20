@@ -2,7 +2,9 @@
 using System.Collections;
 
 using FF.UI;
-using FF.Networking;
+using FF.Network;
+using FF.Network.Message;
+using FF.Multiplayer;
 
 namespace FF
 {
@@ -18,6 +20,13 @@ namespace FF
         protected int _swapPopupId;
         #endregion
 
+        #region Properties Receiver
+        protected Network.Receiver.MessageRemovedFromRoom _removedFromRoomReceiver;
+        protected Network.Receiver.RequestSlotSwap _slotSwapReceiver;
+        protected Network.Receiver.RequestConfirmSwap _confirmSwapReceiver;
+        protected Network.Receiver.MessageRequestGameMode _loadGameReceiver;
+        #endregion
+
         #region States Methods
         internal override int ID
 		{
@@ -29,69 +38,95 @@ namespace FF
 		internal override void Enter ()
 		{
 			base.Enter ();
-			FFLog.Log (EDbgCat.Logic, "Game Room Host state enter.");
-
+            InitReceivers();
+            FFLog.Log (EDbgCat.Logic, "Game Room Host state enter.");
             _slotOptionPopupId = -1;
             _connectionLostPopupId = -1;
             _swapPopupId = -1;
 
-            _roomPanel = FFEngine.UI.GetPanel("MenuRoomPanel") as FFMenuRoomPanel;
-			_roomPanel.UpdateWithRoom(FFEngine.Network.CurrentRoom);
+            _roomPanel = Engine.UI.GetPanel("MenuRoomPanel") as FFMenuRoomPanel;
+            _roomPanel.TrySelectWidget();
+			_roomPanel.UpdateWithRoom(Engine.Game.CurrentRoom);
 			_navigationPanel.SetTitle ("Game Lobby");
 
-            OnLanStatusChanged(FFEngine.NetworkStatus.IsConnectedToLan);
+            OnLanStatusChanged(Engine.NetworkStatus.IsConnectedToLan);
+
+            Engine.Inputs.EnableClientMode();
+            //Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
-		
-		internal override void Exit ()
+
+        private void InitReceivers()
+        {
+            if (_removedFromRoomReceiver == null)
+                _removedFromRoomReceiver = new Network.Receiver.MessageRemovedFromRoom(OnKickReceived, OnBanReceived);
+            if (_slotSwapReceiver == null)
+                _slotSwapReceiver = new Network.Receiver.RequestSlotSwap();
+            if (_confirmSwapReceiver == null)
+                _confirmSwapReceiver = new Network.Receiver.RequestConfirmSwap();
+            if (_loadGameReceiver == null)
+                _loadGameReceiver = new Network.Receiver.MessageRequestGameMode(OnRequestGameModeReceived);
+        }
+
+        internal override void Exit ()
 		{
 			base.Exit ();
             if (_connectionLostPopupId != -1)
-                FFEngine.UI.DismissPopup(_connectionLostPopupId);
+                Engine.UI.DismissPopup(_connectionLostPopupId);
             if(_swapPopupId != -1)
-                FFEngine.UI.DismissPopup(_swapPopupId);
+                Engine.UI.DismissPopup(_swapPopupId);
             if(_slotOptionPopupId != -1)
-                FFEngine.UI.DismissPopup(_slotOptionPopupId);
+                Engine.UI.DismissPopup(_slotOptionPopupId);
         }
-		#endregion
-		
-		#region Events
-		protected override void RegisterForEvent ()
+
+        internal override void GoBack()
+        {
+            base.GoBack();
+            Engine.Inputs.DisableClientMode();
+        }
+        #endregion
+
+        #region Events
+        protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent("SlotSelected", OnSlotSelected);
+			Engine.Events.RegisterForEvent("SlotSelected", OnSlotSelected);
 
-            FFEngine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
+            Engine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
 
-            FFEngine.Network.CurrentRoom.onRoomUpdated += OnRoomUpdate;
-            FFEngine.Network.MainClient.onConnectionSuccess += OnReconnection;
-            FFEngine.Network.MainClient.onConnectionLost += OnConnectionLost;
-            FFEngine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
+            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
+            Engine.Network.MainClient.onConnectionSuccess += OnReconnection;
+            Engine.Network.MainClient.onConnectionLost += OnConnectionLost;
+            Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
 
-            FFMessageRemovedFromRoom.onKickReceived += OnKickReceived;
-            FFMessageRemovedFromRoom.onBanReceived += OnBanReceived;
+            Engine.Receiver.RegisterReceiver(EMessageType.RemovedFromRoom, _removedFromRoomReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageType.SlotSwapRequest, _slotSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageType.ConfirmSwapRequest, _confirmSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageType.RequestGameMode, _loadGameReceiver);
 
-            FFEngine.Inputs.PushOnBackCallback(QuitRoom);
+            Engine.Inputs.PushOnBackCallback(QuitRoom);
         }
 		
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-            FFEngine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
+            Engine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
 
-            FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
+            Engine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
 
-            if (FFEngine.Network.MainClient != null)
+            if (Engine.Network.MainClient != null)
             {
-                FFEngine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
-                FFEngine.Network.MainClient.onConnectionSuccess -= OnReconnection;
-                FFEngine.Network.MainClient.onConnectionLost -= OnConnectionLost;
-                FFEngine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
+                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+                Engine.Network.MainClient.onConnectionSuccess -= OnReconnection;
+                Engine.Network.MainClient.onConnectionLost -= OnConnectionLost;
+                Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
             }
+        
+            Engine.Receiver.UnregisterReceiver(EMessageType.RemovedFromRoom, _removedFromRoomReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageType.SlotSwapRequest, _slotSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageType.ConfirmSwapRequest, _confirmSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageType.RequestGameMode, _loadGameReceiver);
 
-            FFMessageRemovedFromRoom.onKickReceived -= OnKickReceived;
-            FFMessageRemovedFromRoom.onBanReceived -= OnBanReceived;
-
-            FFEngine.Inputs.PopOnBackCallback();
+            Engine.Inputs.PopOnBackCallback();
         }
         #endregion
 
@@ -108,7 +143,7 @@ namespace FF
             }
         }
 
-        protected void OnRoomUpdate(FFRoom a_room)
+        protected void OnRoomUpdate(Room a_room)
         {
             _roomPanel.UpdateWithRoom(a_room);
         }
@@ -117,18 +152,18 @@ namespace FF
         #region Client Callbacks
         protected void OnConnectionLost(FFTcpClient a_client)
         {
-            _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel);
+            _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel, UIManager.POPUP_PRIO_HIGH);
         }
 
         protected void OnReconnection(FFTcpClient a_client)
         {
-            FFEngine.UI.DismissPopup(_connectionLostPopupId);
+            Engine.UI.DismissPopup(_connectionLostPopupId);
             _connectionLostPopupId = -1;
         }
 
         protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
         {
-            FFEngine.Network.SetNoMainClient();
+            Engine.Network.SetNoMainClient();
             FFMessagePopup.RequestDisplay("Connection ended : " + a_reason, "Ok", null);
             GoBack();
         }
@@ -136,7 +171,7 @@ namespace FF
         protected void OnConnectionLostPopupCancel()
         {
             KillClient();
-            FFEngine.UI.DismissPopup(_connectionLostPopupId);
+            Engine.UI.DismissPopup(_connectionLostPopupId);
             _connectionLostPopupId = -1;
             GoBack();
         }
@@ -145,16 +180,16 @@ namespace FF
         #region UI Events
         internal void OnSlotSelected(FFEventParameter a_args)
 		{
-			FFSlotRef selectedSlot = (FFSlotRef)a_args.data;
-            FFNetworkPlayer player = FFEngine.Network.CurrentRoom.GetPlayerForSlot(selectedSlot);
+			SlotRef selectedSlot = (SlotRef)a_args.data;
+            FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForSlot(selectedSlot);
             if (player != null)
             {
-                if(player.ID != FFEngine.Network.Player.ID)
+                if(player.ID != Engine.Game.NetPlayer.ID)
                     _slotOptionPopupId = FFClientSlotOptionPopup.RequestDisplay(player, OnPlayerOptionSwap, null);
             }
             else
             {
-                new FFMoveToSlotHandler(FFEngine.Network.MainClient, selectedSlot, OnMoveToSlotSuccess, OnMoveToSlotFailed);
+                new Handler.MoveToSlot(Engine.Network.MainClient, selectedSlot, OnMoveToSlotSuccess, OnMoveToSlotFailed);
             }
         }
         #endregion
@@ -168,7 +203,7 @@ namespace FF
 
         protected void OnMoveToSlotFailed(int a_errorCode)
         {
-            string message = FFMoveToSlotRequest.MessageForCode(a_errorCode);
+            string message = RequestMoveToSlot.MessageForCode(a_errorCode);
             FFMessageToast.RequestDisplay("Move to slot failed : " + message);
             //FFLog.Log(EDbgCat.Logic, "Move to slot failed : " + message);
         }
@@ -199,45 +234,45 @@ namespace FF
         #endregion
 
         #region Swap
-        FFSlotSwapHandler _swapHandler;
+        Handler.SlotSwap _swapHandler;
         internal void OnPlayerOptionSwap(FFNetworkPlayer a_player)
         {
-            FFEngine.UI.DismissPopup(_slotOptionPopupId);
+            Engine.UI.DismissPopup(_slotOptionPopupId);
             _slotOptionPopupId = -1;
             _swapPopupId = FFLoadingPopup.RequestDisplay("Waiting for " + a_player.player.username + " to respond.", "Cancel", OnSwapCanceled);
-            _swapHandler = new FFSlotSwapHandler(FFEngine.Network.MainClient, a_player.SlotRef, OnSwapSuccess, OnSwapFailed);
+            _swapHandler = new Handler.SlotSwap(Engine.Network.MainClient, a_player.SlotRef, OnSwapSuccess, OnSwapFailed);
         }
 
         protected void OnSwapSuccess()
         {
-            FFEngine.UI.DismissPopup(_swapPopupId);
+            Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap success");
         }
 
         protected void OnSwapFailed(int a_errorCode)
         {
-            string message = FFSlotSwapRequest.MessageForCode(a_errorCode);
-            FFEngine.UI.DismissPopup(_swapPopupId);
+            string message = RequestSlotSwap.MessageForCode(a_errorCode);
+            Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap failed : " + message);
         }
 
         protected void OnSwapCanceled()
         {
-            FFEngine.UI.DismissPopup(_swapPopupId);
+            Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             _swapHandler.Cancel();
         }
         #endregion
 
         #region Quit
-        FFMessageLeavingRoom _leavingMessage = null;
+        MessageLeavingRoom _leavingMessage = null;
         protected void QuitRoom()
         {
-            _leavingMessage = new FFMessageLeavingRoom();
+            _leavingMessage = new MessageLeavingRoom();
             _leavingMessage.onMessageSent += OnLeavingRoomSent;
-            FFEngine.Network.MainClient.QueueFinalMessage(_leavingMessage);
+            Engine.Network.MainClient.QueueFinalMessage(_leavingMessage);
         }
 
         protected void OnLeavingRoomSent()
@@ -251,19 +286,18 @@ namespace FF
         #region Stop
         protected void KillClient()
         {
-            FFEngine.Network.CloseMainClient();
+            Engine.Network.CloseMainClient();
+        }
+        #endregion
+
+        #region LoadGame
+        internal void OnRequestGameModeReceived()
+        {
+            RequestMultiGameMode("PongClientGameMode");
         }
         #endregion
 
         #region focus
-        internal override void OnGetFocus()
-        {
-            base.OnGetFocus();
-            if (FFEngine.Inputs.ShouldUseNavigation)
-            {
-                _roomPanel.TrySelectWidget();
-            }
-        }
         #endregion
     }
 }

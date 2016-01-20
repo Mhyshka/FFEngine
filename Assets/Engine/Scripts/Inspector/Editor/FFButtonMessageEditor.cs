@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEditor.SceneManagement;
 using UnityEditor;
 using System.Collections;
 
@@ -14,9 +15,9 @@ public class FFButtonMessageEditor : Editor
 		FFButtonEvent script = target as FFButtonEvent;
 		GUI.changed = false;
 		
-		script.eventType = (EEventType)EditorGUILayout.EnumPopup("Event type",script.eventType);
+		script.eventType = (FFEventType)EditorGUILayout.EnumPopup("Event type",script.eventType);
 		
-		if(script.eventType == EEventType.Custom)
+		if(script.eventType == FFEventType.Custom)
 		{
 			EditorGUI.indentLevel++;
 			script.eventKey = EditorGUILayout.TextField("Event Key",script.eventKey);
@@ -25,7 +26,7 @@ public class FFButtonMessageEditor : Editor
 		if(GUI.changed)
 		{
 			EditorUtility.SetDirty(script);
-			EditorApplication.MarkSceneDirty();
+			EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 		}
 	}
 }

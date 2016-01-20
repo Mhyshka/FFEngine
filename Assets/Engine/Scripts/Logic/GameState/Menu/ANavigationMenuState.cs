@@ -15,7 +15,7 @@ namespace FF
 		{
 			base.Enter ();
 			if(_navigationPanel == null)
-				_navigationPanel = FFEngine.UI.GetPanel("NavigationBarPanel") as FFNavigationBarPanel;
+				_navigationPanel = Engine.UI.GetPanel("NavigationBarPanel") as FFNavigationBarPanel;
 		}
 	}
 }

@@ -5,22 +5,24 @@ using FF.Utils;
 
 namespace FF.Multiscreen
 {
-	internal class FFMultiscreenManager
+	internal class MultiscreenManager : BaseManager
 	{
 		#region Properties
 		protected bool _isTV;
-		#endregion
+        #endregion
 
-		internal FFMultiscreenManager()
+        #region Manager
+        internal MultiscreenManager()
 		{
 			_isTV = RefreshIsTV();
 		}
-		
-		#region TV
-		/// <summary>
-		/// Returns yes if the device is a TV OS.
-		/// </summary>
-		internal bool IsTV
+        #endregion
+
+        #region TV
+        /// <summary>
+        /// Returns yes if the device is a TV OS.
+        /// </summary>
+        internal bool IsTV
 		{
 			get
 			{

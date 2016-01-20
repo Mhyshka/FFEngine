@@ -6,7 +6,8 @@ namespace FF.UI
 {
 	internal class UIRoot : MonoBehaviour
 	{
-		#region Inspector properties
+        #region Inspector properties
+        public Camera uiCamera = null;
 		public TouchInputModule touchModule = null;
 		public StandaloneInputModule standaloneModule = null;
 		#endregion
@@ -14,14 +15,14 @@ namespace FF.UI
 		
 		void Awake()
 		{
-			FFEngine.UI.RegisterRoot(this);
+			Engine.UI.RegisterRoot(this);
 			ConfigureEnabledInput();
 		}
 		
 		internal void ConfigureEnabledInput()
 		{
 #if !UNITY_EDITOR
-			if(FFEngine.Inputs.ShouldUseNavigation)
+			if(Engine.Inputs.ShouldUseNavigation)
 			{
 				touchModule.enabled = false;
 				standaloneModule.enabled = true;

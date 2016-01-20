@@ -19,12 +19,12 @@ namespace FF.Input
 		}
 	}
 	
-	internal class InputManager
+	internal class InputManager : BaseManager
 	{
 		#region Properties
-		internal Dictionary<string, AInputEvent> keys;
-		internal Dictionary<string, AInputSwitch> switchs;
-		internal Dictionary<string, AInputAxis> axis;
+		protected Dictionary<string, AInputEvent> _keys;
+        protected Dictionary<string, AInputSwitch> _switchs;
+        protected Dictionary<string, AInputAxis> _axis;
 
         protected Stack<SimpleCallback> _backCallbacksStack = null;
 		
@@ -32,57 +32,102 @@ namespace FF.Input
 		protected bool _isPollingAxis = false;
         #endregion
 
-        internal InputManager()
+        #region Manager
+        internal InputManager(bool a_registerForBack = false)
         {
-            keys = new Dictionary<string, AInputEvent>();
-            switchs = new Dictionary<string, AInputSwitch>();
-            axis = new Dictionary<string, AInputAxis>();
+            _keys = new Dictionary<string, AInputEvent>();
+            _switchs = new Dictionary<string, AInputSwitch>();
+            _axis = new Dictionary<string, AInputAxis>();
             _backCallbacksStack = new Stack<SimpleCallback>();
 
-            FFEngine.Events.RegisterForEvent(EEventType.Back, OnBackEvent);
+            SetupDefaultEvents();
+
+            if (a_registerForBack)
+                Engine.Events.RegisterForEvent(FFEventType.Back, OnBackEvent);
         }
 
-        ~InputManager()
+        internal override void DoUpdate()
         {
-            FFEngine.Events.UnregisterForEvent(EEventType.Back, OnBackEvent);
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Escape))
+            {
+                HandleOnBackPressed();
+            }
+            foreach (AInputEvent each in _keys.Values)
+            {
+                each.DoUpdate();
+            }
+            foreach (AInputAxis each in _axis.Values)
+            {
+                each.DoUpdate();
+            }
+
+            if (_isPollingKey)
+            {
+                KeyPoll();
+            }
+
+            if (_isPollingAxis)
+            {
+                AxisPoll();
+            }
         }
 
-        #region Engine
-        internal void DoUpdate ()
-		{
-			if(UnityEngine.Input.GetKeyDown(KeyCode.Escape))
-			{
-                HandleOnBackPressed();
-			}
-			foreach (AInputEvent each in keys.Values)
-			{
-				each.DoUpdate();
-			}
-			foreach (AInputAxis each in axis.Values)
-			{
-				each.DoUpdate();
-			}
-			
-			if(_isPollingKey)
-			{
-				KeyPoll();
-			}
-			
-			if(_isPollingAxis)
-			{
-				AxisPoll();
-			}
-		}
+        internal override void TearDown()
+        {
+            Engine.Events.UnregisterForEvent(FFEventType.Back, OnBackEvent);
+        }
+        #endregion
 
-        internal void Register(AInputEvent a_input)
+        #region Register
+        internal void RegisterInputEvent(AInputEvent a_input)
 		{
-			keys.Add(a_input.eventName, a_input);
+            if (!_keys.ContainsKey(a_input.eventKeyName))
+                _keys.Add(a_input.eventKeyName, a_input);
+            else
+                _keys[a_input.eventKeyName] = a_input;
 		}
 		
-		internal void Register(AInputAxis a_input)
+		internal void RegisterInputAxis(AInputAxis a_input)
 		{
-			axis.Add(a_input.eventName, a_input);
+            if (!_axis.ContainsKey(a_input.eventKeyName))
+                _axis.Add(a_input.eventKeyName, a_input);
+            else
+                _axis[a_input.eventKeyName] = a_input;
 		}
+
+        internal void RegisterInputSwitch(AInputSwitch a_input)
+        {
+            if (!_switchs.ContainsKey(a_input.eventKeyName))
+                _switchs.Add(a_input.eventKeyName, a_input);
+            else
+                _switchs[a_input.eventKeyName] = a_input;
+        }
+        #endregion
+
+        #region Get
+        internal AInputEvent EventForKey(EInputEventKey a_inputKey)
+        {
+            return EventForKey(a_inputKey.ToString());
+        }
+
+        internal AInputEvent EventForKey(string a_key)
+        {
+            AInputEvent inputEvent = null;
+            _keys.TryGetValue(a_key, out inputEvent);
+            return inputEvent;
+        }
+
+        internal AInputAxis AxisForKey(EInputAxisKey a_inputKey)
+        {
+            return AxisForKey(a_inputKey.ToString());
+        }
+
+        internal AInputAxis AxisForKey(string a_key)
+        {
+            AInputAxis inputAxis = null;
+            _axis.TryGetValue(a_key, out inputAxis);
+            return inputAxis;
+        }
         #endregion
 
         #region Polling
@@ -98,7 +143,7 @@ namespace FF.Input
             {
                 FFEventParameter args = new FFEventParameter();
                 args.data = binding;
-                FFEngine.Events.FireEvent("InputKeyDetected", args);
+                Engine.Events.FireEvent("InputKeyDetected", args);
                 _isPollingKey = false;
             }
         }
@@ -112,7 +157,7 @@ namespace FF.Input
         {
             if (InputKeyBinding.IsEscapePressed())
             {
-                FFEngine.Events.FireEvent("InputAxisDetected", null);
+                Engine.Events.FireEvent("InputAxisDetected", null);
             }
             else
             {
@@ -121,28 +166,12 @@ namespace FF.Input
                 {
                     FFEventParameter args = new FFEventParameter();
                     args.data = binding;
-                    FFEngine.Events.FireEvent("InputAxisDetected", args);
+                    Engine.Events.FireEvent("InputAxisDetected", args);
                     _isPollingAxis = false;
                 }
             }
         }
         #endregion
-
-        #region EventListening
-        internal AInputEvent GetInputKey(EInputEventKey a_key)
-		{
-			return GetInputKey(a_key.ToString());
-		}
-		
-		internal AInputEvent GetInputKey(string a_keyName)
-		{
-			if(keys.ContainsKey(a_keyName))
-			{
-				return keys[a_keyName];
-			}
-			return null;
-		}
-		#endregion
 		
 		#region Joystick
 		internal bool HasJoystickConnected
@@ -158,7 +187,7 @@ namespace FF.Input
 		{
 			get
 			{
-				return FFEngine.MultiScreen.IsTV || HasJoystickConnected;
+				return Engine.MultiScreen.IsTV || HasJoystickConnected;
 			}
 		}
         #endregion
@@ -189,5 +218,24 @@ namespace FF.Input
             _backCallbacksStack.Pop();
         }
         #endregion
+
+        protected virtual void SetupDefaultEvents()
+        {
+            //KeyCode
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Up,
+                                                new InputKeyBinding(KeyCode.UpArrow)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Down,
+                                                new InputKeyBinding(KeyCode.DownArrow)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Left,
+                                                new InputKeyBinding(KeyCode.LeftArrow)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Right,
+                                                new InputKeyBinding(KeyCode.RightArrow)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Back,
+                                                new InputKeyBinding(KeyCode.Escape)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Submit,
+                                                new InputKeyBinding(KeyCode.Return)));
+            RegisterInputEvent(new InputEventKey(EInputEventKey.Action,
+                                                new InputKeyBinding(KeyCode.Return)));
+        }
     }
 }

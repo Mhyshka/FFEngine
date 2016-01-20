@@ -8,17 +8,18 @@ namespace FF.UI
     {
         public float targetAlpha = 1f;
 
-        protected CanvasGroup _canvasGroup = null;
+        public CanvasGroup canvasGroup = null;
 
         protected override void Awake()
         {
             base.Awake();
-            _canvasGroup = GetComponent<CanvasGroup>();
+            if(canvasGroup == null)
+                canvasGroup = GetComponent<CanvasGroup>();
         }
 
         protected override void Tween(float a_factor)
         {
-            _canvasGroup.alpha = a_factor * targetAlpha;
+            canvasGroup.alpha = a_factor * targetAlpha;
         }
     }
 }

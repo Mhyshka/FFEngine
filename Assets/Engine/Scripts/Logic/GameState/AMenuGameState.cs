@@ -10,7 +10,14 @@ namespace FF
 		#endregion
 	
 		#region Properties
-		private bool isGoingBack = false;
+		private bool _isGoingBack = false;
+        protected bool IsGoingBack
+        {
+            get
+            {
+                return _isGoingBack;
+            }
+        }
 		private MenuGameMode mgm = null;
 		#endregion
 	
@@ -18,14 +25,14 @@ namespace FF
 		internal override void Enter ()
 		{
 			base.Enter ();
-			isGoingBack = false;
+			_isGoingBack = false;
 			mgm = _gameMode as MenuGameMode;
 		}
 		
 		internal override void Exit ()
 		{
 			base.Exit ();
-			if(!isGoingBack)
+			if(!_isGoingBack)
 			{
 				if(mgm != null)
 				{
@@ -39,7 +46,7 @@ namespace FF
         /// </summary>
 		internal void GoBack(int a_id)
 		{
-            isGoingBack = true;
+            _isGoingBack = true;
             RequestState(a_id);
 		}
 

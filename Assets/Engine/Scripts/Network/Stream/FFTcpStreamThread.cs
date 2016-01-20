@@ -6,7 +6,7 @@ using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
-namespace FF.Networking
+namespace FF.Network
 {
 	internal abstract class FFTcpStreamThread
 	{

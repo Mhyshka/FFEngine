@@ -2,21 +2,23 @@
 using UnityEngine;
 using System.IO;
 
+using UnityEditor.SceneManagement;
+
 public class FFEngineMenu : MonoBehaviour
 {
 	[MenuItem ("FFMenu/Play %#m")]
 	static void Play ()
 	{
-		if(!EditorApplication.isPlayingOrWillChangePlaymode && EditorApplication.SaveCurrentSceneIfUserWantsTo())
+		if(!EditorApplication.isPlayingOrWillChangePlaymode && EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
 		{
 			Debug.Log("Custom Play");
 
 			StreamWriter writer = new StreamWriter("Assets/Editor/lastScene");
-			writer.WriteLine(EditorApplication.currentScene);
+			writer.WriteLine(EditorSceneManager.GetActiveScene().path);
 			writer.Close();
 			AssetDatabase.SaveAssets();
-			
-			EditorApplication.OpenScene("Assets/Scenes/EntryPoint.unity");
+
+            EditorSceneManager.OpenScene("Assets/Scenes/EntryPoint.unity");
 			EditorApplication.isPlaying = true;
 		}
 	}
@@ -32,7 +34,7 @@ public class FFEngineMenu : MonoBehaviour
 		reader.Close();
 		if(!string.IsNullOrEmpty(text))
 		{
-			EditorApplication.OpenScene(text);
+			EditorSceneManager.OpenScene(text);
 		}
 	}
 }

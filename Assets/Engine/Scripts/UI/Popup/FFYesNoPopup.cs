@@ -32,13 +32,14 @@ namespace FF.UI
             if (_onNoPressed != null)
                 _onNoPressed();
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
 
-        internal static int RequestDisplay(string a_message, string a_buttonYesContent, string a_buttonNoContent, SimpleCallback a_yesCallback, SimpleCallback a_noCallback)
+        internal static int RequestDisplay(string a_message, string a_buttonYesContent, string a_buttonNoContent, SimpleCallback a_yesCallback, SimpleCallback a_noCallback, int a_priority = 0)
         {
             FFYesNoPopupData data = new FFYesNoPopupData();
             data.popupName = "YesNoPopup";
+            data.priority = a_priority;
             data.messageContent = a_message;
 
             data.buttonContent = a_buttonYesContent;
@@ -47,7 +48,7 @@ namespace FF.UI
             data.buttonNoContent = a_buttonNoContent;
             data.onNoPressed = a_noCallback;
 
-            FFEngine.UI.PushPopup(data);
+            Engine.UI.PushPopup(data);
 
             return data.id;
         }

@@ -3,7 +3,8 @@ using System.Collections;
 
 using UnityEngine.UI;
 
-using FF.Networking;
+using FF.Network;
+using FF.Multiplayer;
 
 namespace FF.UI
 {
@@ -40,7 +41,7 @@ namespace FF.UI
 
             _player = data.player;
 
-            swapButton.enabled = !data.player.isDCed;
+            swapButton.enabled = !data.player.isDced;
             _onSwapPressed = data.onSwapPressed;
             _onCancelPressed = data.onCancelPressed;
         }
@@ -51,7 +52,7 @@ namespace FF.UI
             if (_onSwapPressed != null)
                 _onSwapPressed(_player);
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
 
         public void OnCancelPressed()
@@ -59,20 +60,21 @@ namespace FF.UI
             if (_onCancelPressed != null)
                 _onCancelPressed();
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
         #endregion
 
-        internal static int RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback)
+        internal static int RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback, int a_priority = 0)
         {
             FFClientSlotOptionPopupData data = new FFClientSlotOptionPopupData();
             data.popupName = "ClientSlotOptionPopup";
             data.player = a_player;
+            data.priority = a_priority;
 
             data.onSwapPressed = a_swapCallback;
             data.onCancelPressed = a_cancelCallback;
 
-            FFEngine.UI.PushPopup(data);
+            Engine.UI.PushPopup(data);
 
             return data.id;
         }

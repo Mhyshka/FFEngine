@@ -7,7 +7,9 @@ using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
-namespace FF.Networking
+using FF.Network.Message;
+
+namespace FF.Network
 {
 	internal class FFTcpReader : FFTcpStreamThread
 	{
@@ -76,7 +78,7 @@ namespace FF.Networking
                     }
                     else
                     {
-                        Thread.Sleep(3);
+                        Thread.Sleep(0);
                     }
 				}
 			}
@@ -98,9 +100,7 @@ namespace FF.Networking
 					byte[] messageData = FFByteArrayExtension.Extract(ref _data, _currentMessageSize);
 					_currentMessageSize = -1;
 					
-					FFMessage message = FFMessage.Deserialize(messageData);
-                    if(message is FFJoinRoomRequest)
-                        FFLog.LogError("Pre queueing join request");
+					AMessage message = AMessage.Deserialize(messageData);
 
                     _ffClient.QueueReadMessage(message);
 				}

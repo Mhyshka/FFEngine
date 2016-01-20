@@ -6,11 +6,12 @@ namespace FF.UI
     internal class FFPopupData
     {
         internal int id = 0;
+        internal int priority = 0;
         internal string popupName = null;
 
         internal FFPopupData()
         {
-            id = FFEngine.UI.NextPopupId;
+            id = Engine.UI.NextPopupId;
         }
     }
 
@@ -27,7 +28,7 @@ namespace FF.UI
         internal override void Show(bool a_isForward = true)
         {
             base.Show(a_isForward);
-            FFEngine.Inputs.PushOnBackCallback(OnBackPressed);
+            Engine.Inputs.PushOnBackCallback(OnBackPressed);
             _isRegisteredToBack = true;
         }
 
@@ -36,7 +37,7 @@ namespace FF.UI
             base.Hide(a_isForward);
             if (_isRegisteredToBack)
             {
-                FFEngine.Inputs.PopOnBackCallback();
+                Engine.Inputs.PopOnBackCallback();
                 _isRegisteredToBack = false;
             }
         }

@@ -37,7 +37,7 @@ namespace FF.UI
             data.toastName = "MessageToast";
             data.duration = a_duration;
             data.messageContent = a_message;
-            FFEngine.UI.PushToast(data);
+            Engine.UI.PushToast(data);
         }
     }
 }

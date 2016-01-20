@@ -14,7 +14,7 @@ namespace FF
 	{
 		None = -1,
 		Main = 2000,
-		GameModePicker,
+		ModeSelection,
 		SearchForRooms,
 		GameRoomHost,
 		GameRoomClient,
@@ -30,13 +30,10 @@ namespace FF
 		Game
 	}
 	
-	public enum EEventType
+	public enum FFEventType
 	{
 		Custom = -1,
-		UILoadingComplete = 0,
-		GMLoadingComplete,
-		AsyncLoadingComplete,
-		Next,
+		Next = 0,
 		Back,
 		Confirm,
 		Decline,
@@ -46,13 +43,21 @@ namespace FF
 	
 	internal enum EInputEventKey
 	{
-		Select,
+        Action,
+        Up,
+        Down,
+        Left,
+        Right,
+        Submit,
+        Back
+
+        /*Select,
 		Interaction,
 		Spell1,
 		Spell2,
 		Spell3,
 		Spell4,
-		Quit
+		Quit*/
 	}
 	
 	internal enum EInputSwitchKey

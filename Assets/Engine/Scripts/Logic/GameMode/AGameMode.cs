@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -22,12 +23,6 @@ namespace FF
             _states.TryGetValue(a_id, out state);
             return state;
         }
-		
-		// Loading
-		protected int _asyncLoadingCount = 0;
-		protected bool _isGameModeLoaded = false;
-		protected bool _isUILoaded = false;
-		internal virtual bool IsLoadingComplete{get{return _isGameModeLoaded && _isUILoaded;}}
 		
 		protected bool _isGoingBack = false;
 		internal bool IsGoingBack
@@ -79,6 +74,10 @@ namespace FF
 			
 			Enter();
 		}
+
+        internal virtual void TearDown()
+        {
+        }
 		
 		protected /*virtual*/ void OnDestroy()
 		{
@@ -94,12 +93,12 @@ namespace FF
 		
 		protected virtual void Enter()
 		{
-			RegisterForEvent();
+            _hasFocus = true;
+            RegisterForEvent();
 			_currentID = -1;
-			FFEngine.Game.RegisterGameMode(this);
-			_isGameModeLoaded = loading.additionalRequiredScenes.Length == 0;
+			Engine.Game.RegisterGameMode(this);
 			CurrentStateID = loading.ID;
-		}
+        }
 		
 		protected virtual void Update ()
 		{
@@ -109,8 +108,8 @@ namespace FF
 		protected virtual void Exit()
 		{
 			UnregisterForEvent();
-			FFEngine.UI.ClearPanels();
-			FFEngine.Game.ReleaseGameMode();
+			Engine.UI.ClearPanels();
+			Engine.Game.ReleaseGameMode();
 		}
 		#endregion
 		
@@ -134,7 +133,8 @@ namespace FF
 						_states[_currentID].Exit();
 					_currentID = value;
 					_states[_currentID].Enter();
-					_isGoingBack = false;
+                    _states[_currentID].PostEnter();
+                    _isGoingBack = false;
 				}
 			}
 		}
@@ -148,38 +148,10 @@ namespace FF
 		#region Event Management
 		protected virtual void RegisterForEvent ()
 		{
-			FFEngine.Events.RegisterForEvent(EEventType.AsyncLoadingComplete, OnAsyncLoadingComplete);
-			FFEngine.Events.RegisterForEvent(EEventType.UILoadingComplete, OnUILoadingComplete);
 		}
 		
 		protected virtual void UnregisterForEvent ()
 		{
-			FFEngine.Events.UnregisterForEvent(EEventType.AsyncLoadingComplete, OnAsyncLoadingComplete);
-			FFEngine.Events.UnregisterForEvent(EEventType.UILoadingComplete, OnUILoadingComplete);
-		}
-		
-		private void OnAsyncLoadingComplete(FFEventParameter a_args)
-		{
-			_asyncLoadingCount--;
-			if(_asyncLoadingCount == 0)
-			{
-				_isGameModeLoaded = true;
-			}
-			else if(_asyncLoadingCount < 0)
-			{
-				Debug.LogError("Async loading error, loading count invalid : " + _asyncLoadingCount.ToString());
-			}
-		}
-		
-		private void OnUILoadingComplete(FFEventParameter a_args)
-		{
-			_isUILoaded = true;
-		}
-		
-		internal void LoadAsyncScene(string a_sceneName)
-		{
-			Application.LoadLevelAdditiveAsync(a_sceneName);
-			_asyncLoadingCount++;
 		}
 		#endregion
 		
@@ -208,13 +180,23 @@ namespace FF
         #endregion
 
         #region Focus Popup
+        protected bool _hasFocus = true;
+        internal bool HasFocus
+        {
+            get
+            {
+                return _hasFocus;
+            }
+        }
         internal virtual void OnLostFocus()
         {
+            _hasFocus = false;
             CurrentState.OnLostFocus();
         }
 
         internal virtual void OnGetFocus()
         {
+            _hasFocus = true;
             CurrentState.OnGetFocus();
         }
         #endregion

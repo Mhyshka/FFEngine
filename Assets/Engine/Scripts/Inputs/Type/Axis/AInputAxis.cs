@@ -6,7 +6,7 @@ namespace FF.Input
 	internal abstract class AInputAxis
 	{
 		#region Properties
-		internal string eventName;
+		internal string eventKeyName;
 		internal abstract float Value{get;}
 		#endregion
 		
@@ -18,11 +18,8 @@ namespace FF.Input
 		internal AInputAxis(string a_eventKeyName,
 		                    bool a_isInverted = false)
 		{
-			eventName = a_eventKeyName;
-			if(!FFEngine.Inputs.axis.ContainsKey(eventName))
-				FFEngine.Inputs.axis.Add(eventName,this);
-			else
-				FFEngine.Inputs.axis[eventName] = this;
+			eventKeyName = a_eventKeyName;
+            Engine.Inputs.RegisterInputAxis(this);
 		}
 		
 		internal bool IsTriggering()

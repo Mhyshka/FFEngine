@@ -7,7 +7,7 @@ using System.Threading;
 using System.IO;
 using System.Net.Sockets;
 
-namespace FF.Networking
+namespace FF.Network
 {
     internal class FFTcpConnectionTask
     {

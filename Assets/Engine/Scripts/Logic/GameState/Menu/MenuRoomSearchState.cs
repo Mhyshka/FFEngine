@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.EventSystems;
 
-using Zeroconf;
 using FF.UI;
-using FF.Networking;
+using FF.Multiplayer;
 
 namespace FF
 {
@@ -16,7 +13,7 @@ namespace FF
 		#endregion
 		
 		#region Properties
-		protected FFHostListPanel _hostListPanel;
+		protected FFSearchRoomPanel _searchRoomPanel;
 		#endregion
 		
 		#region States Methods
@@ -33,10 +30,10 @@ namespace FF
 			base.Enter ();
 			FFLog.Log (EDbgCat.Logic, "Host List state enter.");
 			
-			if(_hostListPanel == null)
-				_hostListPanel = FFEngine.UI.GetPanel("MenuRoomListPanel") as FFHostListPanel;
+			if(_searchRoomPanel == null)
+				_searchRoomPanel = Engine.UI.GetPanel("MenuSearchRoomPanel") as FFSearchRoomPanel;
 				
-			if(FFEngine.Inputs.ShouldUseNavigation)
+			if(Engine.Inputs.ShouldUseNavigation)
 			{
 				_navigationPanel.FocusBackButton();
 			}
@@ -60,17 +57,17 @@ namespace FF
 		#region Init & TearDown
 		protected void ResetState()
 		{
-            if (FFEngine.NetworkStatus.IsConnectedToLan)
+            if (Engine.NetworkStatus.IsConnectedToLan)
 			{
 				_navigationPanel.SetTitle ("Looking for games");
 
-                if (!FFEngine.Network.IsLookingForRoom)// Not yet looking for room.
+                if (!Engine.Network.IsLookingForRoom)// Not yet looking for room.
                 {
-                    _hostListPanel.ClearRoomsCells();
-                    FFEngine.Network.StartLookingForGames();
+                    _searchRoomPanel.ClearRoomsCells();
+                    Engine.Network.StartLookingForGames();
 
-                    FFEngine.Network.onNewRoomReceived += OnRoomAdded;
-                    FFEngine.Network.onRoomLost += OnRoomLost;
+                    Engine.Network.onNewRoomReceived += OnRoomAdded;
+                    Engine.Network.onRoomLost += OnRoomLost;
                 }
 
                 _navigationPanel.ShowLoader("Searching");
@@ -85,7 +82,7 @@ namespace FF
 
         internal override void GoBack()
         {
-            FFEngine.Network.StopLookingForGames();
+            Engine.Network.StopLookingForGames();
             base.GoBack();
         }
 
@@ -93,11 +90,11 @@ namespace FF
 		{
             _navigationPanel.HideLoader();
 
-            if (!FFEngine.Network.IsLookingForRoom)// Not looking for room anymore.
+            if (!Engine.Network.IsLookingForRoom)// Not looking for room anymore.
             {
-                _hostListPanel.ClearRoomsCells();
-                FFEngine.Network.onNewRoomReceived -= OnRoomAdded;
-                FFEngine.Network.onRoomLost -= OnRoomLost;
+                _searchRoomPanel.ClearRoomsCells();
+                Engine.Network.onNewRoomReceived -= OnRoomAdded;
+                Engine.Network.onRoomLost -= OnRoomLost;
             }
         }
 		#endregion
@@ -106,43 +103,45 @@ namespace FF
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent(EEventType.Connect, OnConnectButtonPressed);
+			Engine.Events.RegisterForEvent(FFEventType.Connect, OnConnectButtonPressed);
 
-            FFEngine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
+            Engine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
         }
 
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent(EEventType.Connect, OnConnectButtonPressed);
+			Engine.Events.UnregisterForEvent(FFEventType.Connect, OnConnectButtonPressed);
 
-            FFEngine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
+            Engine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
         }
 		
 		internal void OnConnectButtonPressed(FFEventParameter a_args)
 		{
             if (a_args.data == null)
             {
-                FFLog.LogError("Room is null");
+                FFLog.LogError(EDbgCat.Logic, "Room is null");
                 return;
             }
 
-			FFRoom selectedRoom = a_args.data as FFRoom;
-            FFEngine.Network.SetMainClient(selectedRoom);
+			Room selectedRoom = a_args.data as Room;
+            Engine.Network.SetMainClient(selectedRoom);
 
             RequestState(outState.ID);
 		}
 		#endregion
 		
 		#region List Management
-		internal void OnRoomAdded (FFRoom aRoom)
+		internal void OnRoomAdded (Room aRoom)
 		{
-			_hostListPanel.AddRoom (aRoom);
+            FFLog.LogError(EDbgCat.Logic,"Room added");
+			_searchRoomPanel.AddRoom (aRoom);
 		}
 		
-		internal void OnRoomLost(FFRoom aRoom)
+		internal void OnRoomLost(Room aRoom)
 		{
-			_hostListPanel.RemoveRoom (aRoom);
+			_searchRoomPanel.RemoveRoom (aRoom);
+            _navigationPanel.FocusBackButton();
 		}
 
         internal void OnLanStatusChanged(bool a_state)
@@ -153,7 +152,7 @@ namespace FF
             }
             else
             {
-                FFEngine.Network.StopLookingForGames();
+                Engine.Network.StopLookingForGames();
                 TearDown();
                 _navigationPanel.ShowWifiWarning();
             }
@@ -164,7 +163,7 @@ namespace FF
 		internal override void OnPause ()
 		{
 			base.OnPause ();
-            FFEngine.Network.StopLookingForGames();
+            Engine.Network.StopLookingForGames();
             TearDown();
 		}
 		
@@ -180,7 +179,7 @@ namespace FF
         internal override void OnGetFocus()
         {
             base.OnGetFocus();
-            if (FFEngine.Inputs.ShouldUseNavigation)
+            if (Engine.Inputs.ShouldUseNavigation)
             {
                 _navigationPanel.FocusBackButton();
             }

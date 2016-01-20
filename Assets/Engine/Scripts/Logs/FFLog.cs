@@ -7,12 +7,14 @@ internal enum EDbgCat
 {
 	Zeroconf,
 	Networking,
+    Receiver,
+    Message,
     Socket,
     Serialization,
-    Message,
     Handler,
 	UI,
-	Logic
+	Logic,
+    Input
 }
 
 internal enum EDbgLevel
@@ -28,13 +30,15 @@ internal class FFLog
     internal static EDbgCat[] DBG_CAT = new EDbgCat[]
     { 
         /*EDbgCat.Zeroconf,
-        */EDbgCat.Networking,/*
+        EDbgCat.Networking,
+        EDbgCat.Receiver,
+        EDbgCat.Message,
         EDbgCat.Serialization,
         EDbgCat.Socket,
-        EDbgCat.Message,
         EDbgCat.Handler,
-        */EDbgCat.UI/*,
-        EDbgCat.Logic*/
+        EDbgCat.UI,
+        EDbgCat.Logic,
+        EDbgCat.Input*/
     };
 
     internal static bool HasCatEnable(EDbgCat a_cat)

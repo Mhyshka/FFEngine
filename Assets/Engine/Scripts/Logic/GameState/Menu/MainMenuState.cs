@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using FF.Networking;
+using FF.Network;
 
 namespace FF
 {
@@ -40,13 +40,13 @@ namespace FF
 		protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.Events.RegisterForEvent ("OnPlayPressed", OnPlayPressed);
+			Engine.Events.RegisterForEvent ("OnPlayPressed", OnPlayPressed);
 		}
 
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.Events.UnregisterForEvent ("OnPlayPressed", OnPlayPressed);
+			Engine.Events.UnregisterForEvent ("OnPlayPressed", OnPlayPressed);
 		}
 
 		
@@ -60,7 +60,7 @@ namespace FF
 		internal void OnPlayPressed(FFEventParameter a_args)
 		{
 			FFLog.Log(EDbgCat.Logic,"Main menu state - OnPlayPressed");
-			RequestState ((int)EMenuStateID.GameModePicker);
+			RequestState ((int)EMenuStateID.ModeSelection);
 		}
 		#endregion
 

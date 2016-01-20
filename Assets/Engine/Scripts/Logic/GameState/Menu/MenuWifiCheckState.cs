@@ -18,7 +18,7 @@ namespace FF
             base.Enter();
             FFLog.Log(EDbgCat.Logic, "Menu wifi Check state enter.");
 
-            if (FFEngine.Inputs.ShouldUseNavigation)
+            if (Engine.Inputs.ShouldUseNavigation)
             {
                 _navigationPanel.FocusBackButton();
             }
@@ -28,13 +28,13 @@ namespace FF
         protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
-			FFEngine.NetworkStatus.onLanStatusChanged += OnNetworkStateChanged;
+			Engine.NetworkStatus.onLanStatusChanged += OnNetworkStateChanged;
         }
 		
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
-			FFEngine.NetworkStatus.onLanStatusChanged -= OnNetworkStateChanged;
+			Engine.NetworkStatus.onLanStatusChanged -= OnNetworkStateChanged;
         }
 		
 		internal void OnNetworkStateChanged(bool a_status)

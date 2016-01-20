@@ -6,7 +6,10 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 
-namespace FF.Networking
+using FF.Network.Receiver;
+using FF.Network.Message;
+
+namespace FF.Network
 {
     internal class FFMockTcpClient : FFTcpClient
 	{
@@ -19,7 +22,7 @@ namespace FF.Networking
                 return _mirror;
             }
         }
-		internal override void QueueReadMessage(FFMessage a_message)
+		internal override void QueueReadMessage(AMessage a_message)
 		{
 		}
         #endregion
@@ -30,8 +33,8 @@ namespace FF.Networking
             NetworkID = a_networkId;
             _local = a_local;
             _remote = a_remote;
-            _pendingSentRequest = new Dictionary<int, FFRequestMessage>();
-            _pendingReadRequest = new Dictionary<int, FFRequestMessage>();
+            _pendingSentRequest = new Dictionary<int, ARequest>();
+            _pendingReadRequest = new Dictionary<int, ARequest>();
             _requestIndex = 0;
         }
 
@@ -60,42 +63,44 @@ namespace FF.Networking
 		{
 		}
 		
-		internal override void QueueMessage(FFMessage a_message)
+		internal override void QueueMessage(AMessage a_message)
 		{
             if (a_message.HandleByMock)
             {
                 a_message.Client = this;
-                if (a_message is FFResponseMessage)
+                if (a_message is AResponse)
                 {
-                    FFResponseMessage res = a_message as FFResponseMessage;
+                    AResponse res = a_message as AResponse;
                     _pendingReadRequest.Remove(res.requestId);
                 }
-                else if (a_message is FFRequestMessage)
+                else if (a_message is ARequest)
                 {
-                    FFRequestMessage req = a_message as FFRequestMessage;
+                    ARequest req = a_message as ARequest;
                     req.requestId = _requestIndex;
                     _pendingSentRequest.Add(req.requestId, req);
                     _requestIndex++;
                 }
+
                 if(a_message.onMessageSent != null)
                     a_message.onMessageSent();
+
                 _mirror.Read(a_message);
             }
         }
 
-        internal override void QueueFinalMessage(FFMessage a_message)
+        internal override void QueueFinalMessage(AMessage a_message)
         {
             if (a_message.HandleByMock)
             {
                 a_message.Client = this;
-                if (a_message is FFResponseMessage)
+                if (a_message is AResponse)
                 {
-                    FFResponseMessage res = a_message as FFResponseMessage;
+                    AResponse res = a_message as AResponse;
                     _pendingReadRequest.Remove(res.requestId);
                 }
-                else if (a_message is FFRequestMessage)
+                else if (a_message is ARequest)
                 {
-                    FFRequestMessage req = a_message as FFRequestMessage;
+                    ARequest req = a_message as ARequest;
                     req.requestId = _requestIndex;
                     _pendingSentRequest.Add(req.requestId, req);
                     _requestIndex++;
@@ -103,47 +108,30 @@ namespace FF.Networking
 
                 if (a_message.onMessageSent != null)
                     a_message.onMessageSent();
+
                 _mirror.Read(a_message);
             }
         }
 
-        protected void Read(FFMessage a_message)
+        protected void Read(AMessage a_message)
         {
-            FFMessage messageRead = a_message;
+            AMessage messageRead = a_message;
             FFLog.Log(EDbgCat.Networking, "Reading new message : " + messageRead.ToString());
+
             messageRead.Client = this;
-            if (messageRead is FFRequestMessage)// Request
+            if (messageRead is ARequest)
             {
-                FFRequestMessage request = messageRead as FFRequestMessage;
+                ARequest request = messageRead as ARequest;
                 _pendingReadRequest.Add(request.requestId, request);
-                request.Read();
             }
-            else if (messageRead is FFRequestCancel)// Cancel Request
+
+            foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Type))
             {
-                FFRequestCancel cancel = messageRead as FFRequestCancel;
-                FFRequestMessage request = null;
-                if (_pendingReadRequest.TryGetValue(cancel.requestId, out request))
-                {
-                    cancel.Read(request);
-                }
-            }
-            else if (messageRead is FFResponseMessage)// Response
-            {
-                FFResponseMessage response = messageRead as FFResponseMessage;
-                FFRequestMessage req = null;
-                if (_pendingSentRequest.TryGetValue(response.requestId, out req))
-                {
-                    response.Read(req);
-                    _pendingSentRequest.Remove(response.requestId);
-                }
-            }
-            else// Message
-            {
-                messageRead.Read();
+                each.Read(messageRead);
             }
         }
-        #endregion
-        internal override void DoUpdate()
+    #endregion
+    internal override void DoUpdate()
         {
         }
 

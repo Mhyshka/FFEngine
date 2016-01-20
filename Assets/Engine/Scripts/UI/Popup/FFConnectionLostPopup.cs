@@ -36,7 +36,7 @@ namespace FF.UI
             if (_onCancelPressed != null)
                 _onCancelPressed();
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
 
         internal void Update()
@@ -47,13 +47,14 @@ namespace FF.UI
             timeLabel.text = string.Format("{0}:{1}", span.Minutes.ToString("00"), span.Seconds.ToString("00"));
         }
 
-        internal static int RequestDisplay(SimpleCallback a_callback)
+        internal static int RequestDisplay(SimpleCallback a_callback, int a_priority = 0)
         {
             FFConnectionLostPopupData data = new FFConnectionLostPopupData();
             data.popupName = "ConnectionLostPopup";
             data.onCancelPressed = a_callback;
+            data.priority = a_priority;
 
-            FFEngine.UI.PushPopup(data);
+            Engine.UI.PushPopup(data);
 
             return data.id;
         }

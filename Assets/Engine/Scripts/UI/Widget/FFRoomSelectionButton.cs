@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-using FF.Networking;
+using FF.Multiplayer;
 
 namespace FF.UI
 {/// <summary>
@@ -18,7 +18,7 @@ namespace FF.UI
 		#endregion
 
 		#region Properties
-		internal FFRoom room;
+		internal Room room;
 		protected Button _button;
 		#endregion
 
@@ -40,11 +40,11 @@ namespace FF.UI
                     FFLog.LogError("Button room connect : " + room.roomName);
                 }
 #endif
-                if (canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
+                if (canTriggerWhileTransitionning || !Engine.UI.IsTransitionning)
                 {
                     FFEventParameter args = new FFEventParameter();
                     args.data = room;
-                    FFEngine.Events.FireEvent(EEventType.Connect, args);
+                    Engine.Events.FireEvent(FFEventType.Connect, args);
                 }
             }
 		}

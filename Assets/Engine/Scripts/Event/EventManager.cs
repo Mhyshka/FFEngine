@@ -12,19 +12,26 @@ namespace FF
 	
 	internal delegate void EventCallback(FFEventParameter a_eventParam);
 	
-	internal class EventManager
+	internal class EventManager : BaseManager
 	{
 		#region Properties
 		private Dictionary<string, EventCallback> _mapping;
-		#endregion
-	
-		internal EventManager()
+        #endregion
+
+        #region Manager
+        internal EventManager()
 		{
 			_mapping = new Dictionary<string, EventCallback> ();
 		}
-		
-		#region Register
-		internal void RegisterForEvent(EEventType a_type, EventCallback a_callback)
+
+        internal override void TearDown()
+        {
+            _mapping.Clear();
+        }
+        #endregion
+
+        #region Register
+        internal void RegisterForEvent(FFEventType a_type, EventCallback a_callback)
 		{
 			RegisterForEvent(a_type.ToString(), a_callback);
 		}
@@ -41,7 +48,7 @@ namespace FF
 			}
 		}
 		
-		internal void UnregisterForEvent(EEventType a_type, EventCallback a_callback)
+		internal void UnregisterForEvent(FFEventType a_type, EventCallback a_callback)
 		{
 			UnregisterForEvent(a_type.ToString(), a_callback);
 		}
@@ -57,7 +64,7 @@ namespace FF
 	
 	
 		#region Fire
-		internal void FireEvent(EEventType a_type, FFEventParameter a_eventParam = null)
+		internal void FireEvent(FFEventType a_type, FFEventParameter a_eventParam = null)
 		{
 			FireEvent(a_type.ToString(),a_eventParam);
 		}

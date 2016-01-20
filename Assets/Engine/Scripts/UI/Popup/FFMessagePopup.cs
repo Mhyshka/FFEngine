@@ -37,18 +37,19 @@ namespace FF.UI
             if (_onOkayPressed != null)
                 _onOkayPressed();
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
 
-        internal static int RequestDisplay(string a_message, string a_buttonContent, SimpleCallback a_callback)
+        internal static int RequestDisplay(string a_message, string a_buttonContent, SimpleCallback a_callback, int a_priority = 0)
         {
             FFMessagePopupData data = new FFMessagePopupData();
             data.popupName = "MessagePopup";
             data.messageContent = a_message;
             data.buttonContent = a_buttonContent;
             data.onOkayPressed = a_callback;
+            data.priority = a_priority;
 
-            FFEngine.UI.PushPopup(data);
+            Engine.UI.PushPopup(data);
 
             return data.id;
         }

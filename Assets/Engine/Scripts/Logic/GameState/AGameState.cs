@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 namespace FF
 {
@@ -21,6 +22,8 @@ namespace FF
 		protected float _timeElapsedSinceEnter = 0f;
 		
 		private int _requestedStateId = 0;
+
+        protected GameObject _previousFocus;
 		#endregion
 		
 		#region States Methods
@@ -31,7 +34,8 @@ namespace FF
 	
 		internal virtual void Enter ()
 		{
-			_timeElapsedSinceEnter = 0f;
+            _previousFocus = null;
+            _timeElapsedSinceEnter = 0f;
 			_requestedStateId = -1;
 			
 			//TODO : debug editor script. Temporary
@@ -43,11 +47,16 @@ namespace FF
 			
 			if(panelsToShow != 0)
 			{
-				FFEngine.UI.SwitchToPanels(panelNamesToShow, !_gameMode.IsGoingBack);
+				Engine.UI.SwitchToPanels(panelNamesToShow, !_gameMode.IsGoingBack);
 			}
 			                                                  	  
-			RegisterForEvent();
+			
 		}
+
+        internal void PostEnter()
+        {
+            RegisterForEvent();
+        }
 	
 		internal virtual int Manage ()
 		{
@@ -60,7 +69,8 @@ namespace FF
 	
 		internal virtual void Exit ()
 		{
-			UnregisterForEvent();
+            _previousFocus = null;
+            UnregisterForEvent();
 		}
 		#endregion
 		
@@ -95,6 +105,12 @@ namespace FF
 			_gameMode.exit.gameModeToLoad = a_gameMode;
 			_gameMode.ForceQuit();
 		}
+
+        internal void RequestMultiGameMode(string a_gameMode)
+        {
+            Engine.Game.Loading.loadMultiplayerGameMode = true;
+            RequestGameMode(a_gameMode);
+        }
 		
 		#region Pause
 		internal virtual void OnPause()
@@ -111,10 +127,13 @@ namespace FF
         #region Focus Popup
         internal virtual void OnLostFocus()
         {
+            _previousFocus = EventSystem.current.currentSelectedGameObject;
         }
 
         internal virtual void OnGetFocus()
         {
+            if(_previousFocus != null)
+                EventSystem.current.SetSelectedGameObject(_previousFocus);
         }
         #endregion
     }

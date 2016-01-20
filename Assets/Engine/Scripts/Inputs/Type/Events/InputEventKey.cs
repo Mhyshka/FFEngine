@@ -23,17 +23,13 @@ namespace FF.Input
 		internal override void DoUpdate ()
 		{
 			base.DoUpdate ();
-			if (_binding.IsTriggering(EInputTriggerType.Down) && onDown != null)
+			if (_binding.IsTriggering(EInputTriggerType.Down))
 			{
-				onDown();
+				OnDown();
 			}
-			if(_binding.IsTriggering(EInputTriggerType.Up) && onUp != null)
+			if(_binding.IsTriggering(EInputTriggerType.Up))
 			{
-				onUp();
-			}
-			if(_binding.IsTriggering(EInputTriggerType.Active) && onActive != null)
-			{
-				onActive();
+				OnUp();
 			}
 		}
 		

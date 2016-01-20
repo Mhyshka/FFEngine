@@ -15,7 +15,7 @@ namespace FF.UI
 		public bool canTriggerWhileTransitionning = false;
 		
 		[HideInInspector]
-		public EEventType eventType = EEventType.Next;
+		public FFEventType eventType = FFEventType.Next;
 		
 		[HideInInspector]
 		public string eventKey = "";
@@ -43,7 +43,7 @@ namespace FF.UI
 				FFLog.LogError("Button clicked : " + gameObject.name + " with event : " + eventKey + " / " + eventType.ToString() );
 			}
 #endif
-			if(canTriggerWhileTransitionning || !FFEngine.UI.IsTransitionning)
+			if(canTriggerWhileTransitionning || !Engine.UI.IsTransitionning)
 			{
 				FFEventParameter args = new FFEventParameter();
 				if(Data != null)
@@ -51,10 +51,10 @@ namespace FF.UI
 					args.data = Data;
 				}
 				
-				if(eventType == EEventType.Custom)
-					FFEngine.Events.FireEvent(eventKey, args);
+				if(eventType == FFEventType.Custom)
+					Engine.Events.FireEvent(eventKey, args);
 				else
-					FFEngine.Events.FireEvent(eventType, args);
+					Engine.Events.FireEvent(eventType, args);
 			}
 		}
 	}

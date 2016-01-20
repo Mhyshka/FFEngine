@@ -6,18 +6,30 @@ using System;
 using System.Net.Sockets;
 using System.Net;
 
-namespace FF.Networking
-{
-    internal delegate void FFTcpClientCallback(FFTcpClient a_client);
-    internal delegate void FFTcpDisconnectedCallback(FFTcpClient a_client, string a_reason);
+using FF.Network.Receiver;
+using FF.Network.Message;
 
+namespace FF.Network
+{
     internal class FFTcpClient
     {
         #region Request Properties
         protected int _requestIndex;
-        protected Dictionary<int, FFRequestMessage> _pendingSentRequest;
-        protected Dictionary<int, FFRequestMessage> _pendingReadRequest;
-        protected List<int> _requestToRemove;
+        protected Dictionary<int, ARequest> _pendingSentRequest;
+        internal ARequest SentRequestForId(int a_id)
+        {
+            ARequest toReturn = null;
+            _pendingSentRequest.TryGetValue(a_id, out toReturn);
+            return toReturn;
+        }
+
+        protected Dictionary<int, ARequest> _pendingReadRequest;
+        internal ARequest ReadRequestForId(int a_id)
+        {
+            ARequest toReturn = null;
+            _pendingReadRequest.TryGetValue(a_id, out toReturn);
+            return toReturn;
+        }
         #endregion
 
         #region TCP Properties
@@ -72,18 +84,10 @@ namespace FF.Networking
         #endregion
 
         #region Message Read properties
-        protected Queue<FFMessage> _readMessages = new Queue<FFMessage>();
-
-        internal virtual void QueueReadMessage(FFMessage a_message)
-        {
-            FFLog.Log(EDbgCat.Networking, "Queueing read message");
-           /* if (a_message is FFResponseMessage)
-                FFLog.LogError(EDbgCat.Networking, "Queueing read response : " + a_message.ToString());*/
-            lock (_readMessages)
-            {
-                _readMessages.Enqueue(a_message);
-            }
-        }
+        protected Queue<AMessage> _writtenMessages;
+        protected Queue<AMessage> _readMessages;
+        protected Queue<int> _readRequestToCancel;
+        protected Queue<int> _sentRequestToCancel;
         #endregion
 
         #region Connection Properties
@@ -108,6 +112,13 @@ namespace FF.Networking
         #region Constructors
         protected FFTcpClient()
         {
+            _requestIndex = 0;
+            _writtenMessages = new Queue<AMessage>();
+            _pendingSentRequest = new Dictionary<int, ARequest>();
+            _pendingReadRequest = new Dictionary<int, ARequest>();
+            _readMessages = new Queue<AMessage>();
+            _readRequestToCancel = new Queue<int>();
+            _sentRequestToCancel = new Queue<int>();
         }
 
         /// <summary>
@@ -118,9 +129,12 @@ namespace FF.Networking
             _networkID = a_netId;
 
             _requestIndex = 0;
-            _pendingSentRequest = new Dictionary<int, FFRequestMessage>();
-            _pendingReadRequest = new Dictionary<int, FFRequestMessage>();
-            _requestToRemove = new List<int>();
+            _writtenMessages = new Queue<AMessage>();
+            _pendingSentRequest = new Dictionary<int, ARequest>();
+            _pendingReadRequest = new Dictionary<int, ARequest>();
+            _readMessages = new Queue<AMessage>();
+            _readRequestToCancel = new Queue<int>();
+            _sentRequestToCancel = new Queue<int>();
 
             _local = a_local;
             _remote = a_remote;
@@ -138,9 +152,12 @@ namespace FF.Networking
         internal FFTcpClient(TcpClient a_client)
         {
             _requestIndex = 0;
-            _pendingSentRequest = new Dictionary<int, FFRequestMessage>();
-            _pendingReadRequest = new Dictionary<int, FFRequestMessage>();
-            _requestToRemove = new List<int>();
+            _writtenMessages = new Queue<AMessage>();
+            _pendingSentRequest = new Dictionary<int, ARequest>();
+            _pendingReadRequest = new Dictionary<int, ARequest>();
+            _readMessages = new Queue<AMessage>();
+            _readRequestToCancel = new Queue<int>();
+            _sentRequestToCancel = new Queue<int>();
 
             _wasConnected = true;
             _autoRetryConnection = false;
@@ -157,7 +174,7 @@ namespace FF.Networking
         }
         #endregion
 
-        #region Interface	
+        #region Start & Stop	
         internal virtual void Stop()
         {
             FFLog.Log(EDbgCat.Networking, "Stoping Client");
@@ -192,17 +209,21 @@ namespace FF.Networking
             onConnectionSuccess = null;
             _autoRetryConnection = false;
 
-            foreach (FFRequestMessage each in _pendingReadRequest.Values)
+            foreach (ARequest each in _pendingReadRequest.Values)
             {
                 each.Cancel(false);
             }
             _pendingReadRequest.Clear();
+            _readRequestToCancel.Clear();
 
-            foreach (FFRequestMessage each in _pendingSentRequest.Values)
+            foreach (ARequest each in _pendingSentRequest.Values)
             {
                 each.ForceFail();
             }
             _pendingSentRequest.Clear();
+            _sentRequestToCancel.Clear();
+
+            _writtenMessages.Clear();
 
             TryReadMessages();
 
@@ -215,18 +236,28 @@ namespace FF.Networking
             _reader.Start();
             _writer.Start();
         }
+        #endregion
 
-        internal virtual void QueueMessage(FFMessage a_message)
+        #region Messages
+        internal virtual void QueueWrittenMessage(AMessage a_message)
+        {
+            lock(_writtenMessages)
+            {
+                _writtenMessages.Enqueue(a_message);
+            }
+        }
+
+        internal virtual void QueueMessage(AMessage a_message)
         {
             a_message.Client = this;
-            if (a_message is FFResponseMessage)
+            if (a_message is AResponse)
             {
-                FFResponseMessage res = a_message as FFResponseMessage;
+                AResponse res = a_message as AResponse;
                 _pendingReadRequest.Remove(res.requestId);
             }
-            else if (a_message is FFRequestMessage)
+            else if (a_message is ARequest)
             {
-                FFRequestMessage req = a_message as FFRequestMessage;
+                ARequest req = a_message as ARequest;
                 req.requestId = _requestIndex;
                 _pendingSentRequest.Add(req.requestId, req);
                 _requestIndex++;
@@ -234,17 +265,17 @@ namespace FF.Networking
             _writer.QueueMessage(a_message);
         }
 
-        internal virtual void QueueFinalMessage(FFMessage a_message)
+        internal virtual void QueueFinalMessage(AMessage a_message)
         {
             a_message.Client = this;
-            if (a_message is FFResponseMessage)
+            if (a_message is AResponse)
             {
-                FFResponseMessage res = a_message as FFResponseMessage;
+                AResponse res = a_message as AResponse;
                 _pendingReadRequest.Remove(res.requestId);
             }
-            else if (a_message is FFRequestMessage)
+            else if (a_message is ARequest)
             {
-                FFRequestMessage req = a_message as FFRequestMessage;
+                ARequest req = a_message as ARequest;
                 req.requestId = _requestIndex;
                 _pendingSentRequest.Add(req.requestId, req);
                 _requestIndex++;
@@ -252,14 +283,35 @@ namespace FF.Networking
             _writer.QueueFinalMessage(a_message);
         }
 
-        internal virtual bool CancelReadRequest(int a_requestId)
+        internal virtual void QueueReadMessage(AMessage a_message)
         {
-            return _pendingReadRequest.Remove(a_requestId);
+            FFLog.Log(EDbgCat.Networking, "Queueing read message");
+            /* if (a_message is FFResponseMessage)
+                 FFLog.LogError(EDbgCat.Networking, "Queueing read response : " + a_message.ToString());*/
+            lock (_readMessages)
+            {
+                _readMessages.Enqueue(a_message);
+            }
         }
 
-        internal virtual bool CancelSentRequest(int a_requestId)
+        internal virtual void RemoveReadRequest(int a_requestId)
         {
-            return _pendingSentRequest.Remove(a_requestId);
+            _readRequestToCancel.Enqueue(a_requestId);
+        }
+
+        protected void RemoveReadRequestOnMt(int a_requestId)
+        {
+            _pendingReadRequest.Remove(a_requestId);
+        }
+
+        internal virtual void RemoveSentRequest(int a_requestId)
+        {
+            _sentRequestToCancel.Enqueue(a_requestId);
+        }
+
+        protected void RemoveSentRequestOnMt(int a_requestId)
+        {
+            _pendingSentRequest.Remove(a_requestId);
         }
         #endregion
 
@@ -295,6 +347,7 @@ namespace FF.Networking
                 }
             }
 
+            CheckForWrittenRequest();
             CheckForSentRequestTimeout();
             CheckForReadRequestTimeout();
             TryReadMessages();
@@ -306,7 +359,7 @@ namespace FF.Networking
         {
             while (_readMessages.Count > 0)
             {
-                FFMessage messageRead = null;
+                AMessage messageRead = null;
                 lock (_readMessages)
                 {
                     messageRead = _readMessages.Dequeue();
@@ -314,36 +367,36 @@ namespace FF.Networking
                 FFLog.Log(EDbgCat.Networking, "Reading new message : " + messageRead.ToString());
 
                 messageRead.Client = this;
-                if (messageRead is FFRequestMessage)// Request
+                if (messageRead is ARequest)// Request
                 {
-                    FFRequestMessage request = messageRead as FFRequestMessage;
+                    ARequest request = messageRead as ARequest;
                     _pendingReadRequest.Add(request.requestId, request);
-                    request.Read();
                 }
-                else if (messageRead is FFRequestCancel)// Cancel Request
+
+                List<BaseReceiver> receivers = Engine.Receiver.ReceiversForType(messageRead.Type);
+                if (receivers != null)
                 {
-                    FFRequestCancel cancel = messageRead as FFRequestCancel;
-                    FFRequestMessage request = null;
-                    if (_pendingReadRequest.TryGetValue(cancel.requestId, out request))
+                    receivers = new List<BaseReceiver>();
+                    foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Type))
                     {
-                        cancel.Read(request);
+                        receivers.Add(each);
+                    }
+
+                    foreach (BaseReceiver each in receivers)
+                    {
+                        each.Read(messageRead);
                     }
                 }
-                else if (messageRead is FFResponseMessage)// Response
+            }
+        }
+
+        protected void CheckForWrittenRequest()
+        {
+            if (_writtenMessages.Count > 0)
+            {
+                lock (_writtenMessages)
                 {
-                    FFResponseMessage response = messageRead as FFResponseMessage;
-                    FFRequestMessage req = null;
-                    if (_pendingSentRequest.TryGetValue(response.requestId, out req))
-                    {
-                        response.Read(req);
-                        _pendingSentRequest.Remove(response.requestId);
-                        /*  FFLog.LogError("Sent request count : " + _pendingSentRequest.Count);
-                          FFLog.LogError("Read request count : " + _pendingReadRequest.Count);*/
-                    }
-                }
-                else //Standard message
-                {
-                    messageRead.Read();
+                    _writtenMessages.Dequeue().PostWrite();
                 }
             }
         }
@@ -353,13 +406,12 @@ namespace FF.Networking
             foreach (int id in _pendingSentRequest.Keys)
             {
                 if (_pendingSentRequest[id].CheckForTimeout())
-                    _requestToRemove.Add(id);
+                    _sentRequestToCancel.Enqueue(id);
             }
-            foreach (int id in _requestToRemove)
+            while (_sentRequestToCancel.Count > 0)
             {
-                _pendingSentRequest.Remove(id);
+                RemoveSentRequestOnMt(_sentRequestToCancel.Dequeue());
             }
-            _requestToRemove.Clear();
         }
 
         protected void CheckForReadRequestTimeout()
@@ -367,13 +419,12 @@ namespace FF.Networking
             foreach (int id in _pendingReadRequest.Keys)
             {
                 if (_pendingReadRequest[id].CheckForTimeout())
-                    _requestToRemove.Add(id);
+                    _readRequestToCancel.Enqueue(id);
             }
-            foreach (int id in _requestToRemove)
+            while (_readRequestToCancel.Count > 0)
             {
-                _pendingReadRequest.Remove(id);
+                RemoveSentRequestOnMt(_readRequestToCancel.Dequeue());
             }
-            _requestToRemove.Clear();
         }
         #endregion
 
@@ -389,7 +440,7 @@ namespace FF.Networking
         internal virtual bool Connect()
         {
             FFLog.Log(EDbgCat.Networking, "Trying to connect to : " + _remote.ToString() + " from : " + _local.ToString());
-            if (FFEngine.NetworkStatus.IsConnectedToLan)
+            if (Engine.NetworkStatus.IsConnectedToLan)
             {
                 try
                 {
@@ -418,7 +469,7 @@ namespace FF.Networking
         /// <summary>
         /// Called when the TCPClient successfully connect with the server.
         /// </summary>
-        internal FFTcpClientCallback onConnectionSuccess = null;
+        internal FFClientCallback onConnectionSuccess = null;
         protected bool _didSendId = false;
         internal virtual void ConnectionSuccess()
         {
@@ -432,7 +483,7 @@ namespace FF.Networking
             if (!_didSendId)
             {
                 _didSendId = true;
-                QueueMessage(new FFMessageNetworkID(NetworkID));
+                QueueMessage(new MessageNetworkID(NetworkID));
             }
 
             _didReconnect = true;
@@ -444,8 +495,8 @@ namespace FF.Networking
             FFLog.Log(EDbgCat.Networking, "Connection Failed.");
             _isConnecting = false;
             _connectionTryCount++;
-            FFTcpClient main = FFEngine.Network.MainClient;
-            if ((main == null || FFEngine.Network.MainClient != this) && _connectionTryCount >= MAX_CONNECTION_TRY) // TIME OUT
+            FFTcpClient main = Engine.Network.MainClient;
+            if ((main == null || Engine.Network.MainClient != this) && _connectionTryCount >= MAX_CONNECTION_TRY) // TIME OUT
             {
                 EndConnection("Server unreachable.");
             }
@@ -458,7 +509,7 @@ namespace FF.Networking
         /// <summary>
         /// Called when the TCPClient encounter an error & disconnects.
         /// </summary>
-        internal FFTcpClientCallback onConnectionLost = null;
+        internal FFClientCallback onConnectionLost = null;
         internal virtual void ConnectionLost()
         {
             FFLog.Log(EDbgCat.Networking, "Connection Lost.");
@@ -468,7 +519,7 @@ namespace FF.Networking
         /// <summary>
         /// Called when the TCPClient properly disconnect from user/server request.
         /// </summary>
-        internal FFTcpDisconnectedCallback onConnectionEnded = null;
+        internal FFDisconnectedCallback onConnectionEnded = null;
         internal virtual void EndConnection(string a_reason)
         {
             FFLog.Log(EDbgCat.Networking, "Connection Ended.");

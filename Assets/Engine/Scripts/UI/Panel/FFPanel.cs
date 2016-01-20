@@ -27,6 +27,13 @@ namespace FF.UI
 		#region Properties
 		protected GraphicRaycaster _raycaster = null;
 		protected Canvas _canvas = null;
+        internal Canvas Canvas
+        {
+            get
+            {
+                return _canvas;
+            }
+        }
 		protected Dictionary<Selectable, Navigation.Mode> _selectables = null;
 		internal virtual bool ShouldMoveToRoot
 		{
@@ -45,6 +52,14 @@ namespace FF.UI
 			}
 		}
 		#endregion
+
+        protected virtual bool NeedsTobeRegister
+        {
+            get
+            {
+                return true;
+            }
+        }
 	
 		protected virtual void Awake()
 		{
@@ -70,15 +85,16 @@ namespace FF.UI
 				animator.SetTrigger("Show");
 			}
 
-			if(!debug && !(this is LoadingScreen))
+			if(!debug && NeedsTobeRegister)
 			{
-				FFEngine.UI.Register (gameObject.name, this);
+				Engine.UI.Register (gameObject.name, this);
 			}
 		}
 	
 		protected virtual void OnDestroy()
 		{
-			FFEngine.UI.Unregister (gameObject.name);
+            if(NeedsTobeRegister)
+			    Engine.UI.Unregister (gameObject.name);
 		}
 
 		#region Show
@@ -133,7 +149,7 @@ namespace FF.UI
 
         internal void TrySelectWidget()
         {
-            if (defaultSelectedWidget != null && (debug || FFEngine.Inputs.ShouldUseNavigation))
+            if (defaultSelectedWidget != null && (debug || Engine.Inputs.ShouldUseNavigation))
                 defaultSelectedWidget.Select();
         }
 

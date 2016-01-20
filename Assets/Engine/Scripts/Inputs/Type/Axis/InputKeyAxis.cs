@@ -6,8 +6,8 @@ namespace FF.Input
 	internal class InputKeyAxis : AInputAxis
 	{
 		#region Properties
-		internal InputEventKey inputPositive;
-		internal InputEventKey inputNegative;
+		protected InputEventKey _inputPositive;
+        protected InputEventKey _inputNegative;
 		
 		protected float _currentValue = 0f;
 		protected float _sensitibity = 2f;
@@ -33,30 +33,9 @@ namespace FF.Input
 			_currentValue = 0f;
 			_gravity = a_gravity;
 			
-			inputPositive = a_positive;
-			if(inputPositive != null)
-			{
-				inputPositive.onActive += Increase;
-			}
+			_inputPositive = a_positive;
 			
-			inputNegative = a_negative;
-			if(inputNegative != null)
-			{
-				inputNegative.onActive += Decrease;
-			}
-		}
-		
-		~InputKeyAxis()
-		{
-			if(inputPositive != null)
-			{
-				inputPositive.onActive -= Increase;
-			}
-			
-			if(inputNegative != null)
-			{
-				inputNegative.onActive -= Decrease;
-			}
+			_inputNegative = a_negative;
 		}
 		#endregion
 	
@@ -86,6 +65,12 @@ namespace FF.Input
 		internal override void DoUpdate ()
 		{
 			base.DoUpdate ();
+
+            if (_inputPositive.IsPressed)
+                Increase();
+            if (_inputNegative.IsPressed)
+                Decrease();
+
 			_currentValue = Mathf.MoveTowards(_currentValue, 0f, _gravity * Time.deltaTime);
 		}
 	}

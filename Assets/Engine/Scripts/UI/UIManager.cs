@@ -2,24 +2,35 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 namespace FF.UI
 {
-	internal class UIManager
+    
+
+	internal class UIManager : BaseManager
 	{
-		#region Properties
-		internal UIRoot _root;
+        internal static int POPUP_PRIO_HIGH = 2;
+        internal static int POPUP_PRIO_MEDIUM = 1;
+        internal static int POPUP_PRIO_LOW = 0;
+
+        #region Properties
+        internal UIRoot _root;
+        internal Camera UiCamera
+        {
+            get
+            {
+                return _root.uiCamera; ;
+            }
+        }
 		private LoadingScreen _loadingScreen;
 		
 		private Dictionary<string, FFPanel> _panelsByName;
-
-        private bool _isLoading = false;
-        private int _panelsToLoadCount = 0;
         #endregion
 
         #region Popups
         private Dictionary<string, FFPopup> _popupsByName;
-        private LinkedList<FFPopupData> _pendingPopups;
+        private LinkedList<FFPopupData>[] _pendingPopups;
         protected FFPopup _currentPopup;
         internal FFPopup CurrentPopup
         {
@@ -45,30 +56,37 @@ namespace FF.UI
         private Queue<FFToastData> _pendingToasts;
         protected FFToast _currentToast;
         #endregion
-		
-		internal UIManager()
+
+        #region Manager
+        internal UIManager()
 		{
 			_panelsByName = new Dictionary<string, FFPanel> ();
 
             _popupsByName = new Dictionary<string, FFPopup>();
-            _pendingPopups = new LinkedList<FFPopupData>();
+            _pendingPopups = new LinkedList<FFPopupData>[3];
+            _pendingPopups[POPUP_PRIO_LOW] = new LinkedList<FFPopupData>();
+            _pendingPopups[POPUP_PRIO_MEDIUM] = new LinkedList<FFPopupData>();
+            _pendingPopups[POPUP_PRIO_HIGH] = new LinkedList<FFPopupData>();
 
             _toastsByName = new Dictionary<string, FFToast>();
-            _pendingToasts = new Queue<FFToastData>();
+            _pendingToasts = new Queue< FFToastData>();
+
+            _loadingOperations = new List<AsyncOperation>();
         }
 
-        internal void DoUpdate()
+        internal override void DoUpdate()
         {
-            if (!FFEngine.Inputs.ShouldUseNavigation && EventSystem.current.currentSelectedGameObject != null)
+            GameObject selected = EventSystem.current.currentSelectedGameObject;
+            if (!Engine.Inputs.ShouldUseNavigation && selected != null)
             {
-                EventSystem.current.SetSelectedGameObject(null);
+                if(selected.GetComponent<FFWidgetFocusKeeper>() == null)
+                    EventSystem.current.SetSelectedGameObject(null);
             }
 
-            if (_currentPopup == null && _pendingPopups.Count > 0)
+            if (_currentPopup == null && PendingPopupCount > 0)
             {
-                FFPopupData data = _pendingPopups.Last.Value;
-                _pendingPopups.RemoveLast();
-                DisplayNextPopup(data);
+                FFPopupData data = NextPopupToDisplay;
+                DisplayPopup(data);
             }
 
             if (_currentToast == null && _pendingToasts.Count > 0)
@@ -76,14 +94,20 @@ namespace FF.UI
                 DisplayNextToast(_pendingToasts.Dequeue());
             }
         }
-		
-		#region Loading
-		internal void LoadPanelsSet(string[] a_panelList)
+
+        internal override void TearDown()
+        {
+            
+        }
+        #endregion
+
+        #region Loading
+        protected List<AsyncOperation> _loadingOperations;
+
+        internal void LoadPanelsSet(string[] a_panelList)
 		{
-			
 			if(a_panelList != null && a_panelList.Length > 0)
 			{
-				_isLoading = true;
 				FFLog.Log(EDbgCat.UI,"Starting to load " + a_panelList.Length + " panels.");
 				foreach(string each in a_panelList)
 				{
@@ -95,17 +119,14 @@ namespace FF.UI
 			}
 			else
 			{
-				_isLoading = false;
 				FFLog.Log(EDbgCat.UI,"No panel to load, UIManager is done.");
-				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
 				return;
 			}
 		}
 		
 		internal void LoadAsyncScene(string a_sceneName)
 		{
-			Application.LoadLevelAdditiveAsync(a_sceneName);
-			_panelsToLoadCount++;
+            _loadingOperations.Add(SceneManager.LoadSceneAsync(a_sceneName, LoadSceneMode.Additive));
 		}
 		
 		internal void ClearPanels()
@@ -114,7 +135,40 @@ namespace FF.UI
 			{
 				GameObject.Destroy (each.gameObject);
 			}
-		}
+            foreach (FFPopup each in _popupsByName.Values)
+            {
+                GameObject.Destroy(each.gameObject);
+            }
+            foreach (FFToast each in _toastsByName.Values)
+            {
+                GameObject.Destroy(each.gameObject);
+            }
+        }
+
+        internal float UILoadingFactor
+        {
+            get
+            {
+                return 5f * _loadingOperations.Count;
+            }
+        }
+
+        internal float UILoadingProgress
+        {
+            get
+            {
+                float progress = 0f;
+                foreach(AsyncOperation each in _loadingOperations)
+                {
+                    progress += each.progress;
+                }
+
+                if (_loadingOperations.Count > 0)
+                    progress /= _loadingOperations.Count;
+
+                return progress;
+            }
+        }
 		#endregion
 		
 		#region LoadingScreen
@@ -128,8 +182,6 @@ namespace FF.UI
 				parent = parent.parent;
 			}
 			a_loading.transform.SetParent(_root.transform);
-			
-			GameObject.Destroy(parent.gameObject);
 		}
 		
 		internal bool HasLoadingScreen
@@ -149,6 +201,14 @@ namespace FF.UI
 		{
 			_loadingScreen.Hide();
 		}
+
+        internal LoadingScreen LoadingScreen
+        {
+            get
+            {
+                return _loadingScreen;
+            }
+        }
 		
 		internal FFPanel.EState LoadingScreenState
 		{
@@ -167,7 +227,6 @@ namespace FF.UI
 		
 		internal void Register(string a_panelName, FFPanel a_panel)
 		{
-			_panelsToLoadCount--;
             //POPUPS
             if (a_panel is FFPopup && !_popupsByName.ContainsKey(a_panelName))
             {
@@ -182,7 +241,6 @@ namespace FF.UI
             else if (!_panelsByName.ContainsKey(a_panelName))
             {
                 _panelsByName.Add(a_panelName, a_panel);
-                
             }
             else
             {
@@ -191,6 +249,7 @@ namespace FF.UI
 
             if (a_panel.ShouldMoveToRoot)
             {
+                a_panel.Canvas.worldCamera = UiCamera;
                 RectTransform parent = a_panel.transform as RectTransform;
                 while (parent.parent != null)
                 {
@@ -198,13 +257,6 @@ namespace FF.UI
                 }
                 parent.SetParent(_root.transform, false);
             }
-
-            if (_panelsToLoadCount == 0 && _isLoading)
-			{
-				_isLoading = false;
-				FFEngine.Events.FireEvent(EEventType.UILoadingComplete);
-				FFLog.Log(EDbgCat.UI,"UI LOADING COMPLETE");
-			}
 		}
 		
 		internal void Unregister(string a_eventKey)
@@ -213,7 +265,15 @@ namespace FF.UI
 			{
 				_panelsByName.Remove(a_eventKey);
 			}
-			else
+            else if (_popupsByName.ContainsKey(a_eventKey))
+            {
+                _popupsByName.Remove(a_eventKey);
+            }
+            else if (_toastsByName.ContainsKey(a_eventKey))
+            {
+                _toastsByName.Remove(a_eventKey);
+            }
+            else
 			{
 				FFLog.LogWarning(EDbgCat.UI,"No panel registered with this key : " + a_eventKey);
 			}
@@ -313,7 +373,7 @@ namespace FF.UI
 		{
 			get
 			{
-				if(_isLoading)
+				if(UILoadingProgress != 1f)
 					return true;
 					
 				foreach(FFPanel each in _panelsByName.Values)
@@ -321,7 +381,13 @@ namespace FF.UI
 					if(each.IsTransitionning)
 						return true;
 				}
-				return false;
+
+                foreach (FFPopup each in _popupsByName.Values)
+                {
+                    if (each.IsTransitionning)
+                        return true;
+                }
+                return false;
 			}
 		}
         #endregion
@@ -337,30 +403,27 @@ namespace FF.UI
 
         internal void PushPopup(FFPopupData a_data)
         {
-            //FFLog.LogError("Pushing popup : " + a_data.id + " type : " + a_data.popupName);
             if (HasCurrentActivePopup)
             {
-                //FFLog.LogError("Pushing current popup at last.");
-                _pendingPopups.AddLast(_currentPopup.currentData);
+                if (CurrentPopup.currentData.priority > a_data.priority)
+                {
+                    _pendingPopups[CurrentPopup.currentData.priority].AddLast(_currentPopup.currentData);
+                    DismissCurrentPopup();
+                }
             }
-            DismissCurrentPopup();
-
-            _pendingPopups.AddLast(a_data);
-
-            //FFLog.LogError("Popup count : " + _pendingPopups.Count);
+            _pendingPopups[a_data.priority].AddLast(a_data);
         }
 
-        protected void DisplayNextPopup(FFPopupData a_data)
+        protected void DisplayPopup(FFPopupData a_data)
         {
-            //FFLog.LogError("Displaying popup : " + a_data.id);
             FFPopup popup = _popupsByName[a_data.popupName] as FFPopup;
             popup.SetContent(a_data);
             popup.Show();
             _currentPopup = popup;
 
-            if (FFEngine.Game.CurrentGameMode != null)
+            if (Engine.Game.CurrentGameMode != null && Engine.Game.CurrentGameMode.HasFocus)
             {
-                FFEngine.Game.CurrentGameMode.OnLostFocus();
+                Engine.Game.CurrentGameMode.OnLostFocus();
             }
         }
 
@@ -372,16 +435,18 @@ namespace FF.UI
                 DismissCurrentPopup();
             }
 
-            LinkedListNode<FFPopupData> _current = _pendingPopups.Last;
-            while (_current != null)
+            for (int i = 0; i < 3; i++)
             {
-                if (_current.Value.id == a_id)
+                LinkedListNode<FFPopupData> _current = _pendingPopups[i].Last;
+                while (_current != null)
                 {
-                    //FFLog.LogError("Removed pending popup : " + a_id);
-                    _pendingPopups.Remove(_current);
-                    break;
+                    if (_current.Value.id == a_id)
+                    {
+                        _pendingPopups[i].Remove(_current);
+                        return;
+                    }
+                    _current = _current.Previous;
                 }
-                _current = _current.Previous;
             }
         }
 
@@ -402,9 +467,43 @@ namespace FF.UI
             _currentPopup.onHidden -= OnPopupHidden;
             _currentPopup = null;
 
-            if (_pendingPopups.Count == 0 && FFEngine.Game.CurrentGameMode != null)
+            if (PendingPopupCount == 0 && Engine.Game.CurrentGameMode != null)
             {
-                FFEngine.Game.CurrentGameMode.OnGetFocus();
+                Engine.Game.CurrentGameMode.OnGetFocus();
+            }
+        }
+
+        protected FFPopupData NextPopupToDisplay
+        {
+            get
+            {
+                FFPopupData popup = null;
+
+                for (int i = 2; i >= 0; i--)
+                {
+                    if (_pendingPopups[i].Count > 0)
+                    {
+                        popup = _pendingPopups[i].Last.Value;
+                        _pendingPopups[i].RemoveLast();
+                        break;
+                    }
+                }
+
+                return popup;
+            }
+        }
+
+        protected int PendingPopupCount
+        {
+            get
+            {
+                int total = 0;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    total += _pendingPopups[i].Count;
+                }
+                return total;
             }
         }
         #endregion

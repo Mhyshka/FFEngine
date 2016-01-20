@@ -3,7 +3,8 @@ using System.Collections;
 
 using UnityEngine.UI;
 
-using FF.Networking;
+using FF.Network;
+using FF.Multiplayer;
 
 namespace FF.UI
 {
@@ -35,7 +36,7 @@ namespace FF.UI
             if (_onKickPressed != null)
                 _onKickPressed(_player);
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
 
         public void OnBanPressed()
@@ -43,22 +44,23 @@ namespace FF.UI
             if (_onBanPressed != null)
                 _onBanPressed(_player);
             else
-                FFEngine.UI.DismissPopup(currentData.id);
+                Engine.UI.DismissPopup(currentData.id);
         }
         #endregion
 
-        internal static int RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_kickCallback, NetPlayerCallback a_banCallback, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback)
+        internal static int RequestDisplay(FFNetworkPlayer a_player, NetPlayerCallback a_kickCallback, NetPlayerCallback a_banCallback, NetPlayerCallback a_swapCallback, SimpleCallback a_cancelCallback, int a_priority = 0)
         {
             FFHostSlotOptionPopupData data = new FFHostSlotOptionPopupData();
             data.popupName = "HostSlotOptionPopup";
             data.player = a_player;
+            data.priority = a_priority;
 
             data.onKickPressed = a_kickCallback;
             data.onBanPressed = a_banCallback;
             data.onSwapPressed = a_swapCallback;
             data.onCancelPressed = a_cancelCallback;
 
-            FFEngine.UI.PushPopup(data);
+            Engine.UI.PushPopup(data);
 
             return data.id;
         }

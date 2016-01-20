@@ -24,11 +24,21 @@ namespace FF.Input
 	[System.Serializable]
 	internal class InputKeyBinding
 	{
-		public KeyCode key;
+        #region Inspector Properties
+        public KeyCode key;
 		public EKeyModifier modifier;
-		
-		#region IsTrigerring?
-		internal bool IsTriggering(EInputTriggerType a_triggerType)
+        #endregion
+
+        #region Constructors
+        internal InputKeyBinding(KeyCode a_key, EKeyModifier a_mod = EKeyModifier.None)
+        {
+            key = a_key;
+            modifier = a_mod;
+        }
+        #endregion
+
+        #region IsTrigerring?
+        internal bool IsTriggering(EInputTriggerType a_triggerType)
 		{
 			if(IsModifierTriggered())
 			{
@@ -89,9 +99,7 @@ namespace FF.Input
 					{
 						if(UnityEngine.Input.GetKeyDown(each) && !IsModifier(each))
 						{
-							binding = new InputKeyBinding();
-							binding.key = each;
-							binding.modifier = CurrentModifier;
+							binding = new InputKeyBinding(each,CurrentModifier);
 							break;
 						}
 					}

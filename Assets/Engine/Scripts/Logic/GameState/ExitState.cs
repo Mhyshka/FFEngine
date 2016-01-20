@@ -14,6 +14,7 @@ namespace FF
 	
 		#region Properties
 		private bool _finalized;
+        private bool _isLoadingShowing;
 		#endregion
 	
 		#region States Methods
@@ -29,13 +30,23 @@ namespace FF
 		{
 			base.Enter ();
 			_finalized = false;
-			if(FFEngine.UI.HasLoadingScreen)
-				FFEngine.UI.DisplayLoading();
+            if (Engine.UI.HasLoadingScreen)
+            {
+                Engine.UI.DisplayLoading();
+                Engine.UI.LoadingScreen.SetLoadingDescription("Loading");
+                Engine.UI.LoadingScreen.SetProgress(0f);
+                Engine.UI.LoadingScreen.onShown += OnLoadingShown;
+                _isLoadingShowing = true;
+            }
+            else
+            {
+                _isLoadingShowing = false;
+            }
 		}
 	
 		internal override int Manage ()
 		{
-			if(FFEngine.UI.LoadingScreenState == FFPanel.EState.Shown && !_finalized)
+			if(!_isLoadingShowing && !_finalized)
 			{
 				FinalizeGameMode();
 			}
@@ -50,12 +61,12 @@ namespace FF
 		internal void FinalizeGameMode()
 		{
 			_finalized = true;
-			FFEngine.Game.RequestGameMode(gameModeToLoad);
+			Engine.Game.RequestGameMode(gameModeToLoad);
 		}
-		#endregion
-	
-		#region Event Management
-		/*protected override void RegisterForEvent ()
+        #endregion
+
+        #region Event Management
+        /*protected override void RegisterForEvent ()
 		{
 			base.RegisterForEvent ();
 		}
@@ -69,6 +80,11 @@ namespace FF
 		{
 		}
 		*/
+
+        internal void OnLoadingShown(FFPanel a_panel)
+        {
+            _isLoadingShowing = false;
+        }
 		#endregion
 	}
 }

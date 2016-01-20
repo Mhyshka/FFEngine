@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace FF
 {
@@ -8,20 +9,35 @@ namespace FF
 	{
 		public string mainScene = "MenuGameMode";
 		
-		private FFEngine _engine;
+		private Engine _engine;
 	
 		// Use this for initialization
 		void Awake()
 		{
-			_engine = new FFEngine();
-			Application.LoadLevelAdditive("UI");
-			FFEngine.Game.RequestGameMode(mainScene);
-		}
+			_engine = new Engine();
+			SceneManager.LoadSceneAsync("UI", LoadSceneMode.Additive);
+            SceneManager.LoadSceneAsync("MultiplayerLoadingScreen", LoadSceneMode.Additive);
+            Engine.Game.RequestGameMode(mainScene);
+
+#if UNITY_ANDROID
+            Application.targetFrameRate = 200;
+#endif
+        }
+
+        void Start()
+        {
+            _engine.DoStart();
+        }
 		
 		void Update()
 		{
 			_engine.DoUpdate();
 		}
+
+        void FixedUpdate()
+        {
+            _engine.DoFixedUpdate();
+        }
 		
 		void OnApplicationQuit()
 		{
@@ -31,7 +47,7 @@ namespace FF
 		void OnDestroy()
 		{
 			FFLog.LogError("Destroy EP");
-			_engine.Destroy();
+			_engine.TearDown();
 			_engine = null;
 		}
 		

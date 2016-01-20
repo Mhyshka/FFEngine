@@ -4,7 +4,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-using FF.Networking;
+using FF.Network;
+using FF.Multiplayer;
 
 namespace FF
 {
@@ -179,13 +180,13 @@ namespace FF
 			}
 			return result;
 		}
-		
-		internal List<T> TryReadObjectList<T>() where T : IByteStreamSerialized, new()
+
+        internal List<T> TryReadObjectList<T>() where T : IByteStreamSerialized, new()
 		{
 			int length = TryReadInt();
 			List<T> list = new List<T>(length);
-		/*	try
-			{*/
+			try
+			{
 				for(int i = 0 ; i < length ; i++)
 				{
 					T obj = new T();
@@ -193,11 +194,11 @@ namespace FF
 						obj.LoadFromData(this);
 					list.Add(obj);
 				}
-			/*}
+			}
 			catch
 			{
 				FFLog.LogError("Couldn't read List<Object> from stream");
-			}*/
+			}
 			
 			return list;
 		}
@@ -240,6 +241,121 @@ namespace FF
 			}
 			return obj;
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Primitive List
+        internal List<int> TryReadIntList()
+        {
+            int length = TryReadInt();
+            List<int> list = new List<int>(length);
+            try
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    int val = TryReadInt();
+                    list.Add(val);
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read List<int> from stream");
+            }
+
+            return list;
+        }
+        #endregion
+
+        #region Unity
+        internal Vector2 TryReadVector2()
+        {
+            Vector2 res = Vector2.zero;
+            try
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    res[i] = _reader.ReadSingle();
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read float from stream");
+            }
+            return res;
+        }
+
+        internal Vector3 TryReadVector3()
+        {
+            Vector3 res = Vector3.zero;
+            try
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    res[i] = _reader.ReadSingle();
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read float from stream");
+            }
+            return res;
+        }
+
+        internal Vector4 TryReadVector4()
+        {
+            Vector4 res = Vector4.zero;
+            try
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    res[i] = _reader.ReadSingle();
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read float from stream");
+            }
+            return res;
+        }
+
+        internal Quaternion TryReadQuaternion()
+        {
+            Quaternion res = Quaternion.identity;
+            try
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    res[i] = _reader.ReadSingle();
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read float from stream");
+            }
+            return res;
+        }
+        #endregion
+
+        #region PlayerDictionary
+        internal PlayerDictionary<T> TryReadPlayerDictionary<T>() where T : IByteStreamSerialized, new()
+        {
+            int length = TryReadInt();
+            PlayerDictionary<T> dictionary = new PlayerDictionary<T>(true);
+            try
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    int key = TryReadInt();
+                    T value = TryReadObject<T>();
+                    dictionary.Add(key, value);
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read PlayerDictionary<T> from stream");
+            }
+
+            return dictionary;
+        }
+        #endregion
+    }
 }

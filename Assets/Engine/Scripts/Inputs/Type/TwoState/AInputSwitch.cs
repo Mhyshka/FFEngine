@@ -25,7 +25,7 @@ namespace FF.Input
 		internal AInputSwitch(string a_eventKeyName)
 		{
 			eventKeyName = a_eventKeyName;
-			FFEngine.Inputs.switchs.Add(eventKeyName,this);
+			Engine.Inputs.RegisterInputSwitch(this);
 		}
 	}
 }

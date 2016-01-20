@@ -8,12 +8,14 @@ using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
-namespace FF.Networking
+using FF.Network.Message;
+
+namespace FF.Network
 {
 	internal class FFTcpWriter : FFTcpStreamThread
 	{
 		#region Properties
-		protected Queue<FFMessage> _toSendMessages;
+		protected Queue<AMessage> _toSendMessages;
 		
 		protected double _heartbeatTimespan = 3000d;//in MS
 		protected DateTime _lastHeartbeatTimestamp;
@@ -21,11 +23,11 @@ namespace FF.Networking
 		
 		internal FFTcpWriter(FFTcpClient a_ffClient) : base(a_ffClient)
 		{
-			_toSendMessages = new Queue<FFMessage>();
+			_toSendMessages = new Queue<AMessage>();
         }
 		
 		#region Message
-		internal void QueueMessage(FFMessage a_message)
+		internal void QueueMessage(AMessage a_message)
 		{
 			FFLog.Log(EDbgCat.Socket,"Queue message");
 			lock(_toSendMessages)
@@ -34,7 +36,7 @@ namespace FF.Networking
 			}
 		}
 
-        internal void QueueFinalMessage(FFMessage a_message)
+        internal void QueueFinalMessage(AMessage a_message)
         {
             FFLog.Log(EDbgCat.Socket, "Queue message");
             lock (_toSendMessages)
@@ -52,7 +54,7 @@ namespace FF.Networking
         #endregion
 
         #region Read
-        protected bool Write(FFMessage a_message)
+        protected bool Write(AMessage a_message)
 		{
 			try
 			{
@@ -81,7 +83,7 @@ namespace FF.Networking
 				
 				if(_shouldRun && _toSendMessages.Count > 0)
 				{
-					FFMessage toSend;
+					AMessage toSend;
 					lock(_toSendMessages)
 					{
 						toSend = _toSendMessages.Peek();
@@ -89,7 +91,8 @@ namespace FF.Networking
 
                     if (Write(toSend) || !toSend.IsMandatory)
 					{
-                        if(toSend.PostWrite())
+                        _ffClient.QueueWrittenMessage(toSend);
+                        if (toSend.ShouldStopAfterWrite)
                             break;
 
 						lock(_toSendMessages)
@@ -100,7 +103,7 @@ namespace FF.Networking
                 }
 				else
 				{
-					Thread.Sleep(3);
+					Thread.Sleep(0);
 				}
 			}
 			FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
@@ -111,7 +114,7 @@ namespace FF.Networking
 			TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
 			if(span.TotalMilliseconds > _heartbeatTimespan)
 			{
-				QueueMessage(new FFMessageHeartBeat());
+				QueueMessage(new MessageHeartBeat());
 				_lastHeartbeatTimestamp = DateTime.Now;
 			}
 		}

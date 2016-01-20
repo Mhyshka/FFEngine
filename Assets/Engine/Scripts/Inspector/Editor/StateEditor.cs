@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using System.Collections;
+
 using FF;
+using FF.Logic;
 
 [CustomEditor(typeof(AGameState),true)]
 public class StateEditor : Editor
@@ -23,6 +26,8 @@ public class StateEditor : Editor
 		base.OnInspectorGUI ();
 		AGameState script = target as AGameState;
 		LoadingState loading = script.GetComponent<LoadingState>();
+        /*if(loading == null)
+            loading = script.GetComponent<MultiplayerLoadingState>();*/
 
         // Loading State
         if (loading == script)
@@ -39,7 +44,8 @@ public class StateEditor : Editor
                         scenesChecked[i] = false;
                 }
 
-                UIPanelPopup popup = UIPanelPopup.Init(loading, UIScenes, scenesChecked);
+                /*UIPanelPopup popup = */
+                UIPanelPopup.Init(loading, UIScenes, scenesChecked);
                 //(loading, UIScenes, new bool[UIScenes.Length]);
             }
         }
@@ -72,7 +78,7 @@ public class StateEditor : Editor
 				{
 					script.panelNamesToShow = FFUtils.BitMaskToPanels(script.panelsToShow, loading.panelsToLoad);
 					EditorUtility.SetDirty(script);
-					EditorApplication.MarkSceneDirty();
+					EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 				}
 			}
 			

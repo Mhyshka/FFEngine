@@ -3,8 +3,8 @@ using System.Collections;
 using Zeroconf;
 using UnityEngine.UI;
 
-using FF.Networking;
 using FF.UI;
+using FF.Multiplayer;
 
 namespace FF
 {
@@ -18,7 +18,8 @@ namespace FF
 		
 		public Text gameNameLabel = null;
 		public Text playerCountLabel = null;
-		public Text latencyLabel = null;
+        public Text spectatorCountLabel = null;
+        public Text latencyLabel = null;
 		public Image deviceImage = null;
 		
 		public FFRoomSelectionButton button = null;
@@ -29,8 +30,8 @@ namespace FF
 
         #region Properties
 
-        private FFRoom _room;
-        internal FFRoom Room
+        private Room _room;
+        internal Room Room
         {
             get
             {
@@ -39,13 +40,14 @@ namespace FF
         }
 		#endregion
 
-		internal void UpdateWithRoom (FFRoom aRoom)
+		internal void UpdateWithRoom (Room aRoom)
 		{
 			_room = aRoom;
 			button.room = _room;
 			gameNameLabel.text = aRoom.roomName;
-			playerCountLabel.text = "Player count : " + aRoom.TotalPlayers + " / " + aRoom.TotalSlots;
-			if(aRoom.IsSecondScreenActive)
+			playerCountLabel.text = "Players : " + aRoom.TotalPlayers + " / " + aRoom.TotalPlayableSlots;
+            spectatorCountLabel.text = "Spectators : " + aRoom.TotalSpectatorPlayers + " / " + aRoom.TotalSpectatorSlots;
+            if (aRoom.IsSecondScreenActive)
 			{
 				deviceImage.sprite = tvSprite;
 			}

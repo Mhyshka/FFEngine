@@ -6,7 +6,9 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 
-namespace FF.Networking
+using FF.Network.Message;
+
+namespace FF.Network
 {
 	internal delegate void TcpClientCallback(FFTcpClient a_ffclient);
     internal delegate void IPEndPointCallback(IPEndPoint a_ep);
@@ -22,6 +24,7 @@ namespace FF.Networking
         protected Dictionary<int, IPEndPoint> _idMapping;
         protected Dictionary<IPEndPoint, int> _endPointMapping;
         protected bool _isListening = false;
+        protected bool _isAcceptingConnection = false;
         protected FFMockTcpClient _loopbackClient;
         internal FFMockTcpClient LoopbackClient
         {
@@ -53,6 +56,21 @@ namespace FF.Networking
             _clients.TryGetValue(a_endpoint, out client);
             return client;
         }
+
+        internal List<FFTcpClient> GetPlayersClients()
+        {
+            List<FFTcpClient> targetClients = new List<FFTcpClient>();
+            foreach (int playerId in Engine.Game.CurrentRoom.players.Keys)
+            {
+                IPEndPoint ep = Engine.Game.CurrentRoom.GetPlayerForId(playerId).IpEndPoint;
+                targetClients.Add(_clients[ep]);
+            }
+            return targetClients;
+        }
+        #endregion
+
+        #region Receiver
+        Receiver.MessageNetworkId _networkIdReceiver;
         #endregion
 
         internal FFTcpServer(IPAddress a_ipv4)
@@ -60,6 +78,7 @@ namespace FF.Networking
 			try
 			{
 				_isListening = false;
+                _isAcceptingConnection = false;
 				
 				_clients = new Dictionary<IPEndPoint, FFTcpClient>();
                 _idMapping = new Dictionary<int, IPEndPoint>();
@@ -75,9 +94,10 @@ namespace FF.Networking
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 
-                FFMessageNetworkID.onNetworkIdReceived += OnIdReceived;
+                _networkIdReceiver = new Receiver.MessageNetworkId();
+                Engine.Receiver.RegisterReceiver(EMessageType.NetworkID, _networkIdReceiver);
 
-                _loopbackClient = new FFMockTcpClient(FFEngine.Network.NetworkID, _endPoint, s_MockEP);
+                _loopbackClient = new FFMockTcpClient(Engine.Network.NetworkID, _endPoint, s_MockEP);
                 _loopbackClient.GenereateMirror();
                 AddNewClient(_loopbackClient);
 				
@@ -91,7 +111,7 @@ namespace FF.Networking
 		
 		internal void Close()
 		{
-			if(IsAcceptingConnections)
+			if(IsListeningToConnections)
 			{
 				StopAcceptingConnections();
 			}
@@ -112,7 +132,7 @@ namespace FF.Networking
 			}
 			_clients.Clear();
 
-            FFMessageNetworkID.onNetworkIdReceived -= OnIdReceived;
+            Engine.Receiver.UnregisterReceiver(EMessageType.NetworkID, _networkIdReceiver);
         }
 		
 		#region Client Acceptation
@@ -122,7 +142,8 @@ namespace FF.Networking
 			{
 				FFLog.Log(EDbgCat.Networking,"Server start listening");
 				_isListening = true;
-				_listeningThread = new Thread(new ThreadStart(ListeningTask));
+                _isAcceptingConnection = true;
+                _listeningThread = new Thread(new ThreadStart(ListeningTask));
 				_listeningThread.IsBackground = true;
 				_listeningThread.Start();
 			}
@@ -131,25 +152,44 @@ namespace FF.Networking
 				FFLog.LogError(EDbgCat.Networking,"Server is already listening");
 			}
 		}
+
+        internal void PauseAcceptingConnections()
+        {
+            _isAcceptingConnection = false;
+        }
+
+        internal void ResumeAcceptingConnections()
+        {
+            _isAcceptingConnection = true;
+        }
 		
 		internal void StopAcceptingConnections()
 		{
 			if(_isListening)
 			{
 				_isListening = false;
-				FFLog.Log(EDbgCat.Networking,"Stop thread");
+                _isAcceptingConnection = false;
+                FFLog.Log(EDbgCat.Networking,"Stop thread");
 			}
 			else
 			{
 				FFLog.LogError(EDbgCat.Networking,"Server isn't listening");
 			}
 		}
+
+        internal bool IsListeningToConnections
+        {
+            get
+            {
+                return _isListening;
+            }
+        }
 		
 		internal bool IsAcceptingConnections
 		{
 			get
 			{
-				return _isListening;
+				return _isAcceptingConnection;
 			}
 		}
 		#endregion
@@ -159,7 +199,8 @@ namespace FF.Networking
 		{
 			while(_tcpListener != null && _isListening)
 			{
-				HandlePendingConnections();
+                if(IsAcceptingConnections)
+				    HandlePendingConnections();
 				Thread.Sleep(50);
 			}
 			
@@ -182,7 +223,7 @@ namespace FF.Networking
             ffClient.StartWorkers();
             IPEndPoint newEp = a_client.Client.RemoteEndPoint as IPEndPoint;
 
-            FFMessageRoomInfo infos = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom);
+            MessageRoomInfos infos = new MessageRoomInfos(Engine.Game.CurrentRoom);
             ffClient.QueueMessage(infos);
             if (_clients.ContainsKey(newEp))
             {
@@ -251,7 +292,7 @@ namespace FF.Networking
         #endregion
 
         #region Sending Message
-        internal int BroadcastMessage(FFMessage a_message)
+        internal int BroadcastMessage(AMessage a_message)
 		{
             int count = 0;
 			foreach(IPEndPoint endpoint in _clients.Keys)
@@ -262,7 +303,7 @@ namespace FF.Networking
             return count;
 		}
 		
-		internal bool SendMessageToClient(IPEndPoint a_endpoint, FFMessage a_message)
+		internal bool SendMessageToClient(IPEndPoint a_endpoint, AMessage a_message)
 		{
             FFTcpClient target = null;
             if(_clients.TryGetValue(a_endpoint, out target))
@@ -275,7 +316,20 @@ namespace FF.Networking
             }
             return false;
 		}
-		#endregion
+
+        internal bool SendMessageToClient(int a_clientId, AMessage a_message)
+        {
+            IPEndPoint ep = null;
+            if (_idMapping.TryGetValue(a_clientId, out ep))
+            {
+                return SendMessageToClient(ep, a_message);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
 
         #region Lost Connection Clients
         protected List<FFTcpClient> _lostClients;
@@ -343,7 +397,7 @@ namespace FF.Networking
 			_reconnectedClients.Remove(a_ffclient);
             _lostClients.Remove(a_ffclient);
 
-            FFLog.LogError(EDbgCat.Networking, "Added Client : " + a_ffclient.Remote.ToString());
+            FFLog.Log(EDbgCat.Networking, "Added Client : " + a_ffclient.Remote.ToString());
 		}
 
         private void AddClientOnMt(FFTcpClient a_client)
@@ -368,7 +422,7 @@ namespace FF.Networking
 			_reconnectedClients.Add(a_ffclient);
             _lostClients.Remove(a_ffclient);
 
-            FFLog.LogError(EDbgCat.Networking, "Reconnected Client : " + a_ffclient.Remote.ToString());
+            FFLog.Log(EDbgCat.Networking, "Reconnected Client : " + a_ffclient.Remote.ToString());
 		}
 
         private void ReconnectClientOnMt(FFTcpClient a_client)

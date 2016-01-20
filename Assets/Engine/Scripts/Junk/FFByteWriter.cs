@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System;
 using System.Collections.Generic;
+using FF.Multiplayer;
 
 namespace FF
 {	
@@ -151,6 +152,77 @@ namespace FF
 				Write (false);
 			}
 		}
-		#endregion
-	}
+        #endregion
+
+        #region Primitive Lists
+        internal void Write(List<int> a_list)
+        {
+            if (a_list != null)
+            {
+                Write(a_list.Count);
+                foreach (int each in a_list)
+                {
+                    Write(each);
+                }
+            }
+            else
+            {
+                Write(0);
+            }
+        }
+        #endregion
+
+        #region Unity
+        internal void Write(Vector2 a_vector)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                Write(a_vector[i]);
+            }
+        }
+
+        internal void Write(Vector3 a_vector)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Write(a_vector[i]);
+            }
+        }
+
+        internal void Write(Vector4 a_vector)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Write(a_vector[i]);
+            }
+        }
+
+        internal void Write(Quaternion a_rot)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                Write(a_rot[i]);
+            }
+        }
+        #endregion
+
+        #region PlayerDictionary
+        internal void Write<T>(PlayerDictionary<T> a_dictionary) where T : IByteStreamSerialized, new()
+        {
+            if (a_dictionary != null)
+            {
+                Write(a_dictionary.Count);
+                foreach (KeyValuePair<int,T> each in a_dictionary)
+                {
+                    Write(each.Key);
+                    Write(each.Value);
+                }
+            }
+            else
+            {
+                Write(0);
+            }
+        }
+        #endregion
+    }
 }
