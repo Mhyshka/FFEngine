@@ -43,12 +43,16 @@ namespace FF
 			{
 				FFLog.Log(EDbgCat.UI, "Requesting panel " + each + " from " + this.GetType().ToString());
 			}
-			//debug editor script. Temporary
-			
-			if(panelsToShow != 0)
-			{
-				Engine.UI.SwitchToPanels(panelNamesToShow, !_gameMode.IsGoingBack);
-			}
+            //debug editor script. Temporary
+
+            if (panelsToShow != 0)
+            {
+                Engine.UI.SwitchToPanels(panelNamesToShow, !_gameMode.IsGoingBack);
+            }
+            else
+            {
+                Engine.UI.HideAllPanels();
+            }
 			                                                  	  
 			
 		}

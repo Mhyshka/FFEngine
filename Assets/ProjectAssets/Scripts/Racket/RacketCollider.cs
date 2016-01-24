@@ -24,6 +24,11 @@ namespace FF.Pong
             return result;
         }
 
+        public void OnCollision(ServerBall a_ball)
+        {
+            a_ball.OnRacketHit(motor);
+        }
+
         internal override void Activate()
         {
         }

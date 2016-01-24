@@ -11,5 +11,9 @@ namespace FF.Pong
 
             return result;
         }
+
+        public void OnCollision(ServerBall a_ball)
+        {
+        }
     }
 }

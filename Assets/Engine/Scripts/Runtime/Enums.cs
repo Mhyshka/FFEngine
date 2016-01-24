@@ -38,7 +38,8 @@ namespace FF
 		Confirm,
 		Decline,
 		BackToMenu,
-		Connect
+		Connect,
+        PlayAgain
 	}
 	
 	internal enum EInputEventKey

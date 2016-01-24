@@ -350,7 +350,7 @@ namespace FF
 
         internal void OnClientCheckSucceed(FFTcpClient a_client)
         {
-            FFSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
+            PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)
             {
                 slotWidget.readyCheck.SetSuccess();
@@ -359,7 +359,7 @@ namespace FF
 
         internal void OnClientCheckFailed(FFTcpClient a_client)
         {
-            FFSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
+            PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)
             {
                 slotWidget.readyCheck.SetFail();

@@ -111,6 +111,10 @@ namespace FF
 			Engine.UI.ClearPanels();
 			Engine.Game.ReleaseGameMode();
 		}
+
+        internal virtual void OnLoadingComplete()
+        {
+        }
 		#endregion
 		
 		#region State Management

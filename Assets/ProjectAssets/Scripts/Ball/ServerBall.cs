@@ -4,24 +4,16 @@ using FF.Network;
 
 namespace FF.Pong
 {
-    internal class ServerBall : MonoBehaviour
+    internal class ServerBall : ABall
     {
         #region Inspector Properties
-        public BallColorManager color = null;
-        public BallHitFx hitFx = null;
-        public BallLightManager lightManager = null;
-
         public SynchronizedServerBallMovement synchronizedMovement = null;
-
-        public Rigidbody ballRigidbody = null;
         #endregion
 
         #region Properties
+        internal SideCallback onGoal = null;
+        internal RacketMotorCallback onRacketHit = null;
         #endregion
-
-        protected void Update()
-        {
-        }
 
         protected void OnTriggerEnter(Collider a_other)
         {
@@ -38,12 +30,26 @@ namespace FF.Pong
                 SetVelocity(velocity);
 
                 Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessagePongBallCollision(transform.position, a_other.transform.forward));
+
+                contact.OnCollision(this);
             }
         }
 
-        internal void SetVelocity(Vector3 a_velocity)
+        internal void OnGoal(ESide a_side)
         {
-            ballRigidbody.velocity = a_velocity;
+            if (onGoal != null)
+                onGoal(a_side);
+        }
+
+        internal void OnRacketHit(RacketMotor a_motor)
+        {
+            if (onRacketHit != null)
+                onRacketHit(a_motor);
+        }
+
+        internal override void SetVelocity(Vector3 a_velocity)
+        {
+            base.SetVelocity(a_velocity);
             synchronizedMovement.UpdateNow(transform.position, a_velocity);
         }
     }

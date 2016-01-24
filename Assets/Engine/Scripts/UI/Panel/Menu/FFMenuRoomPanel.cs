@@ -11,7 +11,7 @@ namespace FF.UI
 	internal struct UITeamRef
 	{
         public Text teamNameLabel;
-		public FFSlotWidget[] slots;
+		public PlayerSlotWidget[] slots;
 	}
 	
 	internal class FFMenuRoomPanel : FFPanel
@@ -51,11 +51,11 @@ namespace FF.UI
 			teams[teamIndex].slots[slotIndex].SetPlayer(null);
 		}
 
-        internal FFSlotWidget SlotForId(int a_networkId)
+        internal PlayerSlotWidget SlotForId(int a_networkId)
         {
             foreach (UITeamRef aTeam in teams)
             {
-                foreach (FFSlotWidget aSlot in aTeam.slots)
+                foreach (PlayerSlotWidget aSlot in aTeam.slots)
                 {
                     if (aSlot.Player != null && aSlot.Player.ID == a_networkId)
                     {
@@ -72,7 +72,7 @@ namespace FF.UI
             _isReadyChecking = true;
             foreach (UITeamRef aTeam in teams)
             {
-                foreach (FFSlotWidget aSlot in aTeam.slots)
+                foreach (PlayerSlotWidget aSlot in aTeam.slots)
                 {
                     if (aSlot.Player != null)
                     {
@@ -88,7 +88,7 @@ namespace FF.UI
             _isReadyChecking = false;
             foreach (UITeamRef aTeam in teams)
             {
-                foreach (FFSlotWidget aSlot in aTeam.slots)
+                foreach (PlayerSlotWidget aSlot in aTeam.slots)
                 {
                     if (aSlot.Player != null)
                     {

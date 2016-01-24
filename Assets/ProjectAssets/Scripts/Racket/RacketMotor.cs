@@ -3,12 +3,17 @@ using System.Collections;
 
 namespace FF.Pong
 {
+    internal delegate void RacketMotorCallback(RacketMotor a_motor);
+
     internal class RacketMotor : MonoBehaviour
     {
         #region Inspector Properties
+        [Header("Ball Snap")]
+        public float maxOffsetX = 0.5f;
+        public Transform ballSnapLocator = null;
+
         #region References
         [Header("Script references")]
-        public ServerBall ball = null;
         public RacketTouchController touchController = null;
         public RacketMouseController mouseController = null;
         public RacketRemoteController remoteController = null;
@@ -37,6 +42,7 @@ namespace FF.Pong
 
         #region NetworkProperties
         internal int clientId;
+        internal ABall ball;
         #endregion
 
         #region Properties
@@ -60,6 +66,12 @@ namespace FF.Pong
             {
                 return _currentRatio;
             }
+            set
+            {
+                _targetRatio = value;
+                _currentRatio = value;
+                UpdatePosition();
+            }
         }
 
         internal ARacketComponent _currentController;
@@ -70,6 +82,8 @@ namespace FF.Pong
                 return _currentController;
             }
         }
+
+        internal SimpleCallback onSmash = null;
         #endregion
 
         #region Main
@@ -106,14 +120,19 @@ namespace FF.Pong
 
         internal void TrySmash()
         {
-            //if(Vector3.Distance(ball.transform.position))
+            if (true)
+            {
+                if (onSmash != null)
+                    onSmash();
+            }
         }
         #endregion
 
         #region Enable & Disable
-        internal void Init(int a_clientId)
+        internal void Init(int a_clientId, ABall a_ball)
         {
             clientId = a_clientId;
+            ball = a_ball;
 
             if (clientId == Engine.Network.NetworkID)
             {

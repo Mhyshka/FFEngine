@@ -235,7 +235,7 @@ namespace FF.Input
             RegisterInputEvent(new InputEventKey(EInputEventKey.Submit,
                                                 new InputKeyBinding(KeyCode.Return)));
             RegisterInputEvent(new InputEventKey(EInputEventKey.Action,
-                                                new InputKeyBinding(KeyCode.Return)));
+                                                new InputKeyBinding(KeyCode.Space)));
         }
     }
 }

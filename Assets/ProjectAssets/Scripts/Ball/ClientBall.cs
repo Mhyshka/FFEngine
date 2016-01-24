@@ -3,14 +3,9 @@ using System.Collections;
 
 namespace FF.Pong
 {
-    internal class ClientBall : MonoBehaviour
+    internal class ClientBall : ABall
     {
         #region Inspector Properties
-        public BallColorManager color = null;
-        public BallHitFx hitFx = null;
-        public BallLightManager lightManager = null;
-
-        public new Rigidbody rigidbody = null;
         #endregion
 
         #region Properties
@@ -26,10 +21,6 @@ namespace FF.Pong
         {
             NetworkTearDown();
         }
-
-        void Update()
-        {
-        }
         #endregion
 
         internal void OnCollision(Vector3 a_position, Vector3 a_normal)
@@ -43,8 +34,8 @@ namespace FF.Pong
 
         internal void RefreshMovement(Vector3 a_position, Vector3 a_velocity)
         {
-            rigidbody.MovePosition(a_position);
-            rigidbody.velocity = a_velocity;
+            ballRigidbody.MovePosition(a_position);
+            ballRigidbody.velocity = a_velocity;
         }
 
         #region Network
