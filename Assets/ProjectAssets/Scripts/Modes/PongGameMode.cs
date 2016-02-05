@@ -68,7 +68,7 @@ namespace FF.Pong
             ball.smashSpeedMultiplier = gameSettings.smashSpeedMultiplier;
         }
 
-        internal override void OnLoadingComplete()
+        internal override void OnLoadingExit()
         {
             NewMatch();
         }
@@ -78,6 +78,7 @@ namespace FF.Pong
         {
             _board = a_board;
 
+            ball.Init(this);
             InitRackets();
             _board.blueLifeLights.Init(gameSettings.requiredPointsToWin);
             _board.purpleLifeLights.Init(gameSettings.requiredPointsToWin);
@@ -86,40 +87,27 @@ namespace FF.Pong
         #region Rackets & Controllers
         internal void InitRackets()
         {
-            List<FF.Multiplayer.FFNetworkPlayer> players;
+            List<FFNetworkPlayer> players;
 
-            players = Engine.Game.CurrentRoom.teams[0].Players;
-            if (players.Count > 0)
+            players = Engine.Game.CurrentRoom.teams[GameConstants.BLUE_TEAM_INDEX].Players;
+            for(int i = 0; i < players.Count; i++)
             {
-                _board.blueRacket.Init(players[0].ID, ball);
+                _board.blueRackets[i].Init(players[i].ID, ball);
             }
 
             
-            players = Engine.Game.CurrentRoom.teams[1].Players;
-            if (players.Count > 0)
+            players = Engine.Game.CurrentRoom.teams[GameConstants.PURPLE_TEAM_INDEX].Players;
+            for (int i = 0; i < players.Count; i++)
             {
-                _board.purpleRacket.Init(players[0].ID, ball);
+                _board.purpleRackets[i].Init(players[i].ID, ball);
             }
-        }
-
-        internal RacketMotor RacketForPlayer(int a_clientId)
-        {
-            if (_board.blueRacket.clientId == a_clientId)
-                return _board.blueRacket;
-            else if (_board.purpleRacket.clientId == a_clientId)
-                return _board.purpleRacket;
-            return null;
         }
 
         internal RacketMotor LocalRacket
         {
             get
             {
-                if (_board.blueRacket.clientId == Engine.Network.NetworkID)
-                    return _board.blueRacket;
-                else if (_board.purpleRacket.clientId == Engine.Network.NetworkID)
-                    return _board.purpleRacket;
-                return null;
+                return Board.RacketForId(Engine.Network.NetworkID);
             }
         }
         #endregion
@@ -139,21 +127,7 @@ namespace FF.Pong
 
         internal void NewMatch()
         {
-            int random = Random.Range(0, Engine.Game.CurrentRoom.players.Count);
-
-            int i = 0;
-            FFNetworkPlayer player = null;
-            foreach (FFNetworkPlayer each in Engine.Game.CurrentRoom.players.Values)
-            {
-                if (i == random)
-                {
-                    player = each;
-                    break;
-                }
-                i++;
-            }
-
-            serviceClientId = player.ID;
+            serviceClientId = 0;
             _score = new PongMatchData(gameSettings.requiredPointsToWin);
             _currendRoundIndex = 0;
             _board.blueLifeLights.ResetLives();
@@ -171,6 +145,9 @@ namespace FF.Pong
         internal void NextRound()
         {
             _currendRoundIndex++;
+            ball.ResetBall();
+            PongServiceChallengeState serviceChal = _states[(int)EPongGameState.ServiceChallenge] as PongServiceChallengeState;
+            serviceClientId = serviceChal.NextServerId();
             EnableGameplay();
             ResetRackets();
         }

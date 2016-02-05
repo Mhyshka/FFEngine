@@ -22,7 +22,8 @@ namespace FF.Network
                 return _mirror;
             }
         }
-		internal override void QueueReadMessage(AMessage a_message)
+
+		internal override void QueueReadMessage(ReadMessage a_message)
 		{
 		}
         #endregion
@@ -33,9 +34,8 @@ namespace FF.Network
             NetworkID = a_networkId;
             _local = a_local;
             _remote = a_remote;
-            _pendingSentRequest = new Dictionary<int, ARequest>();
-            _pendingReadRequest = new Dictionary<int, ARequest>();
-            _requestIndex = 0;
+            _pendingSentRequest = new Dictionary<long, SentRequest>();
+            _pendingReadRequest = new Dictionary<long, ReadRequest>();
         }
 
         internal void GenereateMirror()
@@ -62,76 +62,79 @@ namespace FF.Network
 		internal override void StartWorkers()
 		{
 		}
-		
-		internal override void QueueMessage(AMessage a_message)
-		{
-            if (a_message.HandleByMock)
-            {
-                a_message.Client = this;
-                if (a_message is AResponse)
-                {
-                    AResponse res = a_message as AResponse;
-                    _pendingReadRequest.Remove(res.requestId);
-                }
-                else if (a_message is ARequest)
-                {
-                    ARequest req = a_message as ARequest;
-                    req.requestId = _requestIndex;
-                    _pendingSentRequest.Add(req.requestId, req);
-                    _requestIndex++;
-                }
 
-                if(a_message.onMessageSent != null)
-                    a_message.onMessageSent();
-
-                _mirror.Read(a_message);
-            }
-        }
-
-        internal override void QueueFinalMessage(AMessage a_message)
+        internal override void QueueMessage(SentMessage a_message)
         {
-            if (a_message.HandleByMock)
+            if (a_message.IsHandleByMock)
             {
-                a_message.Client = this;
-                if (a_message is AResponse)
-                {
-                    AResponse res = a_message as AResponse;
-                    _pendingReadRequest.Remove(res.requestId);
-                }
-                else if (a_message is ARequest)
-                {
-                    ARequest req = a_message as ARequest;
-                    req.requestId = _requestIndex;
-                    _pendingSentRequest.Add(req.requestId, req);
-                    _requestIndex++;
-                }
+                a_message.PostWrite();
 
-                if (a_message.onMessageSent != null)
-                    a_message.onMessageSent();
-
-                _mirror.Read(a_message);
+                ReadMessage readMessage = new ReadMessage(a_message.Data, a_message.Timestamp, a_message.Channel);
+                _mirror.Read(readMessage);
             }
         }
 
-        protected void Read(AMessage a_message)
+        internal override void QueueRequest(SentRequest a_request)
         {
-            AMessage messageRead = a_message;
-            FFLog.Log(EDbgCat.Networking, "Reading new message : " + messageRead.ToString());
-
-            messageRead.Client = this;
-            if (messageRead is ARequest)
+            if (a_request.IsHandleByMock)
             {
-                ARequest request = messageRead as ARequest;
-                _pendingReadRequest.Add(request.requestId, request);
-            }
+                _pendingSentRequest.Add(a_request.RequestId, a_request);
 
-            foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Type))
-            {
-                each.Read(messageRead);
+                a_request.PostWrite();
+                ReadRequest readRequest = new ReadRequest(a_request.Data, a_request.Timestamp, a_request.RequestId, a_request.Channel);
+
+                _mirror.Read(readRequest);
             }
         }
-    #endregion
-    internal override void DoUpdate()
+
+        internal override void QueueResponse(SentResponse a_response)
+        {
+            if (a_response.IsHandleByMock)
+            {
+                _pendingReadRequest.Remove(a_response.RequestId);
+
+                a_response.PostWrite();
+
+                ReadResponse readMessage = new ReadResponse(a_response.Data, a_response.Timestamp, a_response.RequestId, a_response.ErrorCode, a_response.Channel);
+                _mirror.Read(readMessage);
+            }
+        }
+
+        internal override void QueueFinalMessage(SentMessage a_message)
+        {
+            QueueMessage(a_message);
+        }
+
+        protected void Read(ReadMessage a_message)
+        {
+            FFLog.Log(EDbgCat.Networking, "Reading new message : " + a_message.ToString());
+
+            a_message.Client = this;
+
+            if (a_message is ReadRequest)// Request
+            {
+                ReadRequest request = a_message as ReadRequest;
+                _pendingReadRequest.Add(request.RequestId, request);
+            }
+
+            List<BaseReceiver> receivers = Engine.Receiver.ReceiversForType(messageRead.Data.Type);
+            if (receivers != null)
+            {
+                receivers = new List<BaseReceiver>();
+                foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Data.Type))
+                {
+                    receivers.Add(each);
+                }
+
+                foreach (BaseReceiver each in receivers)
+                {
+                    each.Read(messageRead);
+                }
+            }
+        }
+        #endregion
+
+        internal override void DoUpdate()
         {
         }
 

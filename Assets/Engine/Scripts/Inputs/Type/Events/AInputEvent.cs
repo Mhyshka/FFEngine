@@ -43,7 +43,7 @@ namespace FF.Input
             _isPressed = true;
 
             if (_isForwarded && Engine.Network.MainClient != null)
-                Engine.Network.MainClient.QueueMessage(new MessageInputEvent(eventKeyName, true));
+                Engine.Network.MainClient.QueueMessage(new MessageInputEventData(eventKeyName, true));
         }
 
         protected virtual void OnUp()
@@ -54,7 +54,7 @@ namespace FF.Input
             _isPressed = false;
 
             if (_isForwarded && Engine.Network.MainClient != null)
-                Engine.Network.MainClient.QueueMessage(new MessageInputEvent(eventKeyName, false));
+                Engine.Network.MainClient.QueueMessage(new MessageInputEventData(eventKeyName, false));
         }
 
         internal void ForceDown()

@@ -3,150 +3,185 @@ using System.Collections;
 
 namespace FF.Network.Message
 {
-    internal enum EMessageType
+    internal enum EHeaderType
     {
-        Heartbeat,
-        NetworkID,
+        Message,
+        Request,
+        Response
+    }
+
+    internal enum EDataType
+    {
+        Empty,
+        Long,
+        Integer,
+        Bool,
+        String,
 
         InputEvent,
+        Room,
+        Player,
+        SlotRef,
 
-        RoomInfos,
-
-        RemovedFromRoom,
-        Ban,
-
-        ResponseSuccess,
-        ResponseFail,
-        ResponseCancel,
-
-        RequestEmpty,
-        IsIdleRequest,
-
-        JoinRoomRequest,
-        MoveToSlotRequest,
-        SlotSwapRequest,
-        ConfirmSwapRequest,
-
-        Farewell,
-        LeavingRoom,
-
-        RequestGameMode,
-        LoadingStarted,
+        M_RequestGameMode,
+        M_LoadingStarted,
         LoadingProgress,
-        LoadingComplete,
-        LoadingReady,
-        LoadingEveryoneReady,
+        M_LoadingComplete,
+        M_LoadingReady,
+        M_LoadingEveryoneReady,
 
-        PongTargetRatio,
-        PongBallPosition,
-        PongBallMovement,
-        PongBallCollision,
+        M_PongTargetRatio,
+        M_PongBallMovement,
+        M_PongBallCollision,
 
-        PositionEvent
+        M_PositionEvent,
+
+        M_ServiceChallengeInfo,
+        M_ServiceRatio,
+        M_TrySmash,
+        M_DidSmash,
+        M_RacketHit,
+        M_GoalHit
     }
 
     internal class MessageFactory
     {
-        internal static AMessage CreateMessage(EMessageType a_type)
+        internal static ReadMessage CreateMessage(EHeaderType a_type)
         {
-            AMessage message = null;
-
+            ReadMessage message = null;
             switch (a_type)
             {
-                case EMessageType.Heartbeat:
-                    message = new MessageHeartBeat();
+                case EHeaderType.Message:
+                    message = new ReadMessage();
                     break;
-                case EMessageType.NetworkID:
+
+                case EHeaderType.Response:
+                    message = new ReadResponse();
+                    break;
+
+                case EHeaderType.Request:
+                    message = new ReadRequest();
+                    break;
+            }
+            return message;
+        }
+
+        internal static MessageData CreateData(EDataType a_type)
+        {
+            MessageData message = null;
+            switch (a_type)
+            {
+                case EDataType.Long:
+                    //message = new RequestHeartBeat();
+                    break;
+                /*case EDataType.NetworkID:
                     message = new MessageNetworkID();
                     break;
 
-                case EMessageType.InputEvent:
+                case EDataType.InputEvent:
                     message = new MessageInputEvent();
                     break;
 
-                case EMessageType.RoomInfos:
+                case EDataType.RoomInfos:
                     message = new MessageRoomInfos();
                     break;
 
-                case EMessageType.ResponseSuccess:
+                case EDataType.ResponseSuccess:
                     message = new ResponseSuccess();
                     break;
-                case EMessageType.ResponseFail:
+                case EDataType.ResponseFail:
                     message = new ResponseFail();
                     break;
-                case EMessageType.ResponseCancel:
+                case EDataType.ResponseCancel:
                     message = new ResponseCancel();
                     break;
 
-                case EMessageType.RequestEmpty:
+                case EDataType.RequestEmpty:
                     message = new RequestEmpty();
                     break;
-                case EMessageType.IsIdleRequest:
+                case EDataType.IsIdleRequest:
                     message = new RequestIsIdle();
                     break;
 
-                case EMessageType.JoinRoomRequest:
+                case EDataType.JoinRoomRequest:
                     message = new RequestJoinRoom();
                     break;
-                case EMessageType.MoveToSlotRequest:
+                case EDataType.MoveToSlotRequest:
                     message = new RequestMoveToSlot();
                     break;
 
-                case EMessageType.SlotSwapRequest:
+                case EDataType.SlotSwapRequest:
                     message = new RequestSlotSwap();
                     break;
-                case EMessageType.ConfirmSwapRequest:
+                case EDataType.ConfirmSwapRequest:
                     message = new RequestConfirmSwap();
                     break;
 
-                case EMessageType.RemovedFromRoom:
+                case EDataType.RemovedFromRoom:
                     message = new MessageRemovedFromRoom();
                     break;
 
-                case EMessageType.Farewell:
+                case EDataType.Farewell:
                     message = new MessageFarewell();
                     break;
 
-                case EMessageType.LeavingRoom:
+                case EDataType.LeavingRoom:
                     message = new MessageLeavingRoom();
                     break;
 
 
-                case EMessageType.RequestGameMode:
+                case EDataType.RequestGameMode:
                     message = new MessageRequestGameMode();
                     break;
-                case EMessageType.LoadingStarted:
+                case EDataType.LoadingStarted:
                     message = new MessageLoadingStarted();
                     break;
-                case EMessageType.LoadingProgress:
+                case EDataType.LoadingProgress:
                     message = new MessageLoadingProgress();
                     break;
-                case EMessageType.LoadingComplete:
+                case EDataType.LoadingComplete:
                     message = new MessageLoadingComplete();
                     break;
-                case EMessageType.LoadingReady:
+                case EDataType.LoadingReady:
                     message = new MessageLoadingReady();
                     break;
-                case EMessageType.LoadingEveryoneReady:
+                case EDataType.LoadingEveryoneReady:
                     message = new MessageLoadingEveryoneReady();
                     break;
 
-                case EMessageType.PongTargetRatio:
+                case EDataType.PongTargetRatio:
                     message = new MessagePongTargetRatio();
                     break;
-                case EMessageType.PongBallPosition:
-                    message = new MessagePongBallPosition();
-                    break;
-                case EMessageType.PongBallCollision:
+                case EDataType.PongBallCollision:
                     message = new MessagePongBallCollision();
                     break;
-                case EMessageType.PongBallMovement:
+                case EDataType.PongBallMovement:
                     message = new MessagePongBallMovement();
                     break;
 
-                case EMessageType.PositionEvent:
+                case EDataType.PositionEvent:
                     message = new MessagePositionEvent();
                     break;
+
+                case EDataType.ServiceChallengeInfo:
+                    message = new MessageServiceChallengeInfo();
+                    break;
+
+                case EDataType.ServiceRatio:
+                    message = new MessageServiceRatio();
+                    break;
+
+                case EDataType.TrySmash:
+                    message = new MessageTrySmash();
+                    break;
+
+                case EDataType.RacketHit:
+                    message = new MessageRacketHit();
+                    break;
+
+                case EDataType.GoalHit:
+                    message = new MessageGoalHit();
+                    break;*/
             }
 
             return message;

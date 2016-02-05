@@ -4,17 +4,17 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongBallCollision : AMessage
+    internal class MessagePongBallCollision : MessageData
     {
         #region Properties
         internal Vector3 position;
         internal Vector3 normal;
 
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.PongBallCollision;
+                return EDataType.M_PongBallCollision;
             }
         }
         #endregion

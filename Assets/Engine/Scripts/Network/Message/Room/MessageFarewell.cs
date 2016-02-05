@@ -5,68 +5,53 @@ using FF.UI;
 
 namespace FF.Network.Message
 {
-	internal class MessageFarewell : AMessage
+	internal class StringMessageData : MessageData
 	{
         #region Properties
-        public string reason = null;
+        public string _stringData = null;
+        internal string StringData
+        {
+            get
+            {
+                return _stringData;
+            }
+        }
 		
-	 	internal override EMessageType Type
+	 	internal override EDataType Type
 	 	{
 			get
 			{
-				return EMessageType.Farewell;
+				return EDataType.String;
 			}
 		}
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return true;
-            }
-        }
         #endregion
 
-        public MessageFarewell()
+        public StringMessageData()
 		{
 		}
 		
-		internal MessageFarewell(string a_reason)
+		internal StringMessageData(string a_string)
 		{
-            reason = a_reason;
+            _stringData = a_string;
 		}
 
+        /*
         internal override void PostWrite()
         {
             base.PostWrite();
+            //TODO - FIX THAT SHIT
             _client.EndConnection("The server closed this room.");
-        }
-
-        internal override bool ShouldStopAfterWrite
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        internal override bool IsMandatory
-        {
-            get
-            {
-                return false;
-            }
-        }
+        }*/
 
         #region Serialization
         public override void SerializeData (FFByteWriter stream)
 		{
-			stream.Write(reason);
+			stream.Write(_stringData);
 		}
 		
 		public override void LoadFromData (FFByteReader stream)
 		{
-			reason = stream.TryReadString();
+			_stringData = stream.TryReadString();
 		}
 		#endregion
 	}

@@ -18,6 +18,7 @@ namespace FF.Pong
         public RacketMouseController mouseController = null;
         public RacketRemoteController remoteController = null;
         public RacketNetworkController networkController = null;
+        public RacketSmashRange smashRange = null;
         #endregion
 
         #region Movement
@@ -43,6 +44,7 @@ namespace FF.Pong
         #region NetworkProperties
         internal int clientId;
         internal ABall ball;
+        internal ESide side;
         #endregion
 
         #region Properties
@@ -83,7 +85,8 @@ namespace FF.Pong
             }
         }
 
-        internal SimpleCallback onSmash = null;
+        internal SimpleCallback onTrySmash = null;
+        internal SimpleCallback onDidSmash = null;
         #endregion
 
         #region Main
@@ -120,10 +123,37 @@ namespace FF.Pong
 
         internal void TrySmash()
         {
-            if (true)
+            if (!smashRange.didSmash)
             {
-                if (onSmash != null)
-                    onSmash();
+                if (smashRange.IsInSmashRange)
+                {
+                    smashRange.didSmash = true;
+
+                    if (onDidSmash != null)
+                        onDidSmash();
+
+                    /*if (!Engine.Network.IsServer && clientId == Engine.Network.NetworkID)
+                    {
+                        Network.Message.MessageDidSmash message = new Network.Message.MessageDidSmash(-1);
+                        Engine.Network.MainClient.QueueMessage(message);
+                    }*/
+                }
+                else
+                {
+                    if (onTrySmash != null)
+                        onTrySmash();
+
+                    if (Engine.Network.IsServer)
+                    {
+                        Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
+                        Engine.Network.Server.BroadcastMessage(message);
+                    }
+                    else if (clientId == Engine.Network.NetworkID)
+                    {
+                        Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
+                        Engine.Network.MainClient.QueueMessage(message);
+                    }
+                }
             }
         }
         #endregion
@@ -149,6 +179,16 @@ namespace FF.Pong
             {
                 _currentController = networkController;
                 Enable();
+            }
+
+            Multiplayer.FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForId(clientId);
+            if (player.slot.team.teamIndex == GameConstants.BLUE_TEAM_INDEX)
+            {
+                side = ESide.Left;
+            }
+            else if (player.slot.team.teamIndex == GameConstants.PURPLE_TEAM_INDEX)
+            {
+                side = ESide.Right;
             }
         }
 

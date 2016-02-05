@@ -38,7 +38,7 @@ namespace FF.Pong
             get
             {
                 int count = 0;
-                for (int i = 0; i < _requiredPointsToWin; i++)
+                for (int i = 0; i < MaxRoundCount; i++)
                 {
                     if (_rounds[i].goalSide == ESide.Right)
                     {
@@ -54,7 +54,7 @@ namespace FF.Pong
             get
             {
                 int count = 0;
-                for (int i = 0; i < _requiredPointsToWin; i++)
+                for (int i = 0; i < MaxRoundCount; i++)
                 {
                     if (_rounds[i].goalSide == ESide.Left)
                     {
@@ -70,7 +70,7 @@ namespace FF.Pong
             get
             {
                 int count = 0;
-                for (int i = 0; i < _requiredPointsToWin; i++)
+                for (int i = 0; i < MaxRoundCount; i++)
                 {
                     if (_rounds[i].IsComplete)
                     {
@@ -107,11 +107,19 @@ namespace FF.Pong
         }
         #endregion
 
+        internal int MaxRoundCount
+        {
+            get
+            {
+                return _requiredPointsToWin * 2 - 1;
+            }
+        }
+
         internal PongMatchData(int a_requiredPointsToWin)
         {
             _requiredPointsToWin = a_requiredPointsToWin;
-            _rounds = new PongRoundData[_requiredPointsToWin];
-            for (int i = 0; i < _requiredPointsToWin; i++)
+            _rounds = new PongRoundData[MaxRoundCount];
+            for (int i = 0; i < MaxRoundCount; i++)
             {
                 _rounds[i] = new PongRoundData();
             }

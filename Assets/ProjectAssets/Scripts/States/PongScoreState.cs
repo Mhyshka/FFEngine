@@ -7,7 +7,7 @@ using System;
 
 namespace FF.Pong
 {
-    internal class PongScoreState : APongServerState
+    internal class PongScoreState : APongState
     {
         #region Inspector Properties
         public float duration = 3f;
@@ -29,7 +29,7 @@ namespace FF.Pong
         internal override void Enter()
         {
             base.Enter();
-            _pongServerGm.DisableGameplay();
+            _pongGm.DisableGameplay();
             _scorePanel = Engine.UI.GetPanel("ScorePanel") as PongScorePanel;
             DisplayScore();
         }
@@ -38,11 +38,11 @@ namespace FF.Pong
         {
             if (_timeElapsedSinceEnter > duration)
             {
-                if (_pongServerGm.Score.HighestScore == _pongServerGm.Score.RequiredPointsToWin)
+                if (_pongGm.Score.HighestScore == _pongGm.Score.RequiredPointsToWin)
                     RequestState(outState.ID);
                 else
                 {
-                    _pongServerGm.NextRound();
+                    _pongGm.NextRound();
                     RequestState((int)EPongGameState.Service);
                 }
             }
@@ -54,7 +54,7 @@ namespace FF.Pong
         #region Events
         void DisplayScore()
         {
-            PongRoundData round = _pongServerGm.CurrentRound;
+            PongRoundData round = _pongGm.CurrentRound;
             FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForId(round.strikerId);
             ESide playerSide = player.slot.team.teamIndex == GameConstants.BLUE_TEAM_INDEX ? ESide.Left : ESide.Right;
             _scorePanel.SetScore(player.player.username,

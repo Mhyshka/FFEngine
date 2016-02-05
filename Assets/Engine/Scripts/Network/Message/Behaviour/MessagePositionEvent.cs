@@ -3,16 +3,16 @@ using System.Collections;
 
 namespace FF.Network.Message
 {
-    internal class MessagePositionEvent : AMessage
+    internal class MessagePositionEvent : MessageData
     {
         #region Properties
         internal NetworkPositionEvent positionEvent;
 
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.PositionEvent;
+                return EDataType.M_PositionEvent;
             }
         }
         #endregion

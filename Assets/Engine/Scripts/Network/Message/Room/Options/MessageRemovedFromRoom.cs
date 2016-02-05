@@ -4,36 +4,43 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessageRemovedFromRoom : AMessage
+    internal class MessageBoolData : MessageData
     {
-        internal bool isBan = false;
-
-        internal override EMessageType Type
+        internal bool _value = false;
+        internal bool Data
         {
             get
             {
-                return EMessageType.RemovedFromRoom;
+                return _value;
             }
         }
 
-        public MessageRemovedFromRoom()
+        internal override EDataType Type
+        {
+            get
+            {
+                return EDataType.Bool;
+            }
+        }
+
+        public MessageBoolData()
         {
         }
 
-        internal MessageRemovedFromRoom(bool a_isBan)
+        internal MessageBoolData(bool a_isBan)
         {
-            isBan = a_isBan;
+            _value = a_isBan;
         }
 
         #region Serialization
         public override void LoadFromData(FFByteReader stream)
         {
-            isBan = stream.TryReadBool();
+            _value = stream.TryReadBool();
         }
 
         public override void SerializeData(FFByteWriter stream)
         {
-            stream.Write(isBan);
+            stream.Write(_value);
         }
         #endregion
     }

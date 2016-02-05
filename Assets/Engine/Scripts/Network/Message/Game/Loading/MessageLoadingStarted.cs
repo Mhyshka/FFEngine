@@ -4,32 +4,14 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessageLoadingStarted : AMessage
+    internal class MessageLoadingStarted : MessageData
     {
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.LoadingStarted;
+                return EDataType.M_LoadingStarted;
             }
         }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        #region Serialize
-        public override void LoadFromData(FFByteReader stream)
-        {
-        }
-
-        public override void SerializeData(FFByteWriter stream)
-        {
-        }
-        #endregion
     }
 }

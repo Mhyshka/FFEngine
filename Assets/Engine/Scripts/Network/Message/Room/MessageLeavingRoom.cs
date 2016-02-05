@@ -4,39 +4,17 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessageLeavingRoom : AMessage
+    internal class MessageLeavingRoom : MessageData
     {
         #region Properties
         #endregion
 
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.LeavingRoom;
+                return EDataType.M_LeavingRoom;
             }
         }
-
-        public MessageLeavingRoom()
-        {
-        }
-
-        internal override bool IsMandatory
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        #region Serialization
-        public override void SerializeData(FFByteWriter stream)
-        {
-        }
-
-        public override void LoadFromData(FFByteReader stream)
-        {
-        }
-        #endregion
     }
 }

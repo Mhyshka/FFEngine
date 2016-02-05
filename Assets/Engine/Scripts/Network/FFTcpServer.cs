@@ -70,7 +70,7 @@ namespace FF.Network
         #endregion
 
         #region Receiver
-        Receiver.MessageNetworkId _networkIdReceiver;
+        Receiver.NetworkIdReceiver _networkIdReceiver;
         #endregion
 
         internal FFTcpServer(IPAddress a_ipv4)
@@ -94,8 +94,8 @@ namespace FF.Network
 				_tcpListener.Start();
 				_endPoint = (IPEndPoint)_tcpListener.Server.LocalEndPoint;
 
-                _networkIdReceiver = new Receiver.MessageNetworkId();
-                Engine.Receiver.RegisterReceiver(EMessageType.NetworkID, _networkIdReceiver);
+                _networkIdReceiver = new Receiver.NetworkIdReceiver();
+                Engine.Receiver.RegisterReceiver(EHeaderType.NetworkID, _networkIdReceiver);
 
                 _loopbackClient = new FFMockTcpClient(Engine.Network.NetworkID, _endPoint, s_MockEP);
                 _loopbackClient.GenereateMirror();
@@ -132,7 +132,7 @@ namespace FF.Network
 			}
 			_clients.Clear();
 
-            Engine.Receiver.UnregisterReceiver(EMessageType.NetworkID, _networkIdReceiver);
+            Engine.Receiver.UnregisterReceiver(EHeaderType.NetworkID, _networkIdReceiver);
         }
 		
 		#region Client Acceptation
@@ -223,7 +223,7 @@ namespace FF.Network
             ffClient.StartWorkers();
             IPEndPoint newEp = a_client.Client.RemoteEndPoint as IPEndPoint;
 
-            MessageRoomInfos infos = new MessageRoomInfos(Engine.Game.CurrentRoom);
+            MessageRoomData infos = new MessageRoomData(Engine.Game.CurrentRoom);
             ffClient.QueueMessage(infos);
             if (_clients.ContainsKey(newEp))
             {
@@ -292,7 +292,7 @@ namespace FF.Network
         #endregion
 
         #region Sending Message
-        internal int BroadcastMessage(AMessage a_message)
+        internal int BroadcastMessage(SentMessage a_message)
 		{
             int count = 0;
 			foreach(IPEndPoint endpoint in _clients.Keys)
@@ -303,7 +303,7 @@ namespace FF.Network
             return count;
 		}
 		
-		internal bool SendMessageToClient(IPEndPoint a_endpoint, AMessage a_message)
+		internal bool SendMessageToClient(IPEndPoint a_endpoint, SentMessage a_message)
 		{
             FFTcpClient target = null;
             if(_clients.TryGetValue(a_endpoint, out target))
@@ -317,12 +317,52 @@ namespace FF.Network
             return false;
 		}
 
-        internal bool SendMessageToClient(int a_clientId, AMessage a_message)
+        internal bool SendMessageToClient(int a_clientId, SentMessage a_message)
         {
             IPEndPoint ep = null;
             if (_idMapping.TryGetValue(a_clientId, out ep))
             {
                 return SendMessageToClient(ep, a_message);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region Sending Request
+        internal int BroadcastRequest(SentRequest a_request)
+        {
+            int count = 0;
+            foreach (IPEndPoint endpoint in _clients.Keys)
+            {
+                if (SendRequestToClient(endpoint, a_request))
+                    count++;
+            }
+            return count;
+        }
+
+        internal bool SendRequestToClient(IPEndPoint a_endpoint, SentRequest a_request)
+        {
+            FFTcpClient target = null;
+            if (_clients.TryGetValue(a_endpoint, out target))
+            {
+                if (target != null)
+                {
+                    target.QueueRequest(a_request);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        internal bool SendRequestToClient(int a_clientId, SentRequest a_request)
+        {
+            IPEndPoint ep = null;
+            if (_idMapping.TryGetValue(a_clientId, out ep))
+            {
+                return SendRequestToClient(ep, a_request);
             }
             else
             {

@@ -57,7 +57,7 @@ namespace FF
         #region Events
         protected void OnFail(int a_errorCode)
         {
-            string message = RequestJoinRoom.MessageForCode(a_errorCode);
+            string message = MessagePlayerData.MessageForCode(a_errorCode);
             FFMessageToast.RequestDisplay("Couldn't join room : " + message);
             Engine.Network.SetNoMainClient();
             GoBack();

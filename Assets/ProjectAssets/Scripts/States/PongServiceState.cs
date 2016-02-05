@@ -6,7 +6,7 @@ using System;
 
 namespace FF.Pong
 {
-    internal class PongServiceState : APongServerState
+    internal abstract class PongServiceState : APongState
     {
         #region Inspector Properties
         public AnimationCurve ratioPositionCurve = null;
@@ -38,12 +38,9 @@ namespace FF.Pong
         internal override void Enter()
         {
             base.Enter();
-
+            _serviceRacket = _pongGm.Board.RacketForId(_pongGm.serviceClientId);
+            _pongGm.CurrentRound.strikerId = ServiceRacket.clientId;
             _ratio = 0f;
-            _serviceRacket = _pongServerGm.RacketForPlayer(_pongServerGm.serviceClientId);
-
-            SnapBallToRacket();
-            ServiceRacket.onSmash += OnServicePlayerSmash;
         }
 
         internal override int Manage()
@@ -60,37 +57,43 @@ namespace FF.Pong
         internal override void Exit()
         {
             base.Exit();
-            ServiceRacket.onSmash -= OnServicePlayerSmash;
         }
         #endregion
 
-        protected void OnServicePlayerSmash()
+        #region EventManagement
+        protected override void RegisterForEvent()
         {
-            LaunchBall();
-            RequestState((int)EPongGameState.Gameplay);
+            base.RegisterForEvent();
+            if (ServiceRacket == _pongGm.LocalRacket)
+            {
+                ServiceRacket.onTrySmash += OnServicePlayerSmash;
+            }
         }
 
-        protected void SnapBallToRacket()
+        protected override void UnregisterForEvent()
         {
-            _pongServerGm.ball.SnapToLocator(ServiceRacket.ballSnapLocator);
+            base.UnregisterForEvent();
+            if (ServiceRacket == _pongGm.LocalRacket)
+            {
+                ServiceRacket.onTrySmash -= OnServicePlayerSmash;
+            }
         }
+        #endregion
 
-        protected void LaunchBall()
-        {
-            bool isLeftSide = Engine.Game.CurrentRoom.GetPlayerForId(_serviceRacket.clientId).slot.team.teamIndex == GameConstants.BLUE_TEAM_INDEX;
-            float signedRatio = _ratio * 2f - 1f;
-
-            _pongServerGm.CurrentRound.strikerId = _serviceRacket.clientId;
-
-            _pongServerGm.ball.Launch(signedRatio,
-                                        ServiceRacket.maxBounceFactorX,
-                                        isLeftSide);
-        }
+        protected abstract void OnServicePlayerSmash();
 
         protected void UpdateBallPosition()
         {
-            float offset = _ratio * ServiceRacket.maxOffsetX * 2f - ServiceRacket.maxOffsetX;
-            _pongServerGm.ball.SetServiceOffsetX(offset);
+            float offset = 0f;
+            if (ServiceRacket.side == ESide.Left)
+            {
+                offset = _ratio * ServiceRacket.maxOffsetX * 2f - ServiceRacket.maxOffsetX;
+            }
+            else if (ServiceRacket.side == ESide.Right)
+            {
+                offset = (1 - _ratio) * ServiceRacket.maxOffsetX * 2f - ServiceRacket.maxOffsetX;
+            }
+            _pongGm.ball.SetServiceOffsetX(offset);
         }
     }
 }

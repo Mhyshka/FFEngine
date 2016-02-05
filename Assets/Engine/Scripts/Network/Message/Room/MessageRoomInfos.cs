@@ -7,20 +7,35 @@ using FF.Multiplayer;
 
 namespace FF.Network.Message
 {
-	internal class MessageRoomInfos : AMessage
+	internal class MessageRoomData : MessageData
 	{
 		#region Properties
-		public Room room;
-		#endregion
-		
-		public MessageRoomInfos()
+		protected Room _room;
+        internal Room Room
+        {
+            get
+            {
+                return _room;
+            }
+        }
+        #endregion
+
+        internal override EDataType Type
+        {
+            get
+            {
+                return EDataType.Room;
+            }
+        }
+
+        public MessageRoomData()
 		{
 		
 		}
 		
-		internal MessageRoomInfos(Room a_room)
+		internal MessageRoomData(Room a_room)
 		{
-		 	room = a_room;
+		 	_room = a_room;
 		}
 		
 		#region Methods
@@ -28,20 +43,14 @@ namespace FF.Network.Message
 		
 		public override void SerializeData(FFByteWriter stream)
 		{
-			stream.Write(room);
+			stream.Write(_room);
 		}
 		
 		public override void LoadFromData (FFByteReader stream)
 		{
-			room = stream.TryReadObject<Room>();
+			_room = stream.TryReadObject<Room>();
 		}
 		
-		internal override EMessageType Type
-		{
-			get
-			{
-				return EMessageType.RoomInfos;
-			}
-		}
+		
 	}
 }

@@ -15,7 +15,7 @@ namespace FF.Input
         protected bool _isInServerMode;
         protected bool _isInClientMode;
 
-        protected Network.Receiver.MessageInputEvent _networkEventReceiver;
+        protected Network.Receiver.InputEventReceiver _networkEventReceiver;
         #endregion
 
         internal ServerInputManager(bool a_registerForBack = false) : base(a_registerForBack)
@@ -76,8 +76,8 @@ namespace FF.Input
 
             _networkManagers = new Dictionary<int, NetworkInputManager>();
 
-            _networkEventReceiver = new Network.Receiver.MessageInputEvent();
-            Engine.Receiver.RegisterReceiver(EMessageType.InputEvent,
+            _networkEventReceiver = new Network.Receiver.MessageInputEventReceiver();
+            Engine.Receiver.RegisterReceiver(EHeaderType.InputEvent,
                                              _networkEventReceiver);
         }
 
@@ -96,7 +96,7 @@ namespace FF.Input
                 }
                 _networkManagers.Clear();
 
-                Engine.Receiver.UnregisterReceiver(EMessageType.InputEvent,
+                Engine.Receiver.UnregisterReceiver(EHeaderType.InputEvent,
                                                    _networkEventReceiver);
             }
         }

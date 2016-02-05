@@ -112,7 +112,7 @@ namespace FF
 			Engine.Game.ReleaseGameMode();
 		}
 
-        internal virtual void OnLoadingComplete()
+        internal virtual void OnLoadingExit()
         {
         }
 		#endregion

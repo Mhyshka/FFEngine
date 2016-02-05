@@ -6,9 +6,8 @@ using FF.UI;
 
 namespace FF.Network.Message
 {
-    internal class RequestConfirmSwap : ARequest
+    internal class RequestConfirmSwap : MessageData
     {
-        protected static RequestConfirmSwap s_CurrentRequest = null;
         internal enum EErrorCode
         {
             PlayerRefused,
@@ -19,41 +18,21 @@ namespace FF.Network.Message
         #region Properties
         internal string fromUsername;
         
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.ConfirmSwapRequest;
-            }
-        }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return true;
+                return EDataType.Q_ConfirmSwap;
             }
         }
         #endregion
 
         #region Constructors
-        public RequestConfirmSwap()
-        {
-        }
-
         internal RequestConfirmSwap(string a_fromUsername)
         {
             fromUsername = a_fromUsername;
         }
         #endregion
-
-        protected override float TimeoutDuration
-        {
-            get
-            {
-                return float.MaxValue;
-            }
-        }
 
         #region Serialization
         public override void LoadFromData(FFByteReader stream)

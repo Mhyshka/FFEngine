@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using FF.Network.Receiver;
+using FF.Network.Message;
+
 namespace FF.Network
 {
     internal class SynchronizedClientPosition : MonoBehaviour
@@ -15,22 +18,23 @@ namespace FF.Network
         #endregion
 
         #region Network
-        internal Receiver.GenericReceiver<Message.MessagePositionEvent> _receiver;
+        internal GenericMessageReceiver _receiver;
 
         void Awake()
         {
-            _receiver = new Receiver.GenericReceiver<Message.MessagePositionEvent>(OnMessageReceived);
-            Engine.Receiver.RegisterReceiver(Message.EMessageType.PositionEvent, _receiver);
+            _receiver = new GenericMessageReceiver(OnMessageReceived);
+            Engine.Receiver.RegisterReceiver(EDataType.M_PositionEvent, _receiver);
         }
 
         void OnDestroy()
         {
-            Engine.Receiver.UnregisterReceiver(Message.EMessageType.PositionEvent, _receiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.M_PositionEvent, _receiver);
         }
 
-        void OnMessageReceived(Message.MessagePositionEvent a_message)
+        void OnMessageReceived(ReadMessage a_message, MessagePositionEvent a_data)
         {
-            _positionEvents.AddLast(a_message.positionEvent);
+            MessagePositionEvent data = a_message.Data as MessagePositionEvent;
+            _positionEvents.AddLast(a_data.positionEvent);
         }
         #endregion
 

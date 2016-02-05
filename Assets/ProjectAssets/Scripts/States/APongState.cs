@@ -5,16 +5,16 @@ using FF.Logic;
 
 namespace FF.Pong
 {
-    internal abstract class APongServerState : AGameState
+    internal abstract class APongState : AGameState
     {
         #region Properties
-        protected PongServerGameMode _pongServerGm;
+        protected PongGameMode _pongGm;
         #endregion
 
         internal override void Enter()
         {
             base.Enter();
-            _pongServerGm = _gameMode as PongServerGameMode;
+            _pongGm = _gameMode as PongGameMode;
         }
     }
 }

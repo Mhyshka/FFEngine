@@ -6,7 +6,7 @@ using System;
 
 namespace FF.Pong
 {
-    internal class PongGameplayState : APongServerState
+    internal class PongGameplayState : APongState
     {
         #region Inspector Properties
         #endregion
@@ -43,46 +43,46 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            _pongServerGm.ServerBall.onGoal += OnGoal;
-            _pongServerGm.ServerBall.onRacketHit += OnRacketHit;
+            _pongGm.ball.onGoal += OnGoal;
+            _pongGm.ball.onRacketHit += OnRacketHit;
 
-            _pongServerGm.Board.blueRacket.onSmash += OnSmash;
-            _pongServerGm.Board.purpleRacket.onSmash += OnSmash;
+            /*_pongGm.Board.blueRacket.onSmash += OnSmash;
+            _pongGm.Board.purpleRacket.onSmash += OnSmash;*/
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            _pongServerGm.ServerBall.onGoal -= OnGoal;
-            _pongServerGm.ServerBall.onRacketHit += OnRacketHit;
+            _pongGm.ball.onGoal -= OnGoal;
+            _pongGm.ball.onRacketHit -= OnRacketHit;
 
-            _pongServerGm.Board.blueRacket.onSmash -= OnSmash;
-            _pongServerGm.Board.purpleRacket.onSmash -= OnSmash;
+            /*_pongGm.Board.blueRacket.onSmash -= OnSmash;
+            _pongGm.Board.purpleRacket.onSmash -= OnSmash;*/
         }
 
         protected virtual void OnGoal(ESide a_side)
         {
-            _pongServerGm.CurrentRound.goalSide = a_side;
+            _pongGm.CurrentRound.goalSide = a_side;
             if (a_side == ESide.Left)
-                _pongServerGm.Board.blueLifeLights.TakeRandomLife();
+                _pongGm.Board.blueLifeLights.TakeRandomLife();
             else if (a_side == ESide.Right)
-                _pongServerGm.Board.purpleLifeLights.TakeRandomLife();
+                _pongGm.Board.purpleLifeLights.TakeRandomLife();
 
             RequestState((int)EPongGameState.Score);
         }
 
         protected virtual void OnRacketHit(RacketMotor a_racket)
         {
-            _pongServerGm.CurrentRound.rallyCount++;
-            _pongServerGm.CurrentRound.strikerId = a_racket.clientId;
+            _pongGm.CurrentRound.rallyCount++;
+            _pongGm.CurrentRound.strikerId = a_racket.clientId;
         }
 
         protected virtual void OnSmash()
         {
-            _pongServerGm.CurrentRound.isSmash = true;
-            _pongServerGm.CurrentRound.smashCount++;
+            _pongGm.CurrentRound.isSmash = true;
+            _pongGm.CurrentRound.smashCount++;
 
-            _pongServerGm.ball.Smash();
+            _pongGm.ball.Smash();
         }
         #endregion
     }

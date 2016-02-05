@@ -7,22 +7,14 @@ using FF.Logic;
 
 namespace FF.Network.Message
 {
-    internal class MessageLoadingProgress : AMessage
+    internal class MessageLoadingProgressData : MessageData
     {
         #region Properties
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.LoadingProgress;
-            }
-        }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return false;
+                return EDataType.LoadingProgress;
             }
         }
 
@@ -35,11 +27,11 @@ namespace FF.Network.Message
             }
         }
 
-        internal MessageLoadingProgress()
+        internal MessageLoadingProgressData()
         {
         }
 
-        internal MessageLoadingProgress(PlayerDictionary<PlayerLoadingWrapper> a_playersLoadingState)
+        internal MessageLoadingProgressData(PlayerDictionary<PlayerLoadingWrapper> a_playersLoadingState)
         {
             _playersLoadingState = a_playersLoadingState;
         }

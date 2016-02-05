@@ -4,54 +4,59 @@ using System.Net.Sockets;
 
 namespace FF.Network.Message
 {
-	internal class ResponseFail : AResponse
+    internal enum ERequestErrorCode
+    {
+        Success,
+        Failed,
+
+        Unknown,
+
+        LocalCanceled,
+        RemoteCanceled,
+        
+        IllegalArgument,
+        IllegalState,
+        Forbidden,
+        Timeout,
+
+        LocalConnectionIssue,
+        RemoteConnectionIssue
+    }
+
+    internal class ResponseFail : MessageData
 	{
 		#region Properties
-		public int errorCode = -1;
-
-        internal override bool HandleByMock
+		internal ERequestErrorCode errorCode = ERequestErrorCode.Unknown;
+        internal int detailErrorCode = -1;
+        internal override EDataType Type
         {
             get
             {
-                return true;
+                return EDataType.R_Fail;
             }
         }
-
         #endregion
 
-        public ResponseFail()
-		{
-		
-		}
-		
-		internal ResponseFail(int a_errorCode)
+        internal ResponseFail(ERequestErrorCode a_errorCode, int a_detailErrorCode = -1) : base()
 		{
 			errorCode = a_errorCode;
-		}
-
-		#region Message
-		internal override EMessageType Type
-		{
-			get
-			{
-				return EMessageType.ResponseFail;
-			}
-		}
-        #endregion
+            detailErrorCode = a_detailErrorCode;
+        }
 
         #region Serialization
         public override void SerializeData(FFByteWriter stream)
 		{
 			base.SerializeData(stream);
-			stream.Write(errorCode);
+			stream.Write((int)errorCode);
+            stream.Write(detailErrorCode);
 		}
 		
 		public override void LoadFromData (FFByteReader stream)
 		{
 			base.LoadFromData(stream);
-			errorCode = stream.TryReadInt();
-		}
-		#endregion
-		
-	}
+			errorCode = (ERequestErrorCode)stream.TryReadInt();
+            detailErrorCode = stream.TryReadInt();
+        }
+        #endregion
+    }
 }

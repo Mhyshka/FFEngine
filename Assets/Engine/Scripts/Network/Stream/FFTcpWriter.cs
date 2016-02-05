@@ -15,19 +15,21 @@ namespace FF.Network
 	internal class FFTcpWriter : FFTcpStreamThread
 	{
 		#region Properties
-		protected Queue<AMessage> _toSendMessages;
+		protected Queue<SentMessage> _toSendMessages;
 		
 		protected double _heartbeatTimespan = 3000d;//in MS
 		protected DateTime _lastHeartbeatTimestamp;
+
+        protected SentMessage _finalMessageRef = null;
 		#endregion
 		
 		internal FFTcpWriter(FFTcpClient a_ffClient) : base(a_ffClient)
 		{
-			_toSendMessages = new Queue<AMessage>();
+			_toSendMessages = new Queue<SentMessage>();
         }
 		
 		#region Message
-		internal void QueueMessage(AMessage a_message)
+		internal void QueueMessage(SentMessage a_message)
 		{
 			FFLog.Log(EDbgCat.Socket,"Queue message");
 			lock(_toSendMessages)
@@ -36,14 +38,15 @@ namespace FF.Network
 			}
 		}
 
-        internal void QueueFinalMessage(AMessage a_message)
+        internal void QueueFinalMessage(SentMessage a_message)
         {
-            FFLog.Log(EDbgCat.Socket, "Queue message");
+            FFLog.Log(EDbgCat.Socket, "Queue final message");
             lock (_toSendMessages)
             {
                 _toSendMessages.Clear();
                 _toSendMessages.Enqueue(a_message);
             }
+            _finalMessageRef = a_message;
         }
 
         internal override void Start ()
@@ -54,7 +57,7 @@ namespace FF.Network
         #endregion
 
         #region Read
-        protected bool Write(AMessage a_message)
+        protected bool Write(SentMessage a_message)
 		{
 			try
 			{
@@ -83,7 +86,7 @@ namespace FF.Network
 				
 				if(_shouldRun && _toSendMessages.Count > 0)
 				{
-					AMessage toSend;
+                    SentMessage toSend;
 					lock(_toSendMessages)
 					{
 						toSend = _toSendMessages.Peek();
@@ -92,7 +95,7 @@ namespace FF.Network
                     if (Write(toSend) || !toSend.IsMandatory)
 					{
                         _ffClient.QueueWrittenMessage(toSend);
-                        if (toSend.ShouldStopAfterWrite)
+                        if (_finalMessageRef == toSend)
                             break;
 
 						lock(_toSendMessages)
@@ -114,10 +117,16 @@ namespace FF.Network
 			TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
 			if(span.TotalMilliseconds > _heartbeatTimespan)
 			{
-				QueueMessage(new MessageHeartBeat());
+                MessageLongData newHeartbeat = new MessageLongData();
+                //TODO : FIX THAT SHIT
+                //QueueMessage(newHeartbeat);
 				_lastHeartbeatTimestamp = DateTime.Now;
 			}
 		}
+
+        protected void OnHeartbeatSuccessReceived(MessageLongData a_heartbeat)
+        {
+        }
 		#endregion
 	}
 }

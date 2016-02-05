@@ -11,8 +11,7 @@ namespace FF.Pong
         #endregion
 
         #region Properties
-        internal SideCallback onGoal = null;
-        internal RacketMotorCallback onRacketHit = null;
+
         #endregion
 
         protected void OnTriggerEnter(Collider a_other)
@@ -35,22 +34,35 @@ namespace FF.Pong
             }
         }
 
-        internal void OnGoal(ESide a_side)
-        {
-            if (onGoal != null)
-                onGoal(a_side);
-        }
-
-        internal void OnRacketHit(RacketMotor a_motor)
-        {
-            if (onRacketHit != null)
-                onRacketHit(a_motor);
-        }
 
         internal override void SetVelocity(Vector3 a_velocity)
         {
             base.SetVelocity(a_velocity);
             synchronizedMovement.UpdateNow(transform.position, a_velocity);
+        }
+
+        internal override void OnRacketHit(RacketMotor a_motor)
+        {
+            base.OnRacketHit(a_motor);
+            Network.Message.MessageRacketHit message = new Network.Message.MessageRacketHit(a_motor.clientId);
+            Engine.Network.Server.BroadcastMessage(message);
+        }
+
+        internal override void OnGoal(ESide a_side)
+        {
+            base.OnGoal(a_side);
+            Network.Message.MessageGoalHit message = new Network.Message.MessageGoalHit(a_side);
+            Engine.Network.Server.BroadcastMessage(message);
+        }
+
+        internal override void Smash()
+        {
+            base.Smash();
+
+            _smashCount++;
+            SetVelocity(ballRigidbody.velocity * (1 + _smashCount * smashSpeedMultiplier));
+            Network.Message.MessageDidSmash message = new Network.Message.MessageDidSmash(_smashCount);
+            Engine.Network.Server.BroadcastMessage(message);
         }
     }
 }

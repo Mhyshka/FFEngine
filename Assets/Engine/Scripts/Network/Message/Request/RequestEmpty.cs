@@ -4,22 +4,14 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class RequestEmpty : ARequest
+    internal class RequestEmpty : MessageData
     {
         #region Properties
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.RequestEmpty;
-            }
-        }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return true;
+                return EDataType.Empty;
             }
         }
         #endregion

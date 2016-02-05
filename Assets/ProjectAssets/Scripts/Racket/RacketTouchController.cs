@@ -48,9 +48,14 @@ namespace FF.Pong
                     {
                         _isSelected = false;
                     }
-                    else if (each.fingerId != _touchId && each.phase == TouchPhase.Ended)
+
+                    if (each.phase == TouchPhase.Ended)
                     {
-                        motor.TrySmash();
+                        if (each.position.x > Screen.width / 2f && motor.side == ESide.Left ||
+                            each.position.x < Screen.width / 2f && motor.side == ESide.Right)
+                        {
+                            motor.TrySmash();
+                        }
                     }
                 }
 

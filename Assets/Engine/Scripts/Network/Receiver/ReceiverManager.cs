@@ -9,31 +9,33 @@ namespace FF.Network.Receiver
     internal class ReceiverManager : BaseManager
     {
         #region Properties
-        protected Dictionary<EMessageType, List<BaseReceiver>> _registeredReceiver;
+        protected Dictionary<string, List<BaseReceiver>> _registeredReceiver;
 
-        internal BaseReceiver RESPONSE_ALWAYS_SUCCESS = new RequestFixedResponse(new Message.ResponseSuccess());
-        internal BaseReceiver RESPONSE_ALWAYS_FAIL = new RequestFixedResponse(new Message.ResponseFail((int)ESimpleRequestErrorCode.Forbidden));
-        internal BaseReceiver RESPONSE_ALWAYS_CANCEL = new RequestFixedResponse(new Message.ResponseCancel());
+        /*internal BaseReceiver RESPONSE_ALWAYS_SUCCESS = new RequestReceiverFixedResponse(new ResponseSuccess());
+        internal BaseReceiver RESPONSE_ALWAYS_FAIL = new RequestReceiverFixedResponse(new ResponseFail((int)ERequestErrorCode.Forbidden));*/
         #endregion
 
         #region Manager
         internal ReceiverManager()
         {
-            _registeredReceiver = new Dictionary<EMessageType, List<BaseReceiver>>();
+            _registeredReceiver = new Dictionary<string, List<BaseReceiver>>();
 
-            RegisterReceiver(EMessageType.RoomInfos, new MessageRoomInfos());
+            /*RegisterReceiver(EDataType.M_RoomInfos, new RoomInfosReceiver());
 
-            RegisterReceiver(EMessageType.ResponseSuccess, new ResponseSuccess());
-            RegisterReceiver(EMessageType.ResponseFail, new ResponseFail());
-            RegisterReceiver(EMessageType.ResponseCancel, new ResponseCancel());
+            RegisterReceiver(EDataType.R_Success, new SuccessReceiver());
+            RegisterReceiver(EDataType.R_Fail, new FailReceiver());
+            RegisterReceiver(EDataType.M_Cancel, new CancelReceiver());
 
-            RegisterReceiver(EMessageType.Heartbeat, new MessageHeartbeat());
+            RegisterReceiver(EDataType.R_Heartbeat, new HeartbeatReceiver());
 
-            RegisterReceiver(EMessageType.RequestEmpty, RESPONSE_ALWAYS_SUCCESS);
-            RegisterReceiver(EMessageType.IsIdleRequest, new RequestIsIdle());
+            RegisterReceiver(EDataType.Q_Empty, RESPONSE_ALWAYS_SUCCESS);
+            RegisterReceiver(EDataType.IsIdleRequest, new IsIdleReceiver());
 
-            RegisterReceiver(EMessageType.Farewell, new MessageFarewell());
-            RegisterReceiver(EMessageType.LeavingRoom, new MessageLeavingRoom());
+            RegisterReceiver(EDataType.M_Farewell, new FarewellReceiver());
+            RegisterReceiver(EDataType.M_LeavingRoom, new LeavingRoomReceiver());*/
+
+
+            _client.EndConnection(_data.reason);
         }
 
         internal override void TearDown()
@@ -47,14 +49,14 @@ namespace FF.Network.Receiver
         #endregion
 
         #region Register / Unregister
-        internal void RegisterReceiver(EMessageType a_type, BaseReceiver a_receiver)
+        internal void RegisterReceiver(string a_channel, BaseReceiver a_receiver)
         {
-            if (!_registeredReceiver.ContainsKey(a_type))
+            if (!_registeredReceiver.ContainsKey(a_channel))
             {
-                _registeredReceiver.Add(a_type, new List<BaseReceiver>()); 
+                _registeredReceiver.Add(a_channel, new List<BaseReceiver>()); 
             }
 
-            _registeredReceiver[a_type].Add(a_receiver);
+            _registeredReceiver[a_channel].Add(a_receiver);
 
             /*FFLog.LogError("Registered count : " + _registeredReceiver[a_type].Count);
             foreach (BaseReceiver each in _registeredReceiver[a_type])
@@ -64,24 +66,26 @@ namespace FF.Network.Receiver
             }*/
         }
 
-        internal void UnregisterReceiver(EMessageType a_type, BaseReceiver a_receiver)
+        internal void UnregisterReceiver(string a_channel, BaseReceiver a_receiver)
         {
-            if (_registeredReceiver.ContainsKey(a_type) && _registeredReceiver[a_type].Count > 0)
+            if (_registeredReceiver.ContainsKey(a_channel) && _registeredReceiver[a_channel].Count > 0)
             {
-                _registeredReceiver[a_type].Remove(a_receiver);
+                _registeredReceiver[a_channel].Remove(a_receiver);
             }
             else
             {
-                FFLog.LogWarning(EDbgCat.Receiver, "Trying to remove a receiver from " + a_type.ToString() + " while no receiver are register for this type.");
+                FFLog.LogWarning(EDbgCat.Receiver, "Trying to remove a receiver from " + a_channel.ToString() + " while no receiver are register for this channel.");
             }
         }
         #endregion
 
-        internal List<BaseReceiver> ReceiversForType(EMessageType a_type)
+        internal List<BaseReceiver> ReceiversForType(string a_channel)
         {
-            if (_registeredReceiver[a_type] != null && _registeredReceiver[a_type].Count > 0)
+            List<BaseReceiver> results = null;
+            
+            if (_registeredReceiver.TryGetValue(a_channel, out results))
             {
-                return _registeredReceiver[a_type];
+                return results;
             }
 
             return null;

@@ -5,15 +5,15 @@ namespace FF.Network.Message
 {
     internal class FFRequestForClient
     {
-        protected FFTcpClient _client;
-        protected ARequest _request;
+        /*protected FFTcpClient _client;
+        protected RequestHeader _request;
 
         internal FFClientCallback onSuccess = null;
-        internal FFIntClientCallback onFail = null;
+        internal FFClientCallback onFail = null;
         internal FFClientCallback onTimeout = null;
         internal FFClientCallback onCancel = null;
 
-        internal FFRequestForClient(ARequest a_request, FFTcpClient a_client)
+        internal FFRequestForClient(RequestHeader a_request, FFTcpClient a_client)
         {
             _client = a_client;
             _request = a_request;
@@ -32,10 +32,10 @@ namespace FF.Network.Message
             TearDown();
         }
 
-        protected void OnFail(int a_errorCode)
+        protected void OnFail()
         {
             if (onFail != null)
-                onFail(_client, a_errorCode);
+                onFail(_client);
 
             TearDown();
         }
@@ -70,6 +70,6 @@ namespace FF.Network.Message
 
             _request = null;
             _client = null;
-        }
+        }*/
     }
 }

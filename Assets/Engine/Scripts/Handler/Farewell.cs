@@ -7,21 +7,21 @@ using FF.Network.Message;
 
 namespace FF.Handler
 {
-    internal class Farewell : ASimpleSuccess
+    internal class Farewell : ABaseHandler
     {
         #region Properties
         protected int _count = 0;
         protected int _target = 0;
 
-        protected MessageFarewell _message;
+        protected StringMessageData _data;
         #endregion
 
         internal Farewell(SimpleCallback a_onShutdownComplete) : base()
         {
             _onSuccess = a_onShutdownComplete;
-            _message = new MessageFarewell("Server shuting down.");
-            _message.onMessageSent = OnPostWrite;
-            _target = Engine.Network.Server.BroadcastMessage(_message);
+            _data = new StringMessageData("Server shuting down.");
+            _data.onMessageSent = OnPostWrite;
+            _target = Engine.Network.Server.BroadcastMessage(_data);
         }
 
         internal void OnPostWrite()
@@ -30,14 +30,14 @@ namespace FF.Handler
             _isComplete = _count >= _target;
         }
 
-        internal override void OnComplete()
+        internal override void Complete()
         {
             if (_onSuccess != null)
                 _onSuccess();
 
-            _message.onMessageSent -= OnPostWrite;
+            _data.onMessageSent -= OnPostWrite;
 
-            base.OnComplete();
+            base.Complete();
         }
     }
 }

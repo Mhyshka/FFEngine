@@ -4,17 +4,17 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongTargetRatio : AMessage
+    internal class MessagePongTargetRatio : MessageData
     {
         #region Properties
         internal float ratio;
         internal int clientId;
 
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.PongTargetRatio;
+                return EDataType.M_PongTargetRatio;
             }
         }
         #endregion

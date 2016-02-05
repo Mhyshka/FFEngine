@@ -21,7 +21,7 @@ namespace FF.Logic
         {
             base.RegisterForEvent();
             Engine.Game.Loading.onLoadingProgressReceived += OnLoadingProgressReceived;
-            Engine.Receiver.RegisterReceiver(EMessageType.LoadingEveryoneReady, new Network.Receiver.MessageLoadingEveryoneReady(OnEveryoneReady));
+            Engine.Receiver.RegisterReceiver(EHeaderType.LoadingEveryoneReady, new Network.Receiver.LoadingEveryoneReadyReceiver(OnEveryoneReady));
         }
 
         protected override void UnregisterForEvent()
@@ -30,7 +30,7 @@ namespace FF.Logic
             Engine.Game.Loading.UnregisterLoadingStarted();
             
             Engine.Game.Loading.onLoadingProgressReceived -= OnLoadingProgressReceived;
-            Engine.Receiver.UnregisterReceiver(EMessageType.LoadingEveryoneReady, new Network.Receiver.MessageLoadingEveryoneReady(OnEveryoneReady));
+            Engine.Receiver.UnregisterReceiver(EHeaderType.LoadingEveryoneReady, new Network.Receiver.LoadingEveryoneReadyReceiver(OnEveryoneReady));
         }
 
         protected void OnLoadingProgressReceived()

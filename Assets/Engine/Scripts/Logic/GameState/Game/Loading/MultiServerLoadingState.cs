@@ -14,7 +14,7 @@ namespace FF.Logic
     internal class MultiServerLoadingState : PongLoadingState
     {
         #region Properties
-        protected NetworkCheck _networkCheckHandler;
+        //protected NetworkCheck _networkCheckHandler;
 
         protected ManualLoadingStep _allPlayerReadyStep;
         #endregion
@@ -23,15 +23,16 @@ namespace FF.Logic
         internal override void Enter()
         {
             base.Enter();
-            _networkCheckHandler = null;
+            //_networkCheckHandler = null;
         }
 
         internal override int Manage()
         {
-            if (_networkCheckHandler == null && AllPlayersReady)
+            //TODO Network Check
+            /*if (_networkCheckHandler == null && AllPlayersReady)
             {
                 _networkCheckHandler = new NetworkCheck(OnNetworkCheckSuccess, OnNetworkCheckFailed, null, null);
-            }
+            }*/
             return base.Manage();
         }
         #endregion

@@ -2,10 +2,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+using System;
 using System.Net.Sockets;
 using System.Net;
-using System.Net.NetworkInformation;
-
 using Zeroconf;
 
 using FF.Multiplayer;
@@ -13,33 +12,43 @@ using FF.Network.Message;
 
 namespace FF.Network
 {
-	internal class NetworkManager : BaseManager
-	{
-		private static string GAME_PROTOCOL = "_pong._tcp.";
+    internal class NetworkManager : BaseManager
+    {
+        private static string GAME_PROTOCOL = "_pong._tcp.";
 
         #region Server Properties
-		protected FFTcpServer _server;
-		internal FFTcpServer Server
-		{
-			get
-			{
-				return _server;
-			}
-		}
+        protected FFTcpServer _server;
+        internal FFTcpServer Server
+        {
+            get
+            {
+                return _server;
+            }
+        }
         #endregion
 
         #region Client Properties
         protected Dictionary<IPEndPoint, FFTcpClient> _clients;
-		protected Dictionary<IPEndPoint, Room> _rooms;
-		
-		protected FFTcpClient _mainClient;
-		internal FFTcpClient MainClient
-		{
-			get
-			{
-				return _mainClient;
-			}
-		}
+        protected Dictionary<IPEndPoint, Room> _rooms;
+
+        protected FFTcpClient _mainClient;
+        internal FFTcpClient MainClient
+        {
+            get
+            {
+                return _mainClient;
+            }
+        }
+
+        protected long _requestId = 0L;
+        internal long NextRequestId
+        {
+            get
+            {
+                
+                return _requestId++;
+            }
+        }
         #endregion
 
         #region Player properties
@@ -211,7 +220,7 @@ namespace FF.Network
         #endregion
 
         #region Client
-        internal RequestJoinRoom SetMainClient(Room a_room)
+        internal MessagePlayerData SetMainClient(Room a_room)
         {
             if (_clients.TryGetValue(a_room.serverEndPoint, out _mainClient))
             {

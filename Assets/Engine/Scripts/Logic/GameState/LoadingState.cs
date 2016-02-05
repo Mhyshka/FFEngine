@@ -86,7 +86,7 @@ namespace FF
 		{
 			if(Engine.UI.HasLoadingScreen && Engine.UI.LoadingScreenState != UI.FFPanel.EState.Hidden)
 				Engine.UI.HideLoading();
-            _gameMode.OnLoadingComplete();
+            _gameMode.OnLoadingExit();
 			base.Exit ();
 		}
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using FF.Network;
+using FF.Network.Message;
 using FF.Network.Receiver;
 using FF.Multiplayer;
 using System;
@@ -47,25 +48,25 @@ namespace FF.Logic
 
         #region Loading Server
         internal SimpleCallback onLoadingCompleteReceived;
-        protected MessageLoadingComplete _loadingCompleteReceiver;
-        protected MessageLoadingReady _loadingReadyReceiver;
+        protected LoadingCompleteReceiver _loadingCompleteReceiver;
+        protected LoadingReadyReceiver _loadingReadyReceiver;
         protected int _finishedCount;
 
         internal void RegisterLoadingComplete()
         {
             _finishedCount = 0;
             _playersLoadingState = new PlayerDictionary<PlayerLoadingWrapper>();
-            _loadingCompleteReceiver = new MessageLoadingComplete();
-            _loadingReadyReceiver = new MessageLoadingReady();
-            Engine.Receiver.RegisterReceiver(Network.Message.EMessageType.LoadingComplete, _loadingCompleteReceiver);
-            Engine.Receiver.RegisterReceiver(Network.Message.EMessageType.LoadingReady, _loadingReadyReceiver);
+            _loadingCompleteReceiver = new LoadingCompleteReceiver();
+            _loadingReadyReceiver = new LoadingReadyReceiver();
+            Engine.Receiver.RegisterReceiver(Network.Message.EHeaderType.LoadingComplete, _loadingCompleteReceiver);
+            Engine.Receiver.RegisterReceiver(Network.Message.EHeaderType.LoadingReady, _loadingReadyReceiver);
         }
 
         internal void UnregisterLoadingComplete()
         {
             _playersLoadingState.TearDown();
-            Engine.Receiver.UnregisterReceiver(Network.Message.EMessageType.LoadingComplete, _loadingCompleteReceiver);
-            Engine.Receiver.UnregisterReceiver(Network.Message.EMessageType.LoadingReady, _loadingReadyReceiver);
+            Engine.Receiver.UnregisterReceiver(Network.Message.EHeaderType.LoadingComplete, _loadingCompleteReceiver);
+            Engine.Receiver.UnregisterReceiver(Network.Message.EHeaderType.LoadingReady, _loadingReadyReceiver);
             _loadingCompleteReceiver = null;
         }
 
@@ -75,7 +76,7 @@ namespace FF.Logic
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.NotReady;
             _playersLoadingState[a_client.NetworkID].rank = _finishedCount;
 
-            Network.Message.MessageLoadingProgress loadingProgressMessage = new Network.Message.MessageLoadingProgress(_playersLoadingState);
+            Network.Message.MessageLoadingProgressData loadingProgressMessage = new Network.Message.MessageLoadingProgressData(_playersLoadingState);
             Engine.Network.Server.BroadcastMessage(loadingProgressMessage);
 
             if (onLoadingCompleteReceived != null)
@@ -86,7 +87,7 @@ namespace FF.Logic
         {
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.Ready;
 
-            Network.Message.MessageLoadingProgress loadingProgressMessage = new Network.Message.MessageLoadingProgress(_playersLoadingState);
+            Network.Message.MessageLoadingProgressData loadingProgressMessage = new Network.Message.MessageLoadingProgressData(_playersLoadingState);
             Engine.Network.Server.BroadcastMessage(loadingProgressMessage);
 
             if (onLoadingCompleteReceived != null)
@@ -95,29 +96,34 @@ namespace FF.Logic
         #endregion
 
         #region Loading Client
-        protected MessageLoadingProgress _loadingProgressReceiver;
+        protected GenericMessageReceiver _loadingProgressReceiver;
 
         internal SimpleCallback onLoadingProgressReceived = null;
         internal void RegisterLoadingStarted()
         {
             _playersLoadingState = new PlayerDictionary<PlayerLoadingWrapper>();
-            _loadingProgressReceiver = new MessageLoadingProgress(OnLoadingProgressReceived);
-            Engine.Receiver.RegisterReceiver(Network.Message.EMessageType.LoadingProgress, _loadingProgressReceiver);
+            _loadingProgressReceiver = new GenericMessageReceiver(OnLoadingProgressReceived);
+            Engine.Receiver.RegisterReceiver(EHeaderType.LoadingProgress, _loadingProgressReceiver);
         }
 
         internal void UnregisterLoadingStarted()
         {
             _playersLoadingState.TearDown();
-            Engine.Receiver.UnregisterReceiver(Network.Message.EMessageType.LoadingProgress, _loadingProgressReceiver);
+            Engine.Receiver.UnregisterReceiver(EHeaderType.LoadingProgress, _loadingProgressReceiver);
             _loadingProgressReceiver = null;
         }
 
-        internal void OnLoadingProgressReceived(PlayerDictionary<PlayerLoadingWrapper> a_playersLoadingState)
+        internal void OnLoadingProgressReceived(ReadMessage a_message)
         {
-            _playersLoadingState = a_playersLoadingState;
+            if (a_message.Data.Type == EDataType.LoadingProgress)
+            {
+                MessageLoadingProgressData loadingProgress = a_message.Data as MessageLoadingProgressData;
+                _playersLoadingState = loadingProgress.PlayersLoadingState;
 
-            if (onLoadingProgressReceived != null)
-                onLoadingProgressReceived();
+                if (onLoadingProgressReceived != null)
+                    onLoadingProgressReceived();
+            }
+            
         }
         #endregion
     }

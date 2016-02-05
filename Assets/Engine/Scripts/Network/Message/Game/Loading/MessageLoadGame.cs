@@ -4,32 +4,14 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessageRequestGameMode : AMessage
+    internal class MessageRequestGameMode : MessageData
     {
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.RequestGameMode;
+                return EDataType.M_RequestGameMode;
             }
         }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        #region Serialize
-        public override void LoadFromData(FFByteReader stream)
-        {
-        }
-
-        public override void SerializeData(FFByteWriter stream)
-        {
-        }
-        #endregion
     }
 }

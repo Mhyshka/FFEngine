@@ -7,18 +7,26 @@ using FF.Network.Message;
 
 namespace FF.Handler
 {
-    internal abstract class BroadcastRequest : AHandler
+    internal abstract class BroadcastRequestHandler : ABaseHandler
     {
+        /*internal delegate void BroadcastClientCallback(FFTcpClient a_client,
+                                                       SentRequest a_request);
+        internal delegate void BroadcastCallback(List<FFTcpClient> _successClients,
+                                                 List<FFTcpClient> a_failedClients,
+                                                 SentRequest a_request);
+
         #region Properties
+        internal BroadcastClientCallback onSuccessForClient = null;
+        internal BroadcastClientCallback onFailForClient = null;
+
+        internal BroadcastCallback onFail = null;
+        internal BroadcastCallback onSuccess = null;
+
         protected List<FFTcpClient> _targets;
         protected List<FFTcpClient> _failedClients;
         protected List<FFTcpClient> _successClients;
 
-        protected FFClientCallback _onSuccessForClient = null;
-        protected FFClientCallback _onFailForClient = null;
-
-        protected FFClientsBroadcastCallback _onFail = null;
-        protected FFClientsBroadcastCallback _onSuccess = null;
+        protected SentRequest _request;
         #endregion
 
         #region Constructor
@@ -30,62 +38,44 @@ namespace FF.Handler
             }
         }
 
-        protected BroadcastRequest(FFClientsBroadcastCallback a_onSuccess, FFClientsBroadcastCallback a_onFail, FFClientCallback a_onSuccessForClient, FFClientCallback a_onFailForClient )
+        protected BroadcastRequestHandler(SentRequest a_request)
         {
+            _request = a_request;
             _targets = TargetClients;
             _failedClients = new List<FFTcpClient>();
             _successClients = new List<FFTcpClient>();
-
-            _onSuccess = a_onSuccess;
-            _onFail = a_onFail;
-            _onSuccessForClient = a_onSuccessForClient;
-            _onFailForClient = a_onFailForClient;
-
-            foreach (FFTcpClient each in _targets)
-            {
-                if (each == null)
-                {
-                    OnFailForClient(each, (int)ESimpleRequestErrorCode.Disconnected);
-                }
-                else
-                {
-                    SendRequestToClient(each);
-                }
-            }
         }
         #endregion
-
-        protected abstract void SendRequestToClient(FFTcpClient a_client);
 
         #region Request callbacks per client
         protected virtual void OnSuccessForClient(FFTcpClient a_client)
         {
             _successClients.Add(a_client);
 
-            if (_onSuccessForClient != null)
-                _onSuccessForClient(a_client);
+            if (onSuccessForClient != null)
+                onSuccessForClient(a_client, _requestData);
 
             OnResponseReceived();
         }
 
-        protected virtual void OnFailForClient(FFTcpClient a_client, int a_errorCode)
+        protected virtual void OnFailForClient(FFTcpClient a_client)
         {
             _failedClients.Add(a_client);
 
-            if (_onFailForClient != null)
-                _onFailForClient(a_client);
+            if (onFailForClient != null)
+                onFailForClient(a_client, _request);
 
             OnResponseReceived();
         }
 
         protected virtual void OnTimeoutForClient(FFTcpClient a_client)
         {
-            OnFailForClient(a_client, (int)ESimpleRequestErrorCode.Timedout);
+            OnFailForClient(a_client);
         }
 
         protected virtual void OnCancelForClient(FFTcpClient a_client)
         {
-            OnFailForClient(a_client, (int)ESimpleRequestErrorCode.Canceled);
+            OnFailForClient(a_client);
         }
 
         protected virtual void OnResponseReceived()
@@ -102,32 +92,32 @@ namespace FF.Handler
         {
             _isComplete = true;
 
-            if (_onSuccess != null)
-                _onSuccess(_successClients, _failedClients);
+            if (onSuccess != null)
+                onSuccess(_successClients, _failedClients);
         }
 
         protected virtual void OnFail()
         {
             _isComplete = true;
 
-            if (_onFail != null)
-                _onFail(_successClients, _failedClients);
+            if (onFail != null)
+                onFail(_successClients, _failedClients);
         }
 
-        internal override void OnComplete()
+        internal override void Complete()
         {
             _targets.Clear();
             _failedClients.Clear();
             _successClients.Clear();
 
-            _onSuccessForClient = null;
-            _onFailForClient = null;
+            onSuccessForClient = null;
+            onFailForClient = null;
 
-            _onFail = null;
-            _onSuccess = null;
+            onFail = null;
+            onSuccess = null;
 
-            base.OnComplete();
+            base.Complete();
         }
-        #endregion
+        #endregion*/
     }
 }

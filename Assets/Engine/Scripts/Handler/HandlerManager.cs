@@ -9,7 +9,7 @@ namespace FF.Handler
         #region Manager
         internal HandlerManager()
         {
-            _handlers = new Dictionary<int, AHandler>();
+            _handlers = new Dictionary<int, ABaseHandler>();
             _handlersToRemove = new Queue<int>();
         }
 
@@ -17,7 +17,7 @@ namespace FF.Handler
         {
             lock (_handlers)
             {
-                foreach (AHandler each in _handlers.Values)
+                foreach (ABaseHandler each in _handlers.Values)
                 {
                     each.DoUpdate();
                 }
@@ -36,10 +36,10 @@ namespace FF.Handler
         #endregion
 
         #region Handlers Management
-        protected Dictionary<int, AHandler> _handlers;
+        protected Dictionary<int, ABaseHandler> _handlers;
         protected Queue<int> _handlersToRemove;
 
-        internal void RegisterHandler(AHandler a_handler)
+        internal void RegisterHandler(ABaseHandler a_handler)
         {
             lock (_handlers)
             {
@@ -47,7 +47,7 @@ namespace FF.Handler
             }
         }
 
-        internal void UnregisterHandler(AHandler a_handler)
+        internal void UnregisterHandler(ABaseHandler a_handler)
         {
             lock(_handlersToRemove)
             {

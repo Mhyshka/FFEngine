@@ -11,11 +11,11 @@ namespace FF.Pong
         public Camera gameplayCamera = null;
 
         [Header("Blue Side")]
-        public RacketMotor blueRacket = null;
+        public List<RacketMotor> blueRackets = null;
         public LifeLightRamp blueLifeLights = null;
 
         [Header("Blue Side")]
-        public RacketMotor purpleRacket = null;
+        public List<RacketMotor> purpleRackets = null;
         public LifeLightRamp purpleLifeLights = null;
         #endregion
 
@@ -33,8 +33,14 @@ namespace FF.Pong
         void Awake()
         {
             _rackets = new List<RacketMotor>();
-            _rackets.Add(blueRacket);
-            _rackets.Add(purpleRacket);
+            foreach (RacketMotor each in blueRackets)
+            {
+                _rackets.Add(each);
+            }
+            foreach (RacketMotor each in purpleRackets)
+            {
+                _rackets.Add(each);
+            }
 
             PongGameMode pgm = Engine.Game.CurrentGameMode as PongGameMode;
             pgm.RegisterBoard(this);

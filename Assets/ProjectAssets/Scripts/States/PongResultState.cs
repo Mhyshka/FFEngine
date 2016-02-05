@@ -4,7 +4,7 @@ using System;
 
 namespace FF.Pong
 {
-    internal class PongResultState : APongServerState
+    internal class PongResultState : APongState
     {
         #region Properties
         protected PongResultPanel _resultpanel;
@@ -51,18 +51,18 @@ namespace FF.Pong
 
         protected void OnPlayAgainPressed(FFEventParameter a_args)
         {
-            _pongServerGm.NewMatch();
-            _pongServerGm.ResetRackets();
-            _pongServerGm.EnableGameplay();
-            RequestState((int)EPongGameState.Service);
+            _pongGm.NewMatch();
+            _pongGm.ResetRackets();
+            _pongGm.EnableGameplay();
+            RequestState((int)EPongGameState.ServiceChallenge);
         }
         #endregion
 
         protected void DisplayResult()
         {
-            ESide side = _pongServerGm.Score.WinningSide;
+            ESide side = _pongGm.Score.WinningSide;
 
-            _resultpanel.SetResult(_pongServerGm.Score.WinningSide,
+            _resultpanel.SetResult(_pongGm.Score.WinningSide,
                                     Engine.Game.CurrentRoom);
 
             Queue<SuccessContent> successQueue = new Queue<SuccessContent>();

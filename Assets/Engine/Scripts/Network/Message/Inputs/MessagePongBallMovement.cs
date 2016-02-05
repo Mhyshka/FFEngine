@@ -4,17 +4,17 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongBallMovement : AMessage
+    internal class MessagePongBallMovement : MessageData
     {
         #region Properties
         internal Vector3 velocity;
         internal Vector3 position;
 
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.PongBallMovement;
+                return EDataType.M_PongBallMovement;
             }
         }
         #endregion

@@ -4,32 +4,14 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessageLoadingEveryoneReady : AMessage
+    internal class MessageLoadingEveryoneReady : MessageData
     {
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.LoadingEveryoneReady;
+                return EDataType.M_LoadingEveryoneReady;
             }
         }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        #region Serialize
-        public override void LoadFromData(FFByteReader stream)
-        {
-        }
-
-        public override void SerializeData(FFByteWriter stream)
-        {
-        }
-        #endregion
     }
 }

@@ -7,32 +7,14 @@ namespace FF.Network.Message
     /// <summary>
     /// Sent when a client is ready during loading. ( After the loading is done ( complete ) )
     /// </summary>
-    internal class MessageLoadingReady : AMessage
+    internal class MessageLoadingReady : MessageData
     {
-        internal override EMessageType Type
+        internal override EDataType Type
         {
             get
             {
-                return EMessageType.LoadingReady;
+                return EDataType.M_LoadingReady;
             }
         }
-
-        internal override bool HandleByMock
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        #region Serialize
-        public override void LoadFromData(FFByteReader stream)
-        {
-        }
-
-        public override void SerializeData(FFByteWriter stream)
-        {
-        }
-        #endregion
     }
 }
