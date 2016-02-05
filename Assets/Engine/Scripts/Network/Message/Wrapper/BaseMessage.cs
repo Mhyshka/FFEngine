@@ -7,7 +7,19 @@ internal enum EMessageChannel
 {
     CancelRequest,
 
-    ConfirmSwap
+
+    InputEvent,
+
+    StartGame,
+    LoadingComplete,
+
+    RoomInfos,
+    JoinRoom,
+    RemovedFromRoom,
+    LeavingRoom,
+    MoveToSlot,
+    SwapSlot,
+    SwapConfirm,
 }
 
 namespace FF.Network.Message

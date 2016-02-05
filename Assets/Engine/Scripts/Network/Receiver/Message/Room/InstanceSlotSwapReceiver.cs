@@ -85,8 +85,8 @@ namespace FF.Network.Receiver
                         _request.onCanceled = OnCancelReceived;
                         _client.onConnectionLost += ServerOnConnectionLost;
                         _targetClient.onConnectionLost += ServerOnConnectionLost;
-                        _confirmRequest = new SentRequest(new StringMessageData(source.player.username),
-                                                                    EMessageChannel.ConfirmSwap.ToString(),
+                        _confirmRequest = new SentRequest(new MessageStringData(source.player.username),
+                                                                    EMessageChannel.SwapConfirm.ToString(),
                                                                     Engine.Network.NextRequestId,
                                                                     float.MaxValue,
                                                                     true,

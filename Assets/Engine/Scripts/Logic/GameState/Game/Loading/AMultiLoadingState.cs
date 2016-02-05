@@ -46,7 +46,7 @@ namespace FF.Logic
             Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
         }
 
-        protected void OnEveryoneReady()
+        protected void OnEveryoneReady(ReadMessage a_message)
         {
             RequestState(outState.ID);
         }

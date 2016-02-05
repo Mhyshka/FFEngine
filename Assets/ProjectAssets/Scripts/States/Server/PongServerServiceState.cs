@@ -15,14 +15,14 @@ namespace FF.Pong
         #endregion
 
         #region properties
-        protected GenericMessageReceiver<MessageServiceRatio, MessageHeader> _serviceRatioReceiver = null;
+        protected GenericMessageReceiver _serviceRatioReceiver = null;
         #endregion
 
         #region State Methods
         internal override void Enter()
         {
             base.Enter();
-            _serviceRatioReceiver = new GenericMessageReceiver<MessageServiceRatio, MessageHeader>(OnServiceRatioReceived);
+            _serviceRatioReceiver = new GenericMessageReceiver(OnServiceRatioReceived);
         }
         #endregion
 
@@ -30,19 +30,20 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.M_ServiceRatio, _serviceRatioReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.Empty, _serviceRatioReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.M_ServiceRatio, _serviceRatioReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _serviceRatioReceiver);
         }
         #endregion
 
-        protected void OnServiceRatioReceived(MessageHeader a_header, MessageServiceRatio a_message)
+        protected void OnServiceRatioReceived(ReadMessage a_message)
         {
-            LaunchBall(a_message.ratio);
+            MessageFloatData data = a_message.Data as MessageFloatData;
+            LaunchBall(data.Data);
             RequestState((int)EPongGameState.Gameplay);
         }
 

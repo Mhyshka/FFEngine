@@ -61,21 +61,29 @@ namespace FF.Logic
         protected override void OnLoadingComplete()
         {
             base.OnLoadingComplete();
-            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(new MessageLoadingComplete());
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                 EMessageChannel.LoadingComplete.ToString(),
+                                                 true,
+                                                 true);
+            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(message);
         }
         #endregion
 
         protected void OnNetworkCheckSuccess(List<FFTcpClient> a_success, List<FFTcpClient> a_failed)
         {
             _allPlayerReadyStep.SetComplete();
-            MessageLoadingEveryoneReady message = new MessageLoadingEveryoneReady();
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                    EMessageChannel.LoadingComplete.ToString(),
+                                                    true,
+                                                    true);
             Engine.Network.Server.BroadcastMessage(message);
             RequestState(outState.ID);
         }
 
         protected void OnNetworkCheckFailed(List<FFTcpClient> a_success, List<FFTcpClient> a_failed)
         {
-            _networkCheckHandler = null;
+            //TODO Network check
+            //_networkCheckHandler = null;
         }
 
         #region LoadingStep

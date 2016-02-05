@@ -13,7 +13,7 @@ namespace FF.Network.Receiver
         protected int _popupId;
 
         protected ReadRequest _request;
-        protected StringMessageData _data;
+        protected MessageStringData _data;
         #endregion
 
         public InstanceConfirmSwapReceiver()
@@ -27,7 +27,7 @@ namespace FF.Network.Receiver
                 ReadRequest _request = _message as ReadRequest;
                 if (_message.Data.Type == EDataType.String)
                 {
-                    _data = _message.Data as StringMessageData;
+                    _data = _message.Data as MessageStringData;
                     SentResponse answer = null;
 
                     int detailErrorCode = -1;

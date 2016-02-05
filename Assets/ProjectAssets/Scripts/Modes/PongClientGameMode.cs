@@ -9,13 +9,13 @@ namespace FF.Pong
     internal class PongClientGameMode : PongGameMode
     {
         #region Properties
-        protected GenericMessageReceiver<MessageServiceChallengeInfo, MessageHeader> _challengeInfosReceiver = null;
+        protected GenericMessageReceiver _challengeInfosReceiver = null;
         #endregion
 
         #region State Methods
         protected override void Enter()
         {
-            _challengeInfosReceiver = new GenericMessageReceiver<MessageServiceChallengeInfo, MessageHeader>(OnChallengeInfosReceived);
+            _challengeInfosReceiver = new GenericMessageReceiver(OnChallengeInfosReceived);
             base.Enter();
         }
         #endregion
@@ -24,19 +24,20 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.M_ServiceChallengeInfo, _challengeInfosReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.BallCollision, _challengeInfosReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.M_ServiceChallengeInfo, _challengeInfosReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.BallCollision, _challengeInfosReceiver);
         }
 
-        protected void OnChallengeInfosReceived(MessageHeader a_header, MessageServiceChallengeInfo a_message)
+        protected void OnChallengeInfosReceived(ReadMessage a_message)
         {
+            MessageIntegerData data = a_message.Data as MessageIntegerData;//Ball bounce count
             PongClientServiceChallengeState servChal = _states[(int)EPongGameState.ServiceChallenge] as PongClientServiceChallengeState;
-            servChal.SetTargetBounces(a_message.bounceCount);
+            servChal.SetTargetBounces(data.Data);
         }
         #endregion
     }

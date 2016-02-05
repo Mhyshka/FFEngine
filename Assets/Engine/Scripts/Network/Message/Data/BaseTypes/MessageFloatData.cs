@@ -4,44 +4,49 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongBallCollision : MessageData
+    internal class MessageFloatData : MessageData
     {
         #region Properties
-        internal Vector3 position;
-        internal Vector3 normal;
+        internal float _data;
+        internal float Data
+        {
+            get
+            {
+                return _data;
+            }
+        }
 
         internal override EDataType Type
         {
             get
             {
-                return EDataType.M_PongBallCollision;
+                return EDataType.Float;
             }
         }
         #endregion
 
         #region Constructors
-        public MessagePongBallCollision()
+        public MessageFloatData()
         {
+            _data = 0f;
         }
 
-        public MessagePongBallCollision(Vector3 a_position, Vector3 a_normal)
+        internal MessageFloatData(float a_value)
         {
-            position = a_position;
-            normal = a_normal;
+            _data = a_value;
         }
+
         #endregion
 
         #region
         public override void LoadFromData(FFByteReader stream)
         {
-            position = stream.TryReadVector3();
-            normal = stream.TryReadVector3();
+            _data = stream.TryReadFloat();
         }
 
         public override void SerializeData(FFByteWriter stream)
         {
-            stream.Write(position);
-            stream.Write(normal);
+            stream.Write(_data);
         }
         #endregion
     }

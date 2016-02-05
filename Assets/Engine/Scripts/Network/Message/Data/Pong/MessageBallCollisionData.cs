@@ -4,47 +4,44 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongTargetRatio : MessageData
+    internal class MessageBallCollisionData : MessageData
     {
         #region Properties
-        internal float ratio;
-        internal int clientId;
+        internal Vector3 position;
+        internal Vector3 normal;
 
         internal override EDataType Type
         {
             get
             {
-                return EDataType.M_PongTargetRatio;
+                return EDataType.BallCollision;
             }
         }
         #endregion
 
         #region Constructors
-        public MessagePongTargetRatio()
+        public MessageBallCollisionData()
         {
-            ratio = 0f;
-            clientId = 0;
         }
 
-        internal MessagePongTargetRatio(float a_ratio, int a_clientId)
+        public MessageBallCollisionData(Vector3 a_position, Vector3 a_normal)
         {
-            ratio = a_ratio;
-            clientId = a_clientId;
+            position = a_position;
+            normal = a_normal;
         }
-
         #endregion
 
         #region
         public override void LoadFromData(FFByteReader stream)
         {
-            ratio = stream.TryReadFloat();
-            clientId = stream.TryReadInt();
+            position = stream.TryReadVector3();
+            normal = stream.TryReadVector3();
         }
 
         public override void SerializeData(FFByteWriter stream)
         {
-            stream.Write(ratio);
-            stream.Write(clientId);
+            stream.Write(position);
+            stream.Write(normal);
         }
         #endregion
     }

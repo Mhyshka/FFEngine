@@ -241,11 +241,11 @@ namespace FF.Pong
 
             if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
             {
-                Engine.Network.MainClient.QueueMessage(new FF.Network.Message.MessagePongTargetRatio(_targetRatio, clientId));
+                Engine.Network.MainClient.QueueMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
             }
             else if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessagePongTargetRatio(_targetRatio, clientId));
+                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
             }
         }
         #endregion

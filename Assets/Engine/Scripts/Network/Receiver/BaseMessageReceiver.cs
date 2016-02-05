@@ -43,10 +43,10 @@ namespace FF.Network.Receiver
             onMessageReceived = a_onMessageReceived;
         }
 
-        internal GenericMessageReceiver(GenericRequestCallback a_onRequestReceived)
+        /*internal GenericMessageReceiver(GenericRequestCallback a_onRequestReceived)
         {
             onRequestReceived = a_onRequestReceived;
-        }
+        }*/
 
         internal GenericMessageReceiver(GenericMessageCallback a_onMessageReceived, GenericRequestCallback a_onRequestReceived)
         {

@@ -5,7 +5,7 @@ using FF.UI;
 
 namespace FF.Network.Message
 {
-	internal class StringMessageData : MessageData
+	internal class MessageStringData : MessageData
 	{
         #region Properties
         public string _stringData = null;
@@ -26,11 +26,11 @@ namespace FF.Network.Message
 		}
         #endregion
 
-        public StringMessageData()
+        public MessageStringData()
 		{
 		}
 		
-		internal StringMessageData(string a_string)
+		internal MessageStringData(string a_string)
 		{
             _stringData = a_string;
 		}

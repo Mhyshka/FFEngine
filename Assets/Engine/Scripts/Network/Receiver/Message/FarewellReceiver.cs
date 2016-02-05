@@ -14,7 +14,7 @@ namespace FF.Network.Receiver
         {
             if (_message.Data.Type == EDataType.String)
             {
-                StringMessageData stringData = _message.Data as StringMessageData;
+                MessageStringData stringData = _message.Data as MessageStringData;
                 //Reason
                 _client.EndConnection(stringData.StringData);
             }

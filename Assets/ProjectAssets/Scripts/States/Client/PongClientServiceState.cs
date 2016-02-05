@@ -15,7 +15,7 @@ namespace FF.Pong
         #endregion
 
         #region properties
-        protected GenericMessageReceiver<MessagePongBallMovement, MessageHeader> _ballMovementReceiver;
+        protected GenericMessageReceiver _ballMovementReceiver;
         #endregion
 
         #region State Methods
@@ -23,7 +23,7 @@ namespace FF.Pong
         {
             base.Enter();
             if(_ballMovementReceiver == null)
-                _ballMovementReceiver = new GenericMessageReceiver<MessagePongBallMovement, MessageHeader>(OnBallMovementReceived);
+                _ballMovementReceiver = new GenericMessageReceiver(OnStartGame);
         }
         #endregion
 
@@ -31,13 +31,13 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.M_PongBallMovement, _ballMovementReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.Empty, _ballMovementReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.M_PongBallMovement, _ballMovementReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _ballMovementReceiver);
         }
         #endregion
 
@@ -47,7 +47,7 @@ namespace FF.Pong
             Engine.Network.MainClient.QueueMessage(message);
         }
 
-        protected void OnBallMovementReceived(MessageHeader a_header, MessagePongBallMovement a_ballMovementMessage)
+        protected void OnStartGame(ReadMessage a_message)
         {
             RequestState((int)EPongGameState.Gameplay);
         }

@@ -87,7 +87,8 @@ namespace FF
 
         internal override void GoBack()
         {
-            new Handler.Farewell(OnShutdownComplete);
+            //TODO Broadcast
+            new Handler.FarewellHandler(OnShutdownComplete);
         }
 
         internal void OnShutdownComplete()
@@ -113,19 +114,19 @@ namespace FF
 
         private void RegisterReceiver()
         {
-            Engine.Receiver.RegisterReceiver(EHeaderType.JoinRoomRequest, _joinRoomReceiver);
-            Engine.Receiver.RegisterReceiver(EHeaderType.MoveToSlotRequest, _moveToSlotReceiver);
-            Engine.Receiver.RegisterReceiver(EHeaderType.SlotSwapRequest, _slotSwapReceiver);
-            Engine.Receiver.RegisterReceiver(EHeaderType.ConfirmSwapRequest, _confirmSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.JoinRoom.ToString(), _joinRoomReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.MoveToSlot.ToString(), _moveToSlotReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
             Engine.Events.RegisterForEvent("SlotSelected", OnSlotSelected);
         }
 
         private void RegisterForbiddenReceiver()
         {
-            Engine.Receiver.RegisterReceiver(EHeaderType.JoinRoomRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.RegisterReceiver(EHeaderType.MoveToSlotRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.RegisterReceiver(EHeaderType.SlotSwapRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.RegisterReceiver(EHeaderType.ConfirmSwapRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.JoinRoom.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.MoveToSlot.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapSlot.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapConfirm.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
         }
 
         protected override void UnregisterForEvent()
@@ -147,22 +148,20 @@ namespace FF
 
         private void UnregisterReceiver()
         {
-            Engine.Receiver.UnregisterReceiver(EHeaderType.JoinRoomRequest, _joinRoomReceiver);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.MoveToSlotRequest, _moveToSlotReceiver);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.SlotSwapRequest, _slotSwapReceiver);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.ConfirmSwapRequest, _confirmSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.JoinRoom.ToString(), _joinRoomReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.MoveToSlot.ToString(), _moveToSlotReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
             Engine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
         }
 
         private void UnregisterForbiddenReceiver()
         {
-            Engine.Receiver.UnregisterReceiver(EHeaderType.JoinRoomRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.MoveToSlotRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.SlotSwapRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
-            Engine.Receiver.UnregisterReceiver(EHeaderType.ConfirmSwapRequest, Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.JoinRoom.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.MoveToSlot.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapSlot.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapConfirm.ToString(), Engine.Receiver.RESPONSE_ALWAYS_FAIL);
         }
-
-
         #endregion
 
         protected void OnLanStatusChanged(bool a_state)
@@ -182,7 +181,9 @@ namespace FF
             _roomPanel.UpdateWithRoom(a_room);
 
             MessageRoomData roomInfo = new MessageRoomData(Engine.Game.CurrentRoom);
-            Engine.Network.Server.BroadcastMessage(roomInfo);
+            SentMessage message = new SentMessage(roomInfo,
+                                                    EMessageChannel.RoomInfos.ToString());
+            Engine.Network.Server.BroadcastMessage(message);
         }
 
         #region UI Callback
@@ -232,7 +233,11 @@ namespace FF
             if (!_targetPlayer.isDced)
             {
                 FFTcpClient client = Engine.Network.Server.ClientForEP(_targetPlayer.IpEndPoint);
-                new Handler.RemovedFromRoom(client, false, OnRemoveSent);
+                MessageBoolData data = new MessageBoolData(false);
+                SentMessage message = new SentMessage(data,
+                                                        EMessageChannel.RemovedFromRoom.ToString());
+                message.onMessageSent += OnRemoveSent;
+                client.QueueMessage(message);
             }
             else
             {
@@ -251,7 +256,12 @@ namespace FF
             {
                 Engine.Game.CurrentRoom.BanId(_targetPlayer.ID);
                 FFTcpClient client = Engine.Network.Server.ClientForEP(_targetPlayer.IpEndPoint);
-                new Handler.RemovedFromRoom(client, true, OnRemoveSent);
+
+                MessageBoolData data = new MessageBoolData(true);
+                SentMessage message = new SentMessage(data,
+                                                        EMessageChannel.RemovedFromRoom.ToString());
+                message.onMessageSent += OnRemoveSent;
+                client.QueueMessage(message);
             }
             else
             {
@@ -270,7 +280,7 @@ namespace FF
         #endregion
 
         #region Swap
-        //Handler.SlotSwap _swapHandler;
+        SentRequest _swapRequest;
         internal void OnPlayerOptionSwap(FFNetworkPlayer a_player)
         {
             FFTcpClient client = Engine.Network.Server.ClientForEP(a_player.IpEndPoint);
@@ -279,26 +289,41 @@ namespace FF
                 Engine.UI.DismissPopup(_slotOptionPopupId);
                 _slotOptionPopupId = -1;
                 _swapPopupId = FFLoadingPopup.RequestDisplay("Waiting for " + a_player.player.username + " to respond.", "Cancel", OnSwapCanceled);
-                /*_swapHandler = new Handler.SlotSwap(Engine.Network.Server.LoopbackClient.Mirror,
-                                                            a_player.SlotRef,
-                                                            OnSwapSuccess,
-                                                            OnSwapFailed);*/
+                MessageSlotRefData data = new MessageSlotRefData(a_player.SlotRef);
+                _swapRequest = new SentRequest(data,
+                                                EMessageChannel.SwapSlot.ToString(),
+                                                Engine.Network.NextRequestId,
+                                                float.MaxValue);
+                _swapRequest.onSucces += OnSwapSuccess;
+                _swapRequest.onFail += OnSwapFailed;
+
+                client.QueueRequest(_swapRequest);
             }
             else
                 FFLog.Log("Couldn't swap, client not found.");
         }
 
         
-        protected void OnSwapSuccess()
+        protected void OnSwapSuccess(ReadResponse a_response)
         {
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap success");
         }
 
-        protected void OnSwapFailed(int a_errorCode)
+        protected void OnSwapFailed(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            string message = MessageSlotRefData.MessageForCode(a_errorCode);
+            string message = "";
+
+            if (a_response.Data.Type == EDataType.Integer)
+            {
+                MessageIntegerData data = a_response.Data as MessageIntegerData;
+
+                EErrorCodeSwapSlot errorCode = (EErrorCodeSwapSlot)data.Data;
+                //TODO
+                message = errorCode.ToString();
+            }
+
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap failed : " + message);
@@ -308,7 +333,7 @@ namespace FF
         {
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
-            _swapHandler.Cancel();
+            _swapRequest.Cancel(true);
         }
         #endregion
 
@@ -334,8 +359,9 @@ namespace FF
             RegisterReceiver();
             UnregisterForbiddenReceiver();
 
-            MessageRequestGameMode loadGameMessage = new MessageRequestGameMode();
-            Engine.Network.Server.BroadcastMessage(loadGameMessage);
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                    EMessageChannel.StartGame.ToString());
+            Engine.Network.Server.BroadcastMessage(message);
 
             RequestMultiGameMode("PongServerGameMode");
         }

@@ -23,17 +23,17 @@ namespace FF.Network
         void Awake()
         {
             _receiver = new GenericMessageReceiver(OnMessageReceived);
-            Engine.Receiver.RegisterReceiver(EDataType.M_PongBallMovement, _receiver);
+            Engine.Receiver.RegisterReceiver(EDataType.BallMovement, _receiver);
         }
 
         void OnDestroy()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.M_PongBallMovement, _receiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.BallMovement, _receiver);
         }
 
         void OnMessageReceived(ReadMessage a_message)
         {
-            MessagePongBallMovement data = a_message.Data as MessagePongBallMovement;
+            MessageBallMovementData data = a_message.Data as MessageBallMovementData;
             ball.RefreshMovement(data.position, data.velocity);
         }
         #endregion

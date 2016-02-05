@@ -13,7 +13,7 @@ namespace FF.Pong
         #endregion
 
         #region Properties
-        protected GenericMessageReceiver<MessageLoadingComplete, MessageHeader> _completeReceiver = null;
+        protected GenericMessageReceiver _completeReceiver = null;
         #endregion
 
         #region State Methods
@@ -21,7 +21,7 @@ namespace FF.Pong
         {
             base.Enter();
             if (_completeReceiver == null)
-                _completeReceiver = new GenericMessageReceiver<MessageLoadingComplete, MessageHeader>(OnChallengeCompleteReceived);
+                _completeReceiver = new GenericMessageReceiver(OnChallengeCompleteReceived);
         }
 
         internal override void Exit()
@@ -44,8 +44,9 @@ namespace FF.Pong
             Engine.Receiver.UnregisterReceiver(EDataType.M_LoadingComplete, _completeReceiver);
         }
 
-        protected void OnChallengeCompleteReceived(MessageHeader a_header, MessageLoadingComplete a_completeMessage)
+        protected void OnChallengeCompleteReceived(ReadMessage a_message)
         {
+            MessageLoadingComplete data;
             RequestState(outState.ID);
         }
         #endregion

@@ -28,7 +28,7 @@ namespace FF.Pong
                 Vector3 velocity = contact.BounceOff(transform.position, ballRigidbody.velocity);
                 SetVelocity(velocity);
 
-                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessagePongBallCollision(transform.position, a_other.transform.forward));
+                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessageBallCollisionData(transform.position, a_other.transform.forward));
 
                 contact.OnCollision(this);
             }
@@ -44,7 +44,7 @@ namespace FF.Pong
         internal override void OnRacketHit(RacketMotor a_motor)
         {
             base.OnRacketHit(a_motor);
-            Network.Message.MessageRacketHit message = new Network.Message.MessageRacketHit(a_motor.clientId);
+            Network.Message.MessageRacketHitData message = new Network.Message.MessageRacketHitData(a_motor.clientId);
             Engine.Network.Server.BroadcastMessage(message);
         }
 

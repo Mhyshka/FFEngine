@@ -15,6 +15,7 @@ namespace FF.Network.Message
         Empty,
         Long,
         Integer,
+        Float,
         Bool,
         String,
 
@@ -23,16 +24,18 @@ namespace FF.Network.Message
         Player,
         SlotRef,
 
+        LoadingProgress,
+
         M_RequestGameMode,
         M_LoadingStarted,
-        LoadingProgress,
+        
         M_LoadingComplete,
         M_LoadingReady,
         M_LoadingEveryoneReady,
 
-        M_PongTargetRatio,
-        M_PongBallMovement,
-        M_PongBallCollision,
+
+        BallMovement,
+        
 
         M_PositionEvent,
 
@@ -40,8 +43,10 @@ namespace FF.Network.Message
         M_ServiceRatio,
         M_TrySmash,
         M_DidSmash,
-        M_RacketHit,
-        M_GoalHit
+
+        BallCollision,
+        RacketHit,
+        GoalHit
     }
 
     internal class MessageFactory

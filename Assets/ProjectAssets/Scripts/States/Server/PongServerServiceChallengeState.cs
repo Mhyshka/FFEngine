@@ -17,7 +17,7 @@ namespace FF.Pong
         #region Properties
         protected PlayerDictionary<bool> _playersReady = null;
 
-        protected GenericMessageReceiver<MessageLoadingReady, MessageHeader> _readyReceiver = null;
+        protected GenericMessageReceiver _readyReceiver = null;
         #endregion
 
         #region State Methods
@@ -25,7 +25,7 @@ namespace FF.Pong
         {
             base.Enter();
             if (_readyReceiver == null)
-                _readyReceiver = new GenericMessageReceiver<MessageLoadingReady, MessageHeader>(OnReadyReceived);
+                _readyReceiver = new GenericMessageReceiver(OnReadyReceived);
 
             _playersReady = new PlayerDictionary<bool>();
             _bounceCount = Random.Range(minBounces, maxBounces);
@@ -62,18 +62,18 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.M_LoadingReady, _readyReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.Empty, _readyReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.M_LoadingReady, _readyReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _readyReceiver);
         }
 
-        protected void OnReadyReceived(MessageHeader a_header, MessageLoadingReady a_readyMessage)
+        protected void OnReadyReceived(ReadMessage a_message)
         {
-            _playersReady[a_header.Client.NetworkID] = true;
+            _playersReady[a_message.Client.NetworkID] = true;
         }
         #endregion
 

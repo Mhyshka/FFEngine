@@ -43,7 +43,12 @@ namespace FF.Input
             _isPressed = true;
 
             if (_isForwarded && Engine.Network.MainClient != null)
-                Engine.Network.MainClient.QueueMessage(new MessageInputEventData(eventKeyName, true));
+            {
+                MessageInputEventData data = new MessageInputEventData(eventKeyName, true);
+                SentMessage message = new SentMessage(data,
+                                                        EMessageChannel.InputEvent.ToString());
+                Engine.Network.MainClient.QueueMessage(message);
+            }
         }
 
         protected virtual void OnUp()
@@ -54,7 +59,13 @@ namespace FF.Input
             _isPressed = false;
 
             if (_isForwarded && Engine.Network.MainClient != null)
-                Engine.Network.MainClient.QueueMessage(new MessageInputEventData(eventKeyName, false));
+            {
+                MessageInputEventData data = new MessageInputEventData(eventKeyName, false);
+                SentMessage message = new SentMessage(data,
+                                                        EMessageChannel.InputEvent.ToString());
+                Engine.Network.MainClient.QueueMessage(message);
+            }
+                
         }
 
         internal void ForceDown()

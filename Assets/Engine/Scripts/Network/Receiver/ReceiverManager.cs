@@ -11,8 +11,8 @@ namespace FF.Network.Receiver
         #region Properties
         protected Dictionary<string, List<BaseReceiver>> _registeredReceiver;
 
-        /*internal BaseReceiver RESPONSE_ALWAYS_SUCCESS = new RequestReceiverFixedResponse(new ResponseSuccess());
-        internal BaseReceiver RESPONSE_ALWAYS_FAIL = new RequestReceiverFixedResponse(new ResponseFail((int)ERequestErrorCode.Forbidden));*/
+        internal BaseReceiver RESPONSE_ALWAYS_SUCCESS = new RequestReceiverFixedResponse(ERequestErrorCode.Success, new MessageEmptyData());
+        internal BaseReceiver RESPONSE_ALWAYS_FAIL = new RequestReceiverFixedResponse(ERequestErrorCode.Failed, new MessageEmptyData());
         #endregion
 
         #region Manager

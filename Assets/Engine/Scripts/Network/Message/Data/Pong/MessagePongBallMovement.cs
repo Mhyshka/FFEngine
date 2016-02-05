@@ -4,7 +4,7 @@ using System;
 
 namespace FF.Network.Message
 {
-    internal class MessagePongBallMovement : MessageData
+    internal class MessageBallMovementData : MessageData
     {
         #region Properties
         internal Vector3 velocity;
@@ -14,19 +14,19 @@ namespace FF.Network.Message
         {
             get
             {
-                return EDataType.M_PongBallMovement;
+                return EDataType.BallMovement;
             }
         }
         #endregion
 
         #region Constructors
-        public MessagePongBallMovement()
+        public MessageBallMovementData()
         {
             velocity = Vector3.zero;
             position = Vector3.zero;
         }
 
-        internal MessagePongBallMovement(Vector3 a_position, Vector3 a_velocity)
+        internal MessageBallMovementData(Vector3 a_position, Vector3 a_velocity)
         {
             velocity = a_velocity;
             position = a_position;

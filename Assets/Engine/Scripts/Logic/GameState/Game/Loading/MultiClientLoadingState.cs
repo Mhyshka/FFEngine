@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using FF.Network.Message;
+using FF.Network.Receiver;
 using FF.Pong;
 
 namespace FF.Logic
@@ -11,6 +12,8 @@ namespace FF.Logic
     {
         #region Properties
         protected ManualLoadingStep _serverReadyStep;
+
+        protected GenericMessageReceiver _receiver;
         #endregion
 
         #region State Methods
@@ -21,7 +24,9 @@ namespace FF.Logic
         {
             base.RegisterForEvent();
             Engine.Game.Loading.onLoadingProgressReceived += OnLoadingProgressReceived;
-            Engine.Receiver.RegisterReceiver(EHeaderType.LoadingEveryoneReady, new Network.Receiver.LoadingEveryoneReadyReceiver(OnEveryoneReady));
+            _receiver = new GenericMessageReceiver(OnEveryoneReady);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingComplete.ToString(),
+                                            _receiver);
         }
 
         protected override void UnregisterForEvent()
@@ -30,7 +35,8 @@ namespace FF.Logic
             Engine.Game.Loading.UnregisterLoadingStarted();
             
             Engine.Game.Loading.onLoadingProgressReceived -= OnLoadingProgressReceived;
-            Engine.Receiver.UnregisterReceiver(EHeaderType.LoadingEveryoneReady, new Network.Receiver.LoadingEveryoneReadyReceiver(OnEveryoneReady));
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.LoadingComplete.ToString(),
+                                                _receiver);
         }
 
         protected void OnLoadingProgressReceived()
@@ -42,7 +48,9 @@ namespace FF.Logic
         protected override void OnLoadingComplete()
         {
             base.OnLoadingComplete();
-            Engine.Network.MainClient.QueueMessage(new MessageLoadingComplete());
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                  EMessageChannel.LoadingComplete.ToString());
+            Engine.Network.MainClient.QueueMessage(message);
         }
         #endregion
 

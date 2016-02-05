@@ -76,8 +76,8 @@ namespace FF.Input
 
             _networkManagers = new Dictionary<int, NetworkInputManager>();
 
-            _networkEventReceiver = new Network.Receiver.MessageInputEventReceiver();
-            Engine.Receiver.RegisterReceiver(EHeaderType.InputEvent,
+            _networkEventReceiver = new Network.Receiver.InputEventReceiver();
+            Engine.Receiver.RegisterReceiver(EMessageChannel.InputEvent.ToString(),
                                              _networkEventReceiver);
         }
 
@@ -96,7 +96,7 @@ namespace FF.Input
                 }
                 _networkManagers.Clear();
 
-                Engine.Receiver.UnregisterReceiver(EHeaderType.InputEvent,
+                Engine.Receiver.UnregisterReceiver(EMessageChannel.InputEvent.ToString(),
                                                    _networkEventReceiver);
             }
         }

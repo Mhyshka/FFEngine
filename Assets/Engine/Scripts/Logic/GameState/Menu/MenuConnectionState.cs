@@ -30,7 +30,15 @@ namespace FF
 
             FFNetworkPlayer player = Engine.Game.NetPlayer;
 
-            new Handler.JoinRoom(Engine.Network.MainClient, player, OnSuccess, OnFail);
+            MessagePlayerData data = new MessagePlayerData(Engine.Game.NetPlayer);
+            SentRequest request = new SentRequest(data,
+                                                  EMessageChannel.JoinRoom.ToString(),
+                                                  Engine.Network.NextRequestId,
+                                                  3f);
+            request.onSucces += OnSuccess;
+            request.onFail += OnFail;
+
+            Engine.Network.MainClient.QueueRequest(request);
 
             _popupId = FFLoadingPopup.RequestDisplay("Joining " + Engine.Game.CurrentRoom.roomName, "Cancel", null, false);
         }
@@ -55,15 +63,25 @@ namespace FF
         #endregion
 
         #region Events
-        protected void OnFail(int a_errorCode)
+        protected void OnFail(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            string message = MessagePlayerData.MessageForCode(a_errorCode);
+            string message = "";
+
+            if (a_response.Data.Type == EDataType.Integer)
+            {
+                MessageIntegerData data = a_response.Data as MessageIntegerData;
+
+                EErrorCodeJoinRoom errorCode = (EErrorCodeJoinRoom)data.Data;
+                //TODO
+                message = errorCode.ToString();
+            }
+
             FFMessageToast.RequestDisplay("Couldn't join room : " + message);
             Engine.Network.SetNoMainClient();
             GoBack();
         }
 
-        protected void OnSuccess()
+        protected void OnSuccess(ReadResponse a_response)
         {
             Engine.Network.StopLookingForGames();
             RequestState(outState.ID);

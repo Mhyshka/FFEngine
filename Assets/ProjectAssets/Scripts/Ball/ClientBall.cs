@@ -42,42 +42,45 @@ namespace FF.Pong
         }
 
         #region Network
-        protected GenericMessageReceiver<MessagePongBallCollision, MessageHeader> _collisionReceiver;
-        protected GenericMessageReceiver<MessageRacketHit, MessageHeader> _racketHitReceiver;
-        protected GenericMessageReceiver<MessageGoalHit, MessageHeader> _goalHitReceiver;
+        protected GenericMessageReceiver _collisionReceiver;
+        protected GenericMessageReceiver _racketHitReceiver;
+        protected GenericMessageReceiver _goalHitReceiver;
 
         internal void NetworkInit()
         {
-            _collisionReceiver = new GenericMessageReceiver<MessagePongBallCollision, MessageHeader> (OnBallCollisionReceived);
-            _racketHitReceiver = new GenericMessageReceiver<MessageRacketHit, MessageHeader> (OnRacketHitReceived);
-            _goalHitReceiver = new GenericMessageReceiver<MessageGoalHit, MessageHeader> (OnGoalHitReceived);
+            _collisionReceiver = new GenericMessageReceiver (OnBallCollisionReceived);
+            _racketHitReceiver = new GenericMessageReceiver (OnRacketHitReceived);
+            _goalHitReceiver = new GenericMessageReceiver (OnGoalHitReceived);
 
-            Engine.Receiver.RegisterReceiver(EDataType.M_PongBallCollision, _collisionReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.M_RacketHit, _racketHitReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.M_GoalHit, _goalHitReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.BallCollision, _collisionReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.RacketHit, _racketHitReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.GoalHit, _goalHitReceiver);
         }
 
         internal void NetworkTearDown()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.M_PongBallCollision, _collisionReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.M_RacketHit, _racketHitReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.M_GoalHit, _goalHitReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.BallCollision, _collisionReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.RacketHit, _racketHitReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.GoalHit, _goalHitReceiver);
         }
 
-        protected void OnBallCollisionReceived(MessageHeader a_header, MessagePongBallCollision a_message)
+        protected void OnBallCollisionReceived(ReadMessage a_message)
         {
-            OnCollision(a_message.position, a_message.normal);
+            MessageBallCollisionData data = a_message.Data as MessageBallCollisionData;
+            OnCollision(data.position, data.normal);
         }
 
-        protected void OnRacketHitReceived(MessageHeader a_header, MessageRacketHit a_message)
+        protected void OnRacketHitReceived(ReadMessage a_message)
         {
-            RacketMotor motor = _pongGm.Board.RacketForId(a_message.racketId);
+            MessageRacketHitData data = a_message.Data as MessageRacketHitData;
+            RacketMotor motor = _pongGm.Board.RacketForId(data.racketId);
             OnRacketHit(motor);
         }
 
-        protected void OnGoalHitReceived(MessageHeader a_header, MessageGoalHit a_message)
+        protected void OnGoalHitReceived(ReadMessage a_message)
         {
-            OnGoal(a_message.side);
+            MessageGoalHit data = a_message.Data as MessageGoalHit;
+            OnGoal(data.side);
         }
         #endregion
     }

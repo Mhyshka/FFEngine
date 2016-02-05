@@ -59,7 +59,7 @@ namespace FF
         private void InitReceivers()
         {
             if (_removedFromRoomReceiver == null)
-                _removedFromRoomReceiver = new Network.Receiver.RemovedFromRoomReceiver(OnKickReceived, OnBanReceived);
+                _removedFromRoomReceiver = new RemovedFromRoomReceiver(OnKickReceived, OnBanReceived);
             if (_slotSwapReceiver == null)
                 _slotSwapReceiver = new MultiInstanceReceiver<InstanceSlotSwapReceiver>();
             if (_confirmSwapReceiver == null)
@@ -99,10 +99,10 @@ namespace FF
             Engine.Network.MainClient.onConnectionLost += OnConnectionLost;
             Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
 
-            Engine.Receiver.RegisterReceiver(EDataType.Bool, _removedFromRoomReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.SlotRef, _slotSwapReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.Q_ConfirmSwap, _confirmSwapReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.M_RequestGameMode, _requestGameReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.RemovedFromRoom.ToString(), _removedFromRoomReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.StartGame.ToString(), _requestGameReceiver);
 
             Engine.Inputs.PushOnBackCallback(QuitRoom);
         }
@@ -122,10 +122,10 @@ namespace FF
                 Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
             }
         
-            Engine.Receiver.UnregisterReceiver(EDataType.Bool, _removedFromRoomReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.SlotRef, _slotSwapReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.Q_ConfirmSwap, _confirmSwapReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.M_RequestGameMode, _requestGameReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.RemovedFromRoom.ToString(), _removedFromRoomReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.StartGame.ToString(), _requestGameReceiver);
 
             Engine.Inputs.PopOnBackCallback();
         }
@@ -190,21 +190,39 @@ namespace FF
             }
             else
             {
-                new Handler.MoveToSlot(Engine.Network.MainClient, selectedSlot, OnMoveToSlotSuccess, OnMoveToSlotFailed);
+                MessageSlotRefData data = new MessageSlotRefData(selectedSlot);
+                
+                SentRequest request = new SentRequest(data,
+                                                        EMessageChannel.MoveToSlot.ToString(),
+                                                        Engine.Network.NextRequestId);
+                request.onSucces += OnMoveToSlotSuccess;
+                request.onFail += OnMoveToSlotFailed;
+                Engine.Network.MainClient.QueueRequest(request);
             }
         }
         #endregion
 
         #region Move To Slot Callbacks
-        protected void OnMoveToSlotSuccess()
+        protected void OnMoveToSlotSuccess(ReadResponse a_message)
         {
             FFLog.Log(EDbgCat.Logic, "Move to slot success");
             //FFMessageToast.RequestDisplay("Move to slot success");
         }
 
-        protected void OnMoveToSlotFailed(int a_errorCode)
+        protected void OnMoveToSlotFailed(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            string message = RequestMoveToSlot.MessageForCode(a_errorCode);
+            string message = "";
+
+            if (a_response.Data.Type == EDataType.Integer)
+            {
+                MessageIntegerData data = a_response.Data as MessageIntegerData;
+
+                EErrorCodeMoveToSlot detailErrorCode = (EErrorCodeMoveToSlot)data.Data;
+
+                //TODO display errorMessage
+                message = detailErrorCode.ToString();
+            }
+           
             FFMessageToast.RequestDisplay("Move to slot failed : " + message);
             //FFLog.Log(EDbgCat.Logic, "Move to slot failed : " + message);
         }
@@ -235,25 +253,44 @@ namespace FF
         #endregion
 
         #region Swap
-        MessageSlotRefData _swapRequest;
+        SentRequest _swapRequest;
         internal void OnPlayerOptionSwap(FFNetworkPlayer a_player)
         {
             Engine.UI.DismissPopup(_slotOptionPopupId);
             _slotOptionPopupId = -1;
             _swapPopupId = FFLoadingPopup.RequestDisplay("Waiting for " + a_player.player.username + " to respond.", "Cancel", OnSwapCanceled);
-            _swapHandler = new Handler.SlotSwap(Engine.Network.MainClient, a_player.SlotRef, OnSwapSuccess, OnSwapFailed);
+            MessageSlotRefData data = new MessageSlotRefData(a_player.SlotRef);
+            _swapRequest = new SentRequest(data,
+                                            EMessageChannel.SwapSlot.ToString(),
+                                            Engine.Network.NextRequestId,
+                                            float.MaxValue);
+            _swapRequest.onSucces += OnSwapSuccess;
+            _swapRequest.onFail += OnSwapFailed;
+            Engine.Network.MainClient.QueueRequest(_swapRequest);
         }
 
-        protected void OnSwapSuccess()
+        protected void OnSwapSuccess(ReadResponse a_response)
         {
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap success");
         }
 
-        protected void OnSwapFailed(int a_errorCode)
+        protected void OnSwapFailed(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            string message = MessageSlotRefData.MessageForCode(a_errorCode);
+            string message = "";
+
+            if (a_response.Data.Type == EDataType.Integer)
+            {
+                MessageIntegerData data = a_response.Data as MessageIntegerData;
+
+                EErrorCodeSwapSlot detailErrorCode = (EErrorCodeSwapSlot)data.Data;
+
+                //TODO display errorMessage
+                message = detailErrorCode.ToString();
+            }
+            
+
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap failed : " + message);
@@ -263,15 +300,16 @@ namespace FF
         {
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
-            _swapHandler.Cancel();
+            _swapRequest.Cancel(true);
         }
         #endregion
 
         #region Quit
-        MessageLeavingRoom _leavingMessage = null;
+        SentMessage _leavingMessage = null;
         protected void QuitRoom()
         {
-            _leavingMessage = new MessageLeavingRoom();
+            _leavingMessage = new SentMessage(new MessageEmptyData(),
+                                                EMessageChannel.LeavingRoom.ToString());
             _leavingMessage.onMessageSent += OnLeavingRoomSent;
             Engine.Network.MainClient.QueueFinalMessage(_leavingMessage);
         }

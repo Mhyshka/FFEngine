@@ -5,6 +5,25 @@ using FF.Multiplayer;
 
 namespace FF.Network.Message
 {
+    internal enum ERequestErrorCode
+    {
+        Success,
+        Failed,
+
+        Unknown,
+
+        LocalCanceled,
+        RemoteCanceled,
+
+        IllegalArgument,
+        IllegalState,
+        Forbidden,
+        Timeout,
+
+        LocalConnectionIssue,
+        RemoteConnectionIssue
+    }
+
     internal enum EErrorCodeMoveToSlot
     {
         PlayerNotfound,
