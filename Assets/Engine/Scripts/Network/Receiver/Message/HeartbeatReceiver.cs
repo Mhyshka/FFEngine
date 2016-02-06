@@ -18,7 +18,6 @@ namespace FF.Network.Receiver
                 ReadRequest request = _message as ReadRequest;
                 MessageLongData data = new MessageLongData(_message.Timestamp);
                 SentResponse response = new SentResponse(data,
-                                                         _message.Channel,
                                                          request.RequestId,
                                                          ERequestErrorCode.Success);
 

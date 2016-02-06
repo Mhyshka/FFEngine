@@ -30,8 +30,10 @@ namespace FF.Pong
             _playersReady = new PlayerDictionary<bool>();
             _bounceCount = Random.Range(minBounces, maxBounces);
 
-            MessageServiceChallengeInfo serviceInfo = new MessageServiceChallengeInfo(_bounceCount);
-            Engine.Network.Server.BroadcastMessage(serviceInfo);
+            MessageIntegerData data = new MessageIntegerData(_bounceCount);
+            SentMessage message = new SentMessage(data,
+                                                    EMessageChannel.ChallengeInfos.ToString());
+            Engine.Network.Server.BroadcastMessage(message);
         }
 
         internal override int Manage()
@@ -44,8 +46,9 @@ namespace FF.Pong
 
             if (isEveryoneReady)
             {
-                MessageLoadingComplete completeMessage = new MessageLoadingComplete();
-                Engine.Network.Server.BroadcastMessage(completeMessage);
+                SentMessage nextMessage = new SentMessage(new MessageEmptyData(),
+                                                            EMessageChannel.Next.ToString());
+                Engine.Network.Server.BroadcastMessage(nextMessage);
                 RequestState(outState.ID);
             }
 
@@ -62,13 +65,13 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.Empty, _readyReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.Ready.ToString(), _readyReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _readyReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.Ready.ToString(), _readyReceiver);
         }
 
         protected void OnReadyReceived(ReadMessage a_message)

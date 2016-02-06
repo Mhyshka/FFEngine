@@ -90,9 +90,10 @@ namespace FF.Network.Message
                                                     EMessageChannel.CancelRequest.ToString(),
                                                     true,
                                                     true);
+                _client.QueueMessage(cancel);
             }
 
-            OnFail(ERequestErrorCode.LocalCanceled, null);
+            OnFail(ERequestErrorCode.Canceled, null);
         }
         #endregion
 
@@ -126,7 +127,7 @@ namespace FF.Network.Message
 
         protected virtual void OnConnectionLost(FFTcpClient a_client)
         {
-            OnFail(ERequestErrorCode.LocalConnectionIssue, null);
+            OnFail(ERequestErrorCode.Canceled, null);
         }
         #endregion
 

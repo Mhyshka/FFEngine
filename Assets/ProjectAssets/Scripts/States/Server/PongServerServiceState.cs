@@ -30,13 +30,13 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.Empty, _serviceRatioReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.ServiceRatio.ToString(), _serviceRatioReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _serviceRatioReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.ServiceRatio.ToString(), _serviceRatioReceiver);
         }
         #endregion
 

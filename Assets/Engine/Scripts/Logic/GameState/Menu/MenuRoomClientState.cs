@@ -23,9 +23,8 @@ namespace FF
 
         #region Properties Receiver
         protected RemovedFromRoomReceiver _removedFromRoomReceiver;
-        protected MultiInstanceReceiver<InstanceSlotSwapReceiver> _slotSwapReceiver;
-        protected MultiInstanceReceiver<InstanceConfirmSwapReceiver> _confirmSwapReceiver;
-        protected GenericMessageReceiver _requestGameReceiver;
+        protected InstanceConfirmSwapReceiver _confirmSwapReceiver;
+        protected GenericMessageReceiver _startGameReceiver;
         #endregion
 
         #region States Methods
@@ -60,12 +59,10 @@ namespace FF
         {
             if (_removedFromRoomReceiver == null)
                 _removedFromRoomReceiver = new RemovedFromRoomReceiver(OnKickReceived, OnBanReceived);
-            if (_slotSwapReceiver == null)
-                _slotSwapReceiver = new MultiInstanceReceiver<InstanceSlotSwapReceiver>();
             if (_confirmSwapReceiver == null)
-                _confirmSwapReceiver = new MultiInstanceReceiver<InstanceConfirmSwapReceiver>();
-            if (_requestGameReceiver == null)
-                _requestGameReceiver = new GenericMessageReceiver(OnRequestGameModeReceived);
+                _confirmSwapReceiver = new InstanceConfirmSwapReceiver();
+            if (_startGameReceiver == null)
+                _startGameReceiver = new GenericMessageReceiver(OnRequestGameModeReceived);
         }
 
         internal override void Exit ()
@@ -100,9 +97,8 @@ namespace FF
             Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
 
             Engine.Receiver.RegisterReceiver(EMessageChannel.RemovedFromRoom.ToString(), _removedFromRoomReceiver);
-            Engine.Receiver.RegisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
             Engine.Receiver.RegisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
-            Engine.Receiver.RegisterReceiver(EMessageChannel.StartGame.ToString(), _requestGameReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.StartGame.ToString(), _startGameReceiver);
 
             Engine.Inputs.PushOnBackCallback(QuitRoom);
         }
@@ -123,9 +119,8 @@ namespace FF
             }
         
             Engine.Receiver.UnregisterReceiver(EMessageChannel.RemovedFromRoom.ToString(), _removedFromRoomReceiver);
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapSlot.ToString(), _slotSwapReceiver);
             Engine.Receiver.UnregisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.StartGame.ToString(), _requestGameReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.StartGame.ToString(), _startGameReceiver);
 
             Engine.Inputs.PopOnBackCallback();
         }

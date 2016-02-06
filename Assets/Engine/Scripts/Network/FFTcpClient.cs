@@ -207,14 +207,14 @@ namespace FF.Network
 
             foreach (ReadRequest each in _pendingReadRequest.Values)
             {
-                each.FailWithoutResponse(ERequestErrorCode.LocalConnectionIssue);
+                each.FailWithoutResponse(ERequestErrorCode.Canceled);
             }
             _pendingReadRequest.Clear();
             _readRequestToCancel.Clear();
 
             foreach (SentRequest each in _pendingSentRequest.Values)
             {
-                each.OnFail(ERequestErrorCode.LocalConnectionIssue, null);
+                each.OnFail(ERequestErrorCode.Canceled, null);
             }
             _pendingSentRequest.Clear();
             _sentRequestToRemove.Clear();
@@ -260,6 +260,7 @@ namespace FF.Network
         /// <param name="a_message"></param>
         protected virtual void QueueMessageOnWriterThread(SentMessage a_message)
         {
+            a_message.Client = this;
             _writer.QueueMessage(a_message);
         }
 
@@ -347,9 +348,13 @@ namespace FF.Network
                 {
                     ConnectionLost();
                 }
+                else
+                {
+                    HandleHeartbeat();
+                }
             }
 
-            CheckForWrittenRequest();
+            CheckForWrittenMessage();
             CheckForSentRequestTimeout();
             CheckForReadRequestTimeout();
             TryReadMessages();
@@ -375,11 +380,11 @@ namespace FF.Network
                     _pendingReadRequest.Add(request.RequestId, request);
                 }
 
-                List<BaseReceiver> receivers = Engine.Receiver.ReceiversForType(messageRead.Data.Type);
+                List<BaseReceiver> receivers = Engine.Receiver.ReceiversForChannel(messageRead.Channel);
                 if (receivers != null)
                 {
                     receivers = new List<BaseReceiver>();
-                    foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Data.Type))
+                    foreach (BaseReceiver each in Engine.Receiver.ReceiversForChannel(messageRead.Channel))
                     {
                         receivers.Add(each);
                     }
@@ -392,7 +397,7 @@ namespace FF.Network
             }
         }
 
-        protected void CheckForWrittenRequest()
+        protected void CheckForWrittenMessage()
         {
             if (_writtenMessages.Count > 0)
             {
@@ -483,13 +488,17 @@ namespace FF.Network
             _isConnecting = false;
             _connectionTryCount = 0;
             _wasConnected = true;
+            _lastHeartbeatTimestamp = DateTime.Now;
             _local = _tcpClient.Client.LocalEndPoint as IPEndPoint;
             StartWorkers();
 
             if (!_didSendId)
             {
                 _didSendId = true;
-                QueueMessage(new MessageIntegerData(NetworkID));
+                MessageIntegerData data = new MessageIntegerData(NetworkID);
+                SentMessage networkIdMessage = new SentMessage(data,
+                                                                EMessageChannel.NetworkId.ToString());
+                QueueMessage(networkIdMessage);
             }
 
             _didReconnect = true;
@@ -557,6 +566,79 @@ namespace FF.Network
             if (onConnectionEnded != null)
                 onConnectionEnded(this, _endReason);
             Close();
+        }
+        #endregion
+
+        #region Latency
+        static int MAX_LATENCY_VALUES = 10;
+
+        internal SimpleCallback onLatencyUpdate = null;
+
+        protected Queue<float> _latencyResults;
+
+        protected float _averageLatency;
+        internal float Latency
+        {
+            get
+            {
+                return _averageLatency;
+            }
+        }
+
+        internal void NewLatencyValue(float a_value)
+        {
+            _latencyResults.Enqueue(a_value);
+
+            if (_latencyResults.Count > MAX_LATENCY_VALUES)
+            {
+                _latencyResults.Dequeue();
+            }
+
+            ComputeAverageLatency();
+        }
+
+        protected void ComputeAverageLatency()
+        {
+            _averageLatency = 0f;
+            foreach (float a_val in _latencyResults)
+            {
+                _averageLatency += a_val;
+            }
+
+            if (_latencyResults.Count > 0)
+            {
+                _averageLatency /= (float)(_latencyResults.Count);
+            }
+
+            if (onLatencyUpdate != null)
+                onLatencyUpdate();
+        }
+        #endregion
+
+        #region Heartbeat
+        protected double _heartbeatTimespan = 3000d;//in MS
+        protected DateTime _lastHeartbeatTimestamp;
+
+        protected void HandleHeartbeat()
+        {
+            TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
+            if (span.TotalMilliseconds > _heartbeatTimespan)
+            {
+                SentRequest request = new SentRequest(new MessageEmptyData(),
+                                                        EMessageChannel.Heartbeat.ToString(),
+                                                        Engine.Network.NextRequestId,
+                                                        1f,
+                                                        false);
+                request.onSucces += OnHeartbeatSuccessReceived;
+                QueueRequest(request);
+                _lastHeartbeatTimestamp = DateTime.Now;
+            }
+        }
+
+        protected void OnHeartbeatSuccessReceived(ReadResponse a_heartbeat)
+        {
+            MessageLongData data = a_heartbeat.Data as MessageLongData;
+
         }
         #endregion
     }

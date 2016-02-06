@@ -23,6 +23,14 @@ namespace FF.Network.Message
                 return _errorCode;
             }
         }
+
+        internal override EHeaderType HeaderType
+        {
+            get
+            {
+                return EHeaderType.Response;
+            }
+        }
         #endregion
 
         #region Constructors

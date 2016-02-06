@@ -67,6 +67,7 @@ namespace FF.Network
         {
             if (a_message.IsHandleByMock)
             {
+                a_message.Client = this;
                 a_message.PostWrite();
 
                 ReadMessage readMessage = new ReadMessage(a_message.Data, a_message.Timestamp, a_message.Channel);
@@ -79,7 +80,7 @@ namespace FF.Network
             if (a_request.IsHandleByMock)
             {
                 _pendingSentRequest.Add(a_request.RequestId, a_request);
-
+                a_request.Client = this;
                 a_request.PostWrite();
                 ReadRequest readRequest = new ReadRequest(a_request.Data, a_request.Timestamp, a_request.RequestId, a_request.Channel);
 
@@ -92,7 +93,7 @@ namespace FF.Network
             if (a_response.IsHandleByMock)
             {
                 _pendingReadRequest.Remove(a_response.RequestId);
-
+                a_response.Client = this;
                 a_response.PostWrite();
 
                 ReadResponse readMessage = new ReadResponse(a_response.Data, a_response.Timestamp, a_response.RequestId, a_response.ErrorCode, a_response.Channel);
@@ -117,18 +118,18 @@ namespace FF.Network
                 _pendingReadRequest.Add(request.RequestId, request);
             }
 
-            List<BaseReceiver> receivers = Engine.Receiver.ReceiversForType(messageRead.Data.Type);
+            List<BaseReceiver> receivers = Engine.Receiver.ReceiversForChannel(a_message.Channel);
             if (receivers != null)
             {
                 receivers = new List<BaseReceiver>();
-                foreach (BaseReceiver each in Engine.Receiver.ReceiversForType(messageRead.Data.Type))
+                foreach (BaseReceiver each in Engine.Receiver.ReceiversForChannel(a_message.Channel))
                 {
                     receivers.Add(each);
                 }
 
                 foreach (BaseReceiver each in receivers)
                 {
-                    each.Read(messageRead);
+                    each.Read(a_message);
                 }
             }
         }

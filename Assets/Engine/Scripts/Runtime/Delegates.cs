@@ -24,9 +24,11 @@ namespace FF
 
     internal delegate void FFIntClientCallback(FFTcpClient a_client, int a_value);
     internal delegate void FFClientCallback(FFTcpClient a_client);
+    internal delegate void FFRequestForClientCallback(FFTcpClient a_client, ReadResponse a_response);
     internal delegate void FFDisconnectedCallback(FFTcpClient a_client, string a_reason);
 
     internal delegate void FFClientsCallback(List<FFTcpClient> a_clients);
-    internal delegate void FFClientsBroadcastCallback(List<FFTcpClient> a_successClients, List<FFTcpClient> a_failClients);
+    internal delegate void FFBoolByClientsCallback(Dictionary<FFTcpClient, bool> a_result);
+    internal delegate void FFClientsBroadcastCallback(Dictionary<FFTcpClient, ReadResponse> a_successClients, Dictionary<FFTcpClient, ReadResponse> a_failClients);
     #endregion
 }

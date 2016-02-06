@@ -6,12 +6,24 @@ using System;
 internal enum EMessageChannel
 {
     CancelRequest,
-
+    Response,
 
     InputEvent,
+    IsIdle,
+
+    Next,
+    Ready,
 
     StartGame,
-    LoadingComplete,
+    LoadingComplete, //Clinet : Assets loading is complete.  Server : loadingstate is finished
+    LoadingReady, //eg : Called on click ( press any key )
+    LoadingProgress,
+
+    Farewell,
+    NetworkId,
+    Heartbeat,
+    IsAlive,
+    ClockSync,
 
     RoomInfos,
     JoinRoom,
@@ -20,6 +32,15 @@ internal enum EMessageChannel
     MoveToSlot,
     SwapSlot,
     SwapConfirm,
+
+    ChallengeInfos,
+    ServiceRatio,
+    BallMovement,
+    BallCollision,
+    RacketHit,
+    GoalHit,
+    TrySmash,
+    Smash
 }
 
 namespace FF.Network.Message

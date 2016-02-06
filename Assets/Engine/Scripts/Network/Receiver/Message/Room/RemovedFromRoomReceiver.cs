@@ -21,7 +21,7 @@ namespace FF.Network.Receiver
 
         protected override void HandleMessage()
         {
-            if (_message.Data.Type == EDataType.Ban)
+            if (_message.Data.Type == EDataType.Bool)
             {
                 MessageBoolData data = _message.Data as MessageBoolData;//Value == Is A Ban
                 if (!data.Data && _onKick != null)

@@ -15,14 +15,12 @@ namespace FF.Network.Receiver
             if (!Engine.Game.NetPlayer.IsBusy)
             {
                 response = new SentResponse(new MessageEmptyData(),
-                                            request.Channel,
                                             request.RequestId,
                                             ERequestErrorCode.Success);
             }
             else
             {
                 response = new SentResponse(new MessageEmptyData(),
-                                                request.Channel,
                                                 request.RequestId,
                                                 ERequestErrorCode.Failed);
             }

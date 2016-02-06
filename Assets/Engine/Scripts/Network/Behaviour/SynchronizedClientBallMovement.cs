@@ -23,12 +23,12 @@ namespace FF.Network
         void Awake()
         {
             _receiver = new GenericMessageReceiver(OnMessageReceived);
-            Engine.Receiver.RegisterReceiver(EDataType.BallMovement, _receiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.BallMovement.ToString(), _receiver);
         }
 
         void OnDestroy()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.BallMovement, _receiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.BallMovement.ToString(), _receiver);
         }
 
         void OnMessageReceived(ReadMessage a_message)

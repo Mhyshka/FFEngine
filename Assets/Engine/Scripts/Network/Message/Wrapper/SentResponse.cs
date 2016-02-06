@@ -35,11 +35,9 @@ namespace FF.Network.Message
 
         #region Constructors
         internal SentResponse(MessageData a_data,
-                                string a_channel,
                                 long a_requestId,
                                 ERequestErrorCode a_errorCode,
-                                bool a_isMandatory = true,
-                                bool a_isHandleByMock = false) : base(a_data, a_channel, a_isMandatory, a_isHandleByMock)
+                                bool a_isMandatory = true) : base(a_data, EMessageChannel.Response.ToString(), a_isMandatory, true)
         {
             _requestId = a_requestId;
             _errorCode = a_errorCode;

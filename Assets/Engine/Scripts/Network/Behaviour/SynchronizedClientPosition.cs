@@ -23,18 +23,18 @@ namespace FF.Network
         void Awake()
         {
             _receiver = new GenericMessageReceiver(OnMessageReceived);
-            Engine.Receiver.RegisterReceiver(EDataType.M_PositionEvent, _receiver);
+            //Engine.Receiver.RegisterReceiver(EDataType.M_PositionEvent, _receiver);
         }
 
         void OnDestroy()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.M_PositionEvent, _receiver);
+            //Engine.Receiver.UnregisterReceiver(EDataType.M_PositionEvent, _receiver);
         }
 
-        void OnMessageReceived(ReadMessage a_message, MessagePositionEvent a_data)
+        void OnMessageReceived(ReadMessage a_message)
         {
-            MessagePositionEvent data = a_message.Data as MessagePositionEvent;
-            _positionEvents.AddLast(a_data.positionEvent);
+            /*MessagePositionEvent data = a_message.Data as MessagePositionEvent;
+            _positionEvents.AddLast(a_data.positionEvent);*/
         }
         #endregion
 

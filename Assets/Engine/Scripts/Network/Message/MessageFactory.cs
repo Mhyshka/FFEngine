@@ -26,24 +26,7 @@ namespace FF.Network.Message
 
         LoadingProgress,
 
-        M_RequestGameMode,
-        M_LoadingStarted,
-        
-        M_LoadingComplete,
-        M_LoadingReady,
-        M_LoadingEveryoneReady,
-
-
         BallMovement,
-        
-
-        M_PositionEvent,
-
-        M_ServiceChallengeInfo,
-        M_ServiceRatio,
-        M_TrySmash,
-        M_DidSmash,
-
         BallCollision,
         RacketHit,
         GoalHit
@@ -73,123 +56,58 @@ namespace FF.Network.Message
 
         internal static MessageData CreateData(EDataType a_type)
         {
-            MessageData message = null;
+            MessageData data = null;
             switch (a_type)
             {
-                case EDataType.Long:
-                    //message = new RequestHeartBeat();
+                case EDataType.Empty:
+                    data = new MessageEmptyData();
                     break;
-                /*case EDataType.NetworkID:
-                    message = new MessageNetworkID();
+                case EDataType.Integer:
+                    data = new MessageIntegerData();
+                    break;
+                case EDataType.Long:
+                    data = new MessageLongData();
+                    break;
+                case EDataType.Float:
+                    data = new MessageFloatData();
+                    break;
+                case EDataType.String:
+                    data = new MessageStringData();
+                    break;
+                case EDataType.Bool:
+                    data = new MessageBoolData();
                     break;
 
                 case EDataType.InputEvent:
-                    message = new MessageInputEvent();
+                    data = new MessageInputEventData();
                     break;
 
-                case EDataType.RoomInfos:
-                    message = new MessageRoomInfos();
+                case EDataType.Room:
+                    data = new MessageRoomData();
                     break;
 
-                case EDataType.ResponseSuccess:
-                    message = new ResponseSuccess();
-                    break;
-                case EDataType.ResponseFail:
-                    message = new ResponseFail();
-                    break;
-                case EDataType.ResponseCancel:
-                    message = new ResponseCancel();
+                case EDataType.Player:
+                    data = new MessagePlayerData();
                     break;
 
-                case EDataType.RequestEmpty:
-                    message = new RequestEmpty();
-                    break;
-                case EDataType.IsIdleRequest:
-                    message = new RequestIsIdle();
+                case EDataType.SlotRef:
+                    data = new MessageSlotRefData();
                     break;
 
-                case EDataType.JoinRoomRequest:
-                    message = new RequestJoinRoom();
-                    break;
-                case EDataType.MoveToSlotRequest:
-                    message = new RequestMoveToSlot();
-                    break;
-
-                case EDataType.SlotSwapRequest:
-                    message = new RequestSlotSwap();
-                    break;
-                case EDataType.ConfirmSwapRequest:
-                    message = new RequestConfirmSwap();
-                    break;
-
-                case EDataType.RemovedFromRoom:
-                    message = new MessageRemovedFromRoom();
-                    break;
-
-                case EDataType.Farewell:
-                    message = new MessageFarewell();
-                    break;
-
-                case EDataType.LeavingRoom:
-                    message = new MessageLeavingRoom();
-                    break;
-
-
-                case EDataType.RequestGameMode:
-                    message = new MessageRequestGameMode();
-                    break;
-                case EDataType.LoadingStarted:
-                    message = new MessageLoadingStarted();
-                    break;
                 case EDataType.LoadingProgress:
-                    message = new MessageLoadingProgress();
-                    break;
-                case EDataType.LoadingComplete:
-                    message = new MessageLoadingComplete();
-                    break;
-                case EDataType.LoadingReady:
-                    message = new MessageLoadingReady();
-                    break;
-                case EDataType.LoadingEveryoneReady:
-                    message = new MessageLoadingEveryoneReady();
+                    data = new MessageLoadingProgressData();
                     break;
 
-                case EDataType.PongTargetRatio:
-                    message = new MessagePongTargetRatio();
-                    break;
-                case EDataType.PongBallCollision:
-                    message = new MessagePongBallCollision();
-                    break;
-                case EDataType.PongBallMovement:
-                    message = new MessagePongBallMovement();
-                    break;
 
-                case EDataType.PositionEvent:
-                    message = new MessagePositionEvent();
+                case EDataType.BallMovement:
+                    data = new MessageBallMovementData();
                     break;
-
-                case EDataType.ServiceChallengeInfo:
-                    message = new MessageServiceChallengeInfo();
+                case EDataType.BallCollision:
+                    data = new MessageBallCollisionData();
                     break;
-
-                case EDataType.ServiceRatio:
-                    message = new MessageServiceRatio();
-                    break;
-
-                case EDataType.TrySmash:
-                    message = new MessageTrySmash();
-                    break;
-
-                case EDataType.RacketHit:
-                    message = new MessageRacketHit();
-                    break;
-
-                case EDataType.GoalHit:
-                    message = new MessageGoalHit();
-                    break;*/
             }
 
-            return message;
+            return data;
         }
     }
 }

@@ -36,9 +36,9 @@ namespace FF.Network
 
         void NetworkUpdate()
         {
-            NetworkPositionEvent posEvent = new NetworkPositionEvent(Time.time, transform.position, Vector3.zero);
+           /* NetworkPositionEvent posEvent = new NetworkPositionEvent(Time.time, transform.position, Vector3.zero);
             Message.MessagePositionEvent position = new Message.MessagePositionEvent(posEvent);
-            Engine.Network.Server.BroadcastMessage(position);
+            Engine.Network.Server.BroadcastMessage(position);*/
         }
 
         internal void UpdateNow()

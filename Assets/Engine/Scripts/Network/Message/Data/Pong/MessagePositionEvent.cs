@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace FF.Network.Message
 {
-    internal class MessagePositionEvent : MessageData
+   /* internal class MessagePositionEvent : MessageData
     {
         #region Properties
         internal NetworkPositionEvent positionEvent;
@@ -40,5 +40,5 @@ namespace FF.Network.Message
             stream.Write(positionEvent);
         }
         #endregion
-    }
+    }*/
 }

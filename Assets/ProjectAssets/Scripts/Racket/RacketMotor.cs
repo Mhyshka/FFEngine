@@ -143,7 +143,8 @@ namespace FF.Pong
                     if (onTrySmash != null)
                         onTrySmash();
 
-                    if (Engine.Network.IsServer)
+                    //TODO smash
+                    /*if (Engine.Network.IsServer)
                     {
                         Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
                         Engine.Network.Server.BroadcastMessage(message);
@@ -152,7 +153,7 @@ namespace FF.Pong
                     {
                         Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
                         Engine.Network.MainClient.QueueMessage(message);
-                    }
+                    }*/
                 }
             }
         }
@@ -239,14 +240,16 @@ namespace FF.Pong
             _lastSentRatio = _currentRatio;
             _lastRefreshTime = Time.time;
 
-            if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
+
+            //TODO racket movement
+            /*if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
             {
                 Engine.Network.MainClient.QueueMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
             }
             else if (Engine.Network.IsServer)
             {
                 Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
-            }
+            }*/
         }
         #endregion
     }

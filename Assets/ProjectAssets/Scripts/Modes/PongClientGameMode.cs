@@ -24,13 +24,13 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.BallCollision, _challengeInfosReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.ChallengeInfos.ToString(), _challengeInfosReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.BallCollision, _challengeInfosReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.ChallengeInfos.ToString(), _challengeInfosReceiver);
         }
 
         protected void OnChallengeInfosReceived(ReadMessage a_message)

@@ -50,7 +50,5 @@ namespace FF.Network.Message
 		{
 			_room = stream.TryReadObject<Room>();
 		}
-		
-		
 	}
 }

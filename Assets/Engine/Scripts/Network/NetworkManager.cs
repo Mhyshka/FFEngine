@@ -61,7 +61,7 @@ namespace FF.Network
                 if (!_wasGenerated)
                 {
                     _wasGenerated = true;
-                    string toHash = NetworkIP.ToString() + Random.Range(int.MinValue, int.MaxValue).ToString();
+                    string toHash = NetworkIP.ToString() + UnityEngine.Random.Range(int.MinValue, int.MaxValue).ToString();
                     _networkID = toHash.GetHashCode();
                     FFLog.Log(EDbgCat.Networking, "Generated new NetworkID : " + _networkID.ToString());
                 }

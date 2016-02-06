@@ -58,15 +58,15 @@ namespace FF.Logic
             _playersLoadingState = new PlayerDictionary<PlayerLoadingWrapper>();
             _loadingCompleteReceiver = new LoadingCompleteReceiver();
             _loadingReadyReceiver = new LoadingReadyReceiver();
-            Engine.Receiver.RegisterReceiver(Network.Message.EHeaderType.LoadingComplete, _loadingCompleteReceiver);
-            Engine.Receiver.RegisterReceiver(Network.Message.EHeaderType.LoadingReady, _loadingReadyReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingComplete.ToString(), _loadingCompleteReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingReady.ToString(), _loadingReadyReceiver);
         }
 
         internal void UnregisterLoadingComplete()
         {
             _playersLoadingState.TearDown();
-            Engine.Receiver.UnregisterReceiver(Network.Message.EHeaderType.LoadingComplete, _loadingCompleteReceiver);
-            Engine.Receiver.UnregisterReceiver(Network.Message.EHeaderType.LoadingReady, _loadingReadyReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.LoadingComplete.ToString(), _loadingCompleteReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.LoadingReady.ToString(), _loadingReadyReceiver);
             _loadingCompleteReceiver = null;
         }
 
@@ -76,8 +76,10 @@ namespace FF.Logic
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.NotReady;
             _playersLoadingState[a_client.NetworkID].rank = _finishedCount;
 
-            Network.Message.MessageLoadingProgressData loadingProgressMessage = new Network.Message.MessageLoadingProgressData(_playersLoadingState);
-            Engine.Network.Server.BroadcastMessage(loadingProgressMessage);
+            MessageLoadingProgressData loadingProgressData = new MessageLoadingProgressData(_playersLoadingState);
+            SentMessage message = new SentMessage(loadingProgressData,
+                                                    EMessageChannel.LoadingProgress.ToString());
+            Engine.Network.Server.BroadcastMessage(message);
 
             if (onLoadingCompleteReceived != null)
                 onLoadingCompleteReceived();
@@ -87,8 +89,10 @@ namespace FF.Logic
         {
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.Ready;
 
-            Network.Message.MessageLoadingProgressData loadingProgressMessage = new Network.Message.MessageLoadingProgressData(_playersLoadingState);
-            Engine.Network.Server.BroadcastMessage(loadingProgressMessage);
+            MessageLoadingProgressData loadingProgressData = new MessageLoadingProgressData(_playersLoadingState);
+            SentMessage message = new SentMessage(loadingProgressData,
+                                                    EMessageChannel.LoadingProgress.ToString());
+            Engine.Network.Server.BroadcastMessage(message);
 
             if (onLoadingCompleteReceived != null)
                 onLoadingCompleteReceived();
@@ -103,13 +107,13 @@ namespace FF.Logic
         {
             _playersLoadingState = new PlayerDictionary<PlayerLoadingWrapper>();
             _loadingProgressReceiver = new GenericMessageReceiver(OnLoadingProgressReceived);
-            Engine.Receiver.RegisterReceiver(EHeaderType.LoadingProgress, _loadingProgressReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingProgress.ToString(), _loadingProgressReceiver);
         }
 
         internal void UnregisterLoadingStarted()
         {
             _playersLoadingState.TearDown();
-            Engine.Receiver.UnregisterReceiver(EHeaderType.LoadingProgress, _loadingProgressReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.LoadingProgress.ToString(), _loadingProgressReceiver);
             _loadingProgressReceiver = null;
         }
 

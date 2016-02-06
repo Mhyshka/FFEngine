@@ -100,7 +100,7 @@ namespace FF.Network
 					byte[] messageData = FFByteArrayExtension.Extract(ref _data, _currentMessageSize);
 					_currentMessageSize = -1;
 					
-					AMessage message = AMessage.Deserialize(messageData);
+					ReadMessage message = ReadMessage.Deserialize(messageData);
 
                     _ffClient.QueueReadMessage(message);
 				}

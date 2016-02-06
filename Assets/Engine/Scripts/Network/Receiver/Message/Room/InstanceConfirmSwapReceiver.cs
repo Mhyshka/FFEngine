@@ -24,32 +24,30 @@ namespace FF.Network.Receiver
         {
             if (_message.HeaderType == EHeaderType.Request)
             {
-                ReadRequest _request = _message as ReadRequest;
+                _request = _message as ReadRequest;
                 if (_message.Data.Type == EDataType.String)
                 {
                     _data = _message.Data as MessageStringData;
                     SentResponse answer = null;
 
                     int detailErrorCode = -1;
-                    ERequestErrorCode errorCode = ERequestErrorCode.Unknown;
+                    ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
 
                     bool pending = false;
 
                     if (!_client.IsConnected)
                     {
-                        errorCode = ERequestErrorCode.LocalConnectionIssue;
-                        detailErrorCode = (int)EErrorCodeSwapConfirm.PlayerDisconnected;
+                        errorCode = ERequestErrorCode.Failed;
+                        detailErrorCode = (int)EErrorCodeSwapSlot.PlayerDisconnected;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                   _request.Channel,
                                                    _request.RequestId,
                                                    errorCode);
                     }
                     else if (Engine.Game.NetPlayer.IsBusy)
                     {
-                        errorCode = ERequestErrorCode.LocalConnectionIssue;
-                        detailErrorCode = (int)EErrorCodeSwapConfirm.PlayerIsBusy;
+                        errorCode = ERequestErrorCode.Failed;
+                        detailErrorCode = (int)EErrorCodeSwapSlot.PlayerIsBusy;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                   _request.Channel,
                                                    _request.RequestId,
                                                    errorCode);
                     }
@@ -76,7 +74,7 @@ namespace FF.Network.Receiver
 
         protected void OnConnectionLostWaiting(FFTcpClient a_client)
         {
-            _request.FailWithoutResponse(ERequestErrorCode.LocalConnectionIssue);
+            _request.FailWithoutResponse(ERequestErrorCode.Canceled);
             OnReceiverComplete();
         }
 
@@ -86,9 +84,8 @@ namespace FF.Network.Receiver
             OnReceiverComplete();
 
             ERequestErrorCode errorCode = ERequestErrorCode.Failed;
-            int detailErrorCode = (int)EErrorCodeSwapConfirm.PlayerRefused;
+            int detailErrorCode = (int)EErrorCodeSwapSlot.PlayerRefused;
             SentResponse answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                   _request.Channel,
                                                    _request.RequestId,
                                                    errorCode);
             _client.QueueResponse(answer);
@@ -100,7 +97,6 @@ namespace FF.Network.Receiver
 
             ERequestErrorCode errorCode = ERequestErrorCode.Success;
             SentResponse answer = new SentResponse(new MessageEmptyData(),
-                                                   _request.Channel,
                                                    _request.RequestId,
                                                    errorCode);
             _client.QueueResponse(answer);

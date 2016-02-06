@@ -40,6 +40,7 @@ namespace FF.Network.Message
             EDataType dataType = (EDataType)value;
             FFLog.Log(EDbgCat.Serialization, "Deserializing data type : " + dataType.ToString());
             MessageData data = MessageFactory.CreateData(dataType);
+
             if (data != null)
                 data.LoadFromData(stream);
             else

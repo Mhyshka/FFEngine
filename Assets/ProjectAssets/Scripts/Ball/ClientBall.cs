@@ -52,16 +52,16 @@ namespace FF.Pong
             _racketHitReceiver = new GenericMessageReceiver (OnRacketHitReceived);
             _goalHitReceiver = new GenericMessageReceiver (OnGoalHitReceived);
 
-            Engine.Receiver.RegisterReceiver(EDataType.BallCollision, _collisionReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.RacketHit, _racketHitReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.GoalHit, _goalHitReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.BallCollision.ToString(), _collisionReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.RacketHit.ToString(), _racketHitReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.GoalHit.ToString(), _goalHitReceiver);
         }
 
         internal void NetworkTearDown()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.BallCollision, _collisionReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.RacketHit, _racketHitReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.GoalHit, _goalHitReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.BallCollision.ToString(), _collisionReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.RacketHit.ToString(), _racketHitReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.GoalHit.ToString(), _goalHitReceiver);
         }
 
         protected void OnBallCollisionReceived(ReadMessage a_message)
@@ -72,15 +72,16 @@ namespace FF.Pong
 
         protected void OnRacketHitReceived(ReadMessage a_message)
         {
-            MessageRacketHitData data = a_message.Data as MessageRacketHitData;
-            RacketMotor motor = _pongGm.Board.RacketForId(data.racketId);
+            MessageIntegerData data = a_message.Data as MessageIntegerData;//RacketID
+            RacketMotor motor = _pongGm.Board.RacketForId(data.Data);
             OnRacketHit(motor);
         }
 
         protected void OnGoalHitReceived(ReadMessage a_message)
         {
-            MessageGoalHit data = a_message.Data as MessageGoalHit;
-            OnGoal(data.side);
+            MessageIntegerData data = a_message.Data as MessageIntegerData;//ESide
+            ESide side = (ESide)data.Data;
+            OnGoal(side);
         }
         #endregion
     }

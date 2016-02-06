@@ -22,43 +22,39 @@ namespace FF.Network.Receiver
                     MessagePlayerData data = _message.Data as MessagePlayerData;
 
                     SentResponse answer = null;
-                    ERequestErrorCode errorCode = ERequestErrorCode.Unknown;
+                    ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
                     Room room = Engine.Game.CurrentRoom;
 
                     if (!_client.IsConnected)
                     {
-                        errorCode = ERequestErrorCode.LocalConnectionIssue;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.PlayerDisconnected;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
                     else if (Engine.Network.Server == null)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.ToServerOnly;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
                     else if (room.IsBanned(_client.NetworkID))
                     {
-                        errorCode = ERequestErrorCode.Forbidden;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.PlayerIsBannedFromRoom;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
                     else if (room.IsFull)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.RoomIsFull;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
@@ -68,7 +64,6 @@ namespace FF.Network.Receiver
                         data.Player.IpEndPoint = _client.Remote;
                         Engine.Game.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, data.Player);
                         answer = new SentResponse(new MessageEmptyData(),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     ERequestErrorCode.Success);
                     }

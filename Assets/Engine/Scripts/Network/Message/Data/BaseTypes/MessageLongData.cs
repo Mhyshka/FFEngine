@@ -26,6 +26,10 @@ namespace FF.Network.Message
         }
         #endregion
 
+        public MessageLongData()
+        {
+        }
+
         internal MessageLongData(long a_timestamp)
         {
             _data = a_timestamp;

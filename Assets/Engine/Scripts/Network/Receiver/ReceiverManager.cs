@@ -20,22 +20,18 @@ namespace FF.Network.Receiver
         {
             _registeredReceiver = new Dictionary<string, List<BaseReceiver>>();
 
-            /*RegisterReceiver(EDataType.M_RoomInfos, new RoomInfosReceiver());
+            RegisterReceiver(EMessageChannel.CancelRequest.ToString(), new CancelReceiver());
+            RegisterReceiver(EMessageChannel.Response.ToString(), new ResponseReceiver());
 
-            RegisterReceiver(EDataType.R_Success, new SuccessReceiver());
-            RegisterReceiver(EDataType.R_Fail, new FailReceiver());
-            RegisterReceiver(EDataType.M_Cancel, new CancelReceiver());
+            RegisterReceiver(EMessageChannel.RoomInfos.ToString(), new RoomInfosReceiver());
 
-            RegisterReceiver(EDataType.R_Heartbeat, new HeartbeatReceiver());
+            RegisterReceiver(EMessageChannel.Heartbeat.ToString(), new HeartbeatReceiver());
 
-            RegisterReceiver(EDataType.Q_Empty, RESPONSE_ALWAYS_SUCCESS);
-            RegisterReceiver(EDataType.IsIdleRequest, new IsIdleReceiver());
+            RegisterReceiver(EMessageChannel.IsIdle.ToString(), new IsIdleReceiver());
+            RegisterReceiver(EMessageChannel.IsAlive.ToString(), RESPONSE_ALWAYS_SUCCESS);
 
-            RegisterReceiver(EDataType.M_Farewell, new FarewellReceiver());
-            RegisterReceiver(EDataType.M_LeavingRoom, new LeavingRoomReceiver());*/
-
-
-            _client.EndConnection(_data.reason);
+            RegisterReceiver(EMessageChannel.Farewell.ToString(), new FarewellReceiver());
+            RegisterReceiver(EMessageChannel.LeavingRoom.ToString(), new LeavingRoomReceiver());
         }
 
         internal override void TearDown()
@@ -79,7 +75,7 @@ namespace FF.Network.Receiver
         }
         #endregion
 
-        internal List<BaseReceiver> ReceiversForType(string a_channel)
+        internal List<BaseReceiver> ReceiversForChannel(string a_channel)
         {
             List<BaseReceiver> results = null;
             

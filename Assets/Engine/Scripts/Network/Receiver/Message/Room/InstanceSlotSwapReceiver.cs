@@ -26,14 +26,14 @@ namespace FF.Network.Receiver
         {
             if (_message.HeaderType == EHeaderType.Request)
             {
-                ReadRequest _request = _message as ReadRequest;
+                _request = _message as ReadRequest;
                 if (_message.Data.Type == EDataType.SlotRef)
                 {
                     _slotRefData = _message.Data as MessageSlotRefData;
                     bool pending = false;
 
                     SentResponse answer = null;
-                    ERequestErrorCode errorCode = ERequestErrorCode.Unknown;
+                    ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
 
                     FFNetworkPlayer source = Engine.Game.CurrentRoom.GetPlayerForId(_client.NetworkID);
@@ -45,19 +45,17 @@ namespace FF.Network.Receiver
 
                     if (!_client.IsConnected)
                     {
-                        errorCode = ERequestErrorCode.LocalConnectionIssue;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeSwapSlot.PlayerDisconnected;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    _request.Channel,
                                                     _request.RequestId,
                                                     errorCode);
                     }
                     else if (source == null)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeSwapSlot.PlayerNotfound;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    _request.Channel,
                                                     _request.RequestId,
                                                     errorCode);
                     }
@@ -67,22 +65,20 @@ namespace FF.Network.Receiver
                         Engine.Game.CurrentRoom.MovePlayer(source.SlotRef, _slotRefData.SlotRef);
                         errorCode = ERequestErrorCode.Success;
                         answer = new SentResponse(new MessageEmptyData(),
-                                                    _request.Channel,
                                                     _request.RequestId,
                                                     errorCode);
                     }
                     else if (_targetClient == null)
                     {
-                        errorCode = ERequestErrorCode.RemoteConnectionIssue;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeSwapSlot.TargetDisconnected;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    _request.Channel,
                                                     _request.RequestId,
                                                     errorCode);
                     }
                     else
                     {
-                        _request.onCanceled = OnCancelReceived;
+                        _request.onCanceled += OnCancelReceived;
                         _client.onConnectionLost += ServerOnConnectionLost;
                         _targetClient.onConnectionLost += ServerOnConnectionLost;
                         _confirmRequest = new SentRequest(new MessageStringData(source.player.username),
@@ -109,9 +105,6 @@ namespace FF.Network.Receiver
         {
             _client.onConnectionLost -= ServerOnConnectionLost;
             _targetClient.onConnectionLost -= ServerOnConnectionLost;
-
-            ERequestErrorCode errorCode = ERequestErrorCode.RemoteConnectionIssue;
-            
             
             if (a_client == _client)//Cancel for target
             {
@@ -121,10 +114,8 @@ namespace FF.Network.Receiver
             else//Fail for sender
             {
                 SentResponse message = new SentResponse(new MessageEmptyData(),
-                                                        _request.Channel,
                                                         _request.RequestId,
-                                                        errorCode,
-                                                        true,
+                                                        ERequestErrorCode.Failed,
                                                         true);
                 _client.QueueResponse(message);
             }
@@ -137,10 +128,8 @@ namespace FF.Network.Receiver
             Engine.Game.CurrentRoom.SwapPlayers(source.SlotRef, _slotRefData.SlotRef);
 
             SentResponse response = new SentResponse(a_response.Data,
-                                                     _request.Channel,
                                                      _request.RequestId,
                                                      a_response.ErrorCode,
-                                                     true,
                                                      true);
             _client.QueueResponse(response);
         }
@@ -148,10 +137,8 @@ namespace FF.Network.Receiver
         protected void OnFail(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
             SentResponse response = new SentResponse(a_response.Data,
-                                                    _request.Channel,
                                                     _request.RequestId,
                                                     a_response.ErrorCode,
-                                                    true,
                                                     true);
             _client.QueueResponse(response);
         }
@@ -159,7 +146,7 @@ namespace FF.Network.Receiver
         protected void OnCancelReceived()
         {
             if(!_confirmRequest.IsComplete)
-                _confirmRequest.Cancel();
+                _confirmRequest.Cancel(true);
         }
         #endregion
     }

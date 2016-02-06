@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net;
 
 using FF.UI;
+using FF.Handler;
 using FF.Network;
 using FF.Network.Message;
 using FF.Network.Receiver;
@@ -87,8 +88,14 @@ namespace FF
 
         internal override void GoBack()
         {
-            //TODO Broadcast
-            new Handler.FarewellHandler(OnShutdownComplete);
+            SentBroadcastMessage broadcastFarewell = new SentBroadcastMessage(new MessageEmptyData(),
+                                                                                EMessageChannel.Farewell.ToString(),
+                                                                                false,
+                                                                                false,
+                                                                                2f);
+            broadcastFarewell.onEveryMessageSent += OnShutdownComplete;
+            broadcastFarewell.onTimeout += delegate { OnShutdownComplete(); };
+            broadcastFarewell.Broadcast();
         }
 
         internal void OnShutdownComplete()
@@ -293,11 +300,13 @@ namespace FF
                 _swapRequest = new SentRequest(data,
                                                 EMessageChannel.SwapSlot.ToString(),
                                                 Engine.Network.NextRequestId,
-                                                float.MaxValue);
+                                                float.MaxValue,
+                                                true,
+                                                true);
                 _swapRequest.onSucces += OnSwapSuccess;
                 _swapRequest.onFail += OnSwapFailed;
 
-                client.QueueRequest(_swapRequest);
+                Engine.Network.Server.LoopbackClient.Mirror.QueueRequest(_swapRequest);
             }
             else
                 FFLog.Log("Couldn't swap, client not found.");
@@ -315,13 +324,20 @@ namespace FF
         {
             string message = "";
 
-            if (a_response.Data.Type == EDataType.Integer)
+            if (a_errorCode == ERequestErrorCode.Failed)
             {
-                MessageIntegerData data = a_response.Data as MessageIntegerData;
+                if (a_response.Data.Type == EDataType.Integer)
+                {
+                    MessageIntegerData data = a_response.Data as MessageIntegerData;
 
-                EErrorCodeSwapSlot errorCode = (EErrorCodeSwapSlot)data.Data;
-                //TODO
-                message = errorCode.ToString();
+                    EErrorCodeSwapSlot errorCode = (EErrorCodeSwapSlot)data.Data;
+                    //TODO
+                    message = errorCode.ToString();
+                }
+            }
+            else
+            {
+                message = a_errorCode.ToString();
             }
 
             Engine.UI.DismissPopup(_swapPopupId);
@@ -349,34 +365,47 @@ namespace FF
             UnregisterReceiver();
             RegisterForbiddenReceiver();
 
-            new Handler.IsIdleCheck(OnCheckSuccess,OnCheckFailed, OnClientCheckSucceed, OnClientCheckFailed);
+            SentBroadcastRequest broadcastIsIdle = new SentBroadcastRequest(new MessageEmptyData(),
+                                                                                EMessageChannel.IsIdle.ToString(),
+                                                                                Engine.Network.NextRequestId,
+                                                                                true,
+                                                                                true,
+                                                                                2f);
+            broadcastIsIdle.onFailureForClient += OnClientCheckFailed;
+            broadcastIsIdle.onSuccessForClient += OnClientCheckSucceed;
+            broadcastIsIdle.onResult += OnCheckResult;
+            broadcastIsIdle.Broadcast();
         }
 
-        internal void OnCheckSuccess(List<FFTcpClient> succeed, List<FFTcpClient> failed)
+        internal void OnCheckResult(Dictionary<FFTcpClient, ReadResponse> succeed, Dictionary<FFTcpClient, ReadResponse> failed)
         {
-            _roomPanel.StopReadyCheck();
+            if (failed.Count > 0)
+            {
+                //failure
+                RegisterReceiver();
+                UnregisterForbiddenReceiver();
 
-            RegisterReceiver();
-            UnregisterForbiddenReceiver();
+                Engine.Network.Server.ResumeAcceptingConnections();
+                FFMessageToast.RequestDisplay("Some player aren't ready.");
+                _roomPanel.StopReadyCheck();
+            }
+            else
+            {
+                //Success
+                _roomPanel.StopReadyCheck();
 
-            SentMessage message = new SentMessage(new MessageEmptyData(),
-                                                    EMessageChannel.StartGame.ToString());
-            Engine.Network.Server.BroadcastMessage(message);
+                RegisterReceiver();
+                UnregisterForbiddenReceiver();
 
-            RequestMultiGameMode("PongServerGameMode");
+                SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                        EMessageChannel.StartGame.ToString());
+                Engine.Network.Server.BroadcastMessage(message);
+
+                RequestMultiGameMode("PongServerGameMode");
+            }
         }
 
-        internal void OnCheckFailed(List<FFTcpClient> succeed, List<FFTcpClient> failed)
-        {
-            RegisterReceiver();
-            UnregisterForbiddenReceiver();
-
-            Engine.Network.Server.ResumeAcceptingConnections();
-            FFMessageToast.RequestDisplay("Some player aren't ready.");
-            _roomPanel.StopReadyCheck();
-        }
-
-        internal void OnClientCheckSucceed(FFTcpClient a_client)
+        internal void OnClientCheckSucceed(FFTcpClient a_client, ReadResponse a_response)
         {
             PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)
@@ -385,7 +414,7 @@ namespace FF
             }
         }
 
-        internal void OnClientCheckFailed(FFTcpClient a_client)
+        internal void OnClientCheckFailed(FFTcpClient a_client, ReadResponse a_response)
         {
             PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)

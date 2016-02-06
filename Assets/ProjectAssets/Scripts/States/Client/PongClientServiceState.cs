@@ -15,15 +15,15 @@ namespace FF.Pong
         #endregion
 
         #region properties
-        protected GenericMessageReceiver _ballMovementReceiver;
+        protected GenericMessageReceiver _startGameReceiver;
         #endregion
 
         #region State Methods
         internal override void Enter()
         {
             base.Enter();
-            if(_ballMovementReceiver == null)
-                _ballMovementReceiver = new GenericMessageReceiver(OnStartGame);
+            if(_startGameReceiver == null)
+                _startGameReceiver = new GenericMessageReceiver(OnStartGame);
         }
         #endregion
 
@@ -31,19 +31,21 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.Empty, _ballMovementReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.BallMovement.ToString(), _startGameReceiver);//When we detect a ball movement !
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.Empty, _ballMovementReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.BallMovement.ToString(), _startGameReceiver);
         }
         #endregion
 
         protected override void OnServicePlayerSmash()
         {
-            Network.Message.MessageServiceRatio message = new MessageServiceRatio(_ratio);
+            MessageFloatData data = new MessageFloatData(_ratio);
+            SentMessage message = new SentMessage(data,
+                                                  EMessageChannel.ServiceRatio.ToString());
             Engine.Network.MainClient.QueueMessage(message);
         }
 

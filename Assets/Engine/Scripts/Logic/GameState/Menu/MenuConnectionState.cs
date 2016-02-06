@@ -37,7 +37,6 @@ namespace FF
                                                   3f);
             request.onSucces += OnSuccess;
             request.onFail += OnFail;
-
             Engine.Network.MainClient.QueueRequest(request);
 
             _popupId = FFLoadingPopup.RequestDisplay("Joining " + Engine.Game.CurrentRoom.roomName, "Cancel", null, false);
@@ -67,13 +66,20 @@ namespace FF
         {
             string message = "";
 
-            if (a_response.Data.Type == EDataType.Integer)
+            if (a_errorCode == ERequestErrorCode.Failed)
             {
-                MessageIntegerData data = a_response.Data as MessageIntegerData;
+                if (a_response.Data.Type == EDataType.Integer)
+                {
+                    MessageIntegerData data = a_response.Data as MessageIntegerData;
 
-                EErrorCodeJoinRoom errorCode = (EErrorCodeJoinRoom)data.Data;
-                //TODO
-                message = errorCode.ToString();
+                    EErrorCodeJoinRoom errorCode = (EErrorCodeJoinRoom)data.Data;
+                    //TODO
+                    message = errorCode.ToString();
+                }
+            }
+            else
+            {
+                message = a_errorCode.ToString();
             }
 
             FFMessageToast.RequestDisplay("Couldn't join room : " + message);

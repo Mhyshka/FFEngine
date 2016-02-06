@@ -173,8 +173,8 @@ namespace FF.Multiplayer
 		public void LoadFromData(FFByteReader stream)
 		{
 			teamName = stream.TryReadString();
-			teamIndex = stream.TryReadInt();
-			_slots = stream.TryReadObjectList<Slot>();
+            teamIndex = stream.TryReadInt();
+            _slots = stream.TryReadObjectList<Slot>();
 			
 			foreach(Slot each in _slots)
 			{

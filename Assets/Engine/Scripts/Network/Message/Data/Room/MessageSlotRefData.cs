@@ -28,6 +28,10 @@ namespace FF.Network.Message
         #endregion
 
         #region Constructors
+        public MessageSlotRefData()
+        {
+        }
+
         internal MessageSlotRefData(SlotRef a_target)
         {
             _slotRef = a_target;

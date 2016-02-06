@@ -16,9 +16,6 @@ namespace FF.Network
 	{
 		#region Properties
 		protected Queue<SentMessage> _toSendMessages;
-		
-		protected double _heartbeatTimespan = 3000d;//in MS
-		protected DateTime _lastHeartbeatTimestamp;
 
         protected SentMessage _finalMessageRef = null;
 		#endregion
@@ -48,12 +45,6 @@ namespace FF.Network
             }
             _finalMessageRef = a_message;
         }
-
-        internal override void Start ()
-		{
-			base.Start ();
-			_lastHeartbeatTimestamp = DateTime.Now;
-		}
         #endregion
 
         #region Read
@@ -82,8 +73,6 @@ namespace FF.Network
 		{
 			while(_shouldRun && Client != null && Client.Connected && _stream != null && _stream.CanWrite)
 			{
-                HandleHeartbeat();
-				
 				if(_shouldRun && _toSendMessages.Count > 0)
 				{
                     SentMessage toSend;
@@ -112,21 +101,7 @@ namespace FF.Network
 			FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
 		}
 		
-		protected void HandleHeartbeat()
-		{
-			TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
-			if(span.TotalMilliseconds > _heartbeatTimespan)
-			{
-                MessageLongData newHeartbeat = new MessageLongData();
-                //TODO : FIX THAT SHIT
-                //QueueMessage(newHeartbeat);
-				_lastHeartbeatTimestamp = DateTime.Now;
-			}
-		}
 
-        protected void OnHeartbeatSuccessReceived(MessageLongData a_heartbeat)
-        {
-        }
 		#endregion
 	}
 }

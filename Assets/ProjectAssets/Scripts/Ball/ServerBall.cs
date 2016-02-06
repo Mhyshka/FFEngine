@@ -2,6 +2,8 @@
 using System.Collections;
 using FF.Network;
 
+using FF.Network.Message;
+
 namespace FF.Pong
 {
     internal class ServerBall : ABall
@@ -28,7 +30,10 @@ namespace FF.Pong
                 Vector3 velocity = contact.BounceOff(transform.position, ballRigidbody.velocity);
                 SetVelocity(velocity);
 
-                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessageBallCollisionData(transform.position, a_other.transform.forward));
+                SentMessage message = new SentMessage(new MessageBallCollisionData(transform.position, a_other.transform.forward),
+                                                        EMessageChannel.BallCollision.ToString(),
+                                                        false);
+                Engine.Network.Server.BroadcastMessage(message);
 
                 contact.OnCollision(this);
             }
@@ -44,14 +49,20 @@ namespace FF.Pong
         internal override void OnRacketHit(RacketMotor a_motor)
         {
             base.OnRacketHit(a_motor);
-            Network.Message.MessageRacketHitData message = new Network.Message.MessageRacketHitData(a_motor.clientId);
+            MessageIntegerData data = new MessageIntegerData(a_motor.clientId);
+            SentMessage message = new SentMessage(data,
+                                                  EMessageChannel.RacketHit.ToString(),
+                                                  false);
             Engine.Network.Server.BroadcastMessage(message);
         }
 
         internal override void OnGoal(ESide a_side)
         {
             base.OnGoal(a_side);
-            Network.Message.MessageGoalHit message = new Network.Message.MessageGoalHit(a_side);
+            MessageIntegerData data = new MessageIntegerData((int)a_side);
+            SentMessage message = new SentMessage(data,
+                                                  EMessageChannel.GoalHit.ToString(),
+                                                  false);
             Engine.Network.Server.BroadcastMessage(message);
         }
 
@@ -61,7 +72,11 @@ namespace FF.Pong
 
             _smashCount++;
             SetVelocity(ballRigidbody.velocity * (1 + _smashCount * smashSpeedMultiplier));
-            Network.Message.MessageDidSmash message = new Network.Message.MessageDidSmash(_smashCount);
+
+            MessageIntegerData data = new MessageIntegerData(_smashCount);
+            SentMessage message = new SentMessage(data,
+                                                  EMessageChannel.Smash.ToString(),
+                                                  false);
             Engine.Network.Server.BroadcastMessage(message);
         }
     }

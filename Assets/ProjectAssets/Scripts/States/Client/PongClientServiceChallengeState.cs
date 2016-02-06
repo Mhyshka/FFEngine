@@ -35,18 +35,17 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EDataType.M_LoadingComplete, _completeReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.Next.ToString(), _completeReceiver);
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EDataType.M_LoadingComplete, _completeReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.Next.ToString(), _completeReceiver);
         }
 
         protected void OnChallengeCompleteReceived(ReadMessage a_message)
         {
-            MessageLoadingComplete data;
             RequestState(outState.ID);
         }
         #endregion
@@ -54,8 +53,9 @@ namespace FF.Pong
         protected override void OnAnimationComplete()
         {
             base.OnAnimationComplete();
-            Network.Message.MessageLoadingReady readyMessage = new Network.Message.MessageLoadingReady();
-            Engine.Network.MainClient.QueueMessage(readyMessage);
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                    EMessageChannel.Ready.ToString());
+            Engine.Network.MainClient.QueueMessage(message);
         }
 
 

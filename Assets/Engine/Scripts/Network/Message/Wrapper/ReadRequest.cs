@@ -14,6 +14,14 @@ namespace FF.Network.Message
                 return _requestId;
             }
         }
+
+        internal override EHeaderType HeaderType
+        {
+            get
+            {
+                return EHeaderType.Request;
+            }
+        }
         #endregion
 
         #region Constructors
@@ -48,7 +56,7 @@ namespace FF.Network.Message
         #region Controls
         internal void Success(MessageData a_data)
         {
-            SentResponse response = new SentResponse(a_data, _channel, _requestId, ERequestErrorCode.Success);
+            SentResponse response = new SentResponse(a_data, _requestId, ERequestErrorCode.Success);
             _client.QueueResponse(response);
 
             OnComplete();
@@ -63,7 +71,7 @@ namespace FF.Network.Message
 
         internal void FailWithResponse(ERequestErrorCode a_errorCode, MessageData a_data)
         {
-            SentResponse response = new SentResponse(a_data, _channel, _requestId, a_errorCode);
+            SentResponse response = new SentResponse(a_data, _requestId, a_errorCode);
             _client.QueueResponse(response);
 
             OnComplete();

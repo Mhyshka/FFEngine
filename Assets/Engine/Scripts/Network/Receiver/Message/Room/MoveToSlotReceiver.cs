@@ -24,33 +24,30 @@ namespace FF.Network.Receiver
                     SentResponse answer = null;
                     FFNetworkPlayer source = Engine.Game.CurrentRoom.GetPlayerForId(_client.NetworkID);
 
-                    ERequestErrorCode errorCode = ERequestErrorCode.Unknown;
+                    ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
 
                     if (!_client.IsConnected)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeMoveToSlot.PlayerDisconnected;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
                     else if (source == null)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeMoveToSlot.PlayerNotfound;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
                     else if (Engine.Game.CurrentRoom.teams[data.SlotRef.teamIndex].Slots[data.SlotRef.slotIndex].netPlayer != null)
                     {
-                        errorCode = ERequestErrorCode.IllegalState;
+                        errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeMoveToSlot.SlotIsUsed;
                         answer = new SentResponse(new MessageIntegerData(detailErrorCode),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }
@@ -59,7 +56,6 @@ namespace FF.Network.Receiver
                         Engine.Game.CurrentRoom.MovePlayer(source.SlotRef, data.SlotRef);
                         errorCode = ERequestErrorCode.Success;
                         answer = new SentResponse(new MessageEmptyData(),
-                                                    request.Channel,
                                                     request.RequestId,
                                                     errorCode);
                     }

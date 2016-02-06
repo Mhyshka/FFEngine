@@ -16,7 +16,11 @@ namespace FF.Pong
         protected override void OnRacketTargetReached()
         {
             base.OnRacketTargetReached();
-            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(new MessageLoadingReady());
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                    EMessageChannel.LoadingReady.ToString(),
+                                                    true,
+                                                    true);
+            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(message);
         }
         #endregion
     }

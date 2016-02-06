@@ -9,19 +9,8 @@ namespace FF.Network.Message
     {
         Success,
         Failed,
-
-        Unknown,
-
-        LocalCanceled,
-        RemoteCanceled,
-
-        IllegalArgument,
-        IllegalState,
-        Forbidden,
-        Timeout,
-
-        LocalConnectionIssue,
-        RemoteConnectionIssue
+        Canceled,
+        Timeout
     }
 
     internal enum EErrorCodeMoveToSlot
@@ -35,7 +24,9 @@ namespace FF.Network.Message
     {
         PlayerNotfound,
         PlayerDisconnected,
-        TargetDisconnected
+        TargetDisconnected,
+        PlayerRefused,
+        PlayerIsBusy,
     }
 
     internal enum EErrorCodeJoinRoom
@@ -45,13 +36,5 @@ namespace FF.Network.Message
         PlayerIsBannedFromRoom,
         RoomIsFull,
         ToServerOnly
-    }
-
-    internal enum EErrorCodeSwapConfirm
-    {
-        PlayerDisconnected,
-        PlayerRefused,
-        PlayerIsBusy,
-        TargetNotFound
     }
 }

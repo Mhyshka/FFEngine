@@ -13,7 +13,9 @@ namespace FF.Pong
         protected override void OnRacketTargetReached()
         {
             base.OnRacketTargetReached();
-            Engine.Network.MainClient.QueueMessage(new MessageLoadingReady());
+            SentMessage message = new SentMessage(new MessageEmptyData(),
+                                                    EMessageChannel.LoadingReady.ToString());
+            Engine.Network.MainClient.QueueMessage(message);
         }
         #endregion
     }

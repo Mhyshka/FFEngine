@@ -25,14 +25,15 @@ namespace FF.Pong
             if(_trySmashReceiver == null)
                 _trySmashReceiver = new GenericMessageReceiver(OnTrySmashReceived);
 
-            Engine.Receiver.RegisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.Float, _targetRatioReceiver);
+            //TODO smash racket move
+            /*Engine.Receiver.RegisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
+            Engine.Receiver.RegisterReceiver(EDataType.Float, _targetRatioReceiver);*/
         }
 
         internal override void TearDown()
         {
-            Engine.Receiver.UnregisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.Float, _targetRatioReceiver);
+            /*Engine.Receiver.UnregisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
+            Engine.Receiver.UnregisterReceiver(EDataType.Float, _targetRatioReceiver);*/
         }
 
         protected void OnTargetRatioReceived(ReadMessage a_message)

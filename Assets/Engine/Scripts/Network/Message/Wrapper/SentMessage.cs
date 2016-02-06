@@ -27,7 +27,7 @@ namespace FF.Network.Message
         {
             get
             {
-                return false;
+                return _isHandleByMock;
             }
         }
         #endregion
@@ -68,7 +68,7 @@ namespace FF.Network.Message
             SerializeData(stream);
 
             stream.Write((short)Data.Type);
-            stream.Write(Data);
+            Data.SerializeData(stream);
 
             stream.Close();
             FFLog.Log(EDbgCat.Serialization, "Serializing Request type : " + Data.Type.ToString());

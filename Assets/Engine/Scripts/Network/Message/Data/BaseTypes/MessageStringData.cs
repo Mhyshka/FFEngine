@@ -35,14 +35,6 @@ namespace FF.Network.Message
             _stringData = a_string;
 		}
 
-        /*
-        internal override void PostWrite()
-        {
-            base.PostWrite();
-            //TODO - FIX THAT SHIT
-            _client.EndConnection("The server closed this room.");
-        }*/
-
         #region Serialization
         public override void SerializeData (FFByteWriter stream)
 		{

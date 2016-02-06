@@ -400,8 +400,9 @@ namespace FF.Multiplayer
 		
 		public void LoadFromData(FFByteReader stream)
 		{
-			roomName = stream.TryReadString();
-			teams = stream.TryReadObjectList<Team>();
+            roomName = stream.TryReadString();
+            teams = stream.TryReadObjectList<Team>();
+
 		}
 #endregion
 
