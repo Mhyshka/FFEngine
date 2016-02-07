@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.Network.Message;
+
 namespace FF.Pong
 {
     internal delegate void RacketMotorCallback(RacketMotor a_motor);
@@ -210,7 +212,8 @@ namespace FF.Pong
         [Header("Network")]
         public int refreshPerSecond = 20;
         public float minRatioDelta = 0.02f;
-        
+        public string channelSuffix = "_L_0";
+
         protected float _lastSentRatio = 0f;
         protected float _lastRefreshTime = 0f;
         protected float RefreshInterval
@@ -240,16 +243,21 @@ namespace FF.Pong
             _lastSentRatio = _currentRatio;
             _lastRefreshTime = Time.time;
 
-
             //TODO racket movement
-            /*if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
+            MessageFloatData data = new MessageFloatData(_targetRatio);
+            SentMessage message = new SentMessage(data,
+                                                    EMessageChannel.RacketPosition.ToString() + channelSuffix,
+                                                    false,
+                                                    false);
+
+            if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
             {
-                Engine.Network.MainClient.QueueMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
+                Engine.Network.MainClient.QueueMessage(message);
             }
             else if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.BroadcastMessage(new FF.Network.Message.MessageFloatData(_targetRatio, clientId));
-            }*/
+                Engine.Network.Server.BroadcastMessage(message);
+            }
         }
         #endregion
     }

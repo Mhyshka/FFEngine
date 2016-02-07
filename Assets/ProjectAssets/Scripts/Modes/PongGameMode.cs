@@ -68,6 +68,15 @@ namespace FF.Pong
             ball.smashSpeedMultiplier = gameSettings.smashSpeedMultiplier;
         }
 
+        internal void OnLoadingComplete()
+        {
+            ball.Init(this);
+            InitRackets();
+            _board.blueLifeLights.Init(gameSettings.requiredPointsToWin);
+            _board.purpleLifeLights.Init(gameSettings.requiredPointsToWin);
+            EnableGameplay();
+        }
+
         internal override void OnLoadingExit()
         {
             NewMatch();
@@ -77,11 +86,6 @@ namespace FF.Pong
         internal void RegisterBoard(PongBoard a_board)
         {
             _board = a_board;
-
-            ball.Init(this);
-            InitRackets();
-            _board.blueLifeLights.Init(gameSettings.requiredPointsToWin);
-            _board.purpleLifeLights.Init(gameSettings.requiredPointsToWin);
         }
 
         #region Rackets & Controllers

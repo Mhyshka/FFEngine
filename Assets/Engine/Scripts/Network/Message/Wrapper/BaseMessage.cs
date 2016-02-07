@@ -35,6 +35,8 @@ internal enum EMessageChannel
 
     ChallengeInfos,
     ServiceRatio,
+
+    RacketPosition,
     BallMovement,
     BallCollision,
     RacketHit,

@@ -29,7 +29,16 @@ namespace FF.Network
 
         #region Client Properties
         protected Dictionary<IPEndPoint, FFTcpClient> _clients;
+        internal Dictionary<IPEndPoint, FFTcpClient> Clients
+        {
+            get
+            {
+                return _clients;
+            }
+        }
+
         protected Dictionary<IPEndPoint, Room> _rooms;
+       
 
         protected FFTcpClient _mainClient;
         internal FFTcpClient MainClient

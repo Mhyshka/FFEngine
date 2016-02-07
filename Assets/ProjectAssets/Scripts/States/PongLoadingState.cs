@@ -53,7 +53,7 @@ namespace FF.Pong
             _loadingScreen.SetTip("Take your racket to the bottom of the screen.");
             _unlockStep.onStart -= OnUnlockStepStart;
             PongGameMode pgm = _gameMode as PongGameMode;
-            pgm.EnableGameplay();
+            pgm.OnLoadingComplete();
         }
 
         protected virtual void OnRacketTargetReached()

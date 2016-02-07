@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.Collections;
+using System.Net;
 using System.Collections.Generic;
-using Zeroconf;
+
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -50,16 +50,28 @@ namespace FF.UI
 
                 if (roomsCells.Count == 1 && Engine.Inputs.ShouldUseNavigation)
                     EventSystem.current.SetSelectedGameObject(lObject);
-            }
 
-            FFLog.LogError("Chiled count : " + verticalLayout.transform.childCount.ToString());
+             
+            }
 		}
 
+        internal FFRoomCellWidget RoomWidgetForEP(IPEndPoint a_endpoint)
+        {
+            foreach (KeyValuePair<Room, FFRoomCellWidget> pair in roomsCells)
+            {
+                if (pair.Key.serverEndPoint == a_endpoint)
+                {
+                    return pair.Value;
+                }
+            }
+
+            return null;
+        }
 
 		internal void RemoveRoom (Room a_room)
 		{
-			FFRoomCellWidget lCell = roomsCells [a_room];
-            if (lCell != null)
+			FFRoomCellWidget lCell = null;
+            if (roomsCells.TryGetValue(a_room, out lCell))
             {
                 a_room.onRoomUpdated -= lCell.UpdateWithRoom;
                 lCell.Destroy();

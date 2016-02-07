@@ -25,24 +25,22 @@ namespace FF.Pong
             if(_trySmashReceiver == null)
                 _trySmashReceiver = new GenericMessageReceiver(OnTrySmashReceived);
 
-            //TODO smash racket move
-            /*Engine.Receiver.RegisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.RegisterReceiver(EDataType.Float, _targetRatioReceiver);*/
+            //TODO smash
+            //Engine.Receiver.RegisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.channelSuffix, _targetRatioReceiver);
         }
 
         internal override void TearDown()
         {
-            /*Engine.Receiver.UnregisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.UnregisterReceiver(EDataType.Float, _targetRatioReceiver);*/
+            //TODO smash
+            //Engine.Receiver.UnregisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.channelSuffix, _targetRatioReceiver);
         }
 
         protected void OnTargetRatioReceived(ReadMessage a_message)
         {
-            /*if (a_message.clientId == motor.clientId)
-            {*/
             MessageFloatData data = a_message.Data as MessageFloatData;
             motor.TargetRatio = data.Data;
-            //}
         }
 
         protected void OnTrySmashReceived(ReadMessage a_message)

@@ -13,8 +13,6 @@ namespace FF.Logic
         #region Properties
         protected MultiplayerLoadingScreen _loadingScreen;
 
-        protected bool _didFinishToLoad = false;
-
         protected ManualLoadingStep _unlockStep;
         #endregion
 
@@ -22,8 +20,6 @@ namespace FF.Logic
         internal override void Enter()
         {
             base.Enter();
-
-            _didFinishToLoad = false;
 
             _loadingScreen = Engine.UI.LoadingScreen as MultiplayerLoadingScreen;
             _loadingScreen.PrepareView();

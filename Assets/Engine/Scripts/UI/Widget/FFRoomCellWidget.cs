@@ -57,7 +57,7 @@ namespace FF
 			}
 		}
 		
-		internal void UpdateLatency(float latency)
+		internal void UpdateLatency(double latency)
 		{
 			if(!latencyLabel.gameObject.activeSelf)
 				latencyLabel.gameObject.SetActive(true);

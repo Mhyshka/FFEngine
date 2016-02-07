@@ -36,15 +36,18 @@ namespace FF.Handler
 
             foreach (FFTcpClient each in Engine.Network.Server.Clients.Values)
             {
-                if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
+                if (each != null)
                 {
-                    SentMessage message = new SentMessage(a_data,
-                                                       a_channel,
-                                                       a_isMandatory,
-                                                       a_isHandleByMock);
-                    message.onMessageSent += delegate { OnMessageSent(message); };
-                    _sentForClients.Add(each, false);
-                    _messageForClients.Add(each, message);
+                    if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
+                    {
+                        SentMessage message = new SentMessage(a_data,
+                                                           a_channel,
+                                                           a_isMandatory,
+                                                           a_isHandleByMock);
+                        message.onMessageSent += delegate { OnMessageSent(message); };
+                        _sentForClients.Add(each, false);
+                        _messageForClients.Add(each, message);
+                    }
                 }
             }
         }

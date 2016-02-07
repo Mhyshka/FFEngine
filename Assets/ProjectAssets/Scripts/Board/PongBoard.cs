@@ -14,7 +14,7 @@ namespace FF.Pong
         public List<RacketMotor> blueRackets = null;
         public LifeLightRamp blueLifeLights = null;
 
-        [Header("Blue Side")]
+        [Header("Purple Side")]
         public List<RacketMotor> purpleRackets = null;
         public LifeLightRamp purpleLifeLights = null;
         #endregion

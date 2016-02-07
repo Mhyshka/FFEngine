@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Net;
 
+using FF.Network;
 using FF.UI;
 using FF.Multiplayer;
 
@@ -136,13 +138,32 @@ namespace FF
 		{
             FFLog.LogError(EDbgCat.Logic,"Room added");
 			_searchRoomPanel.AddRoom (aRoom);
-		}
+
+            FFTcpClient serverClient = null;
+            if (Engine.Network.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
+            {
+                serverClient.onLatencyUpdate += OnLatencyUpdate;
+            }
+        }
 		
 		internal void OnRoomLost(Room aRoom)
 		{
 			_searchRoomPanel.RemoveRoom (aRoom);
             _navigationPanel.FocusBackButton();
-		}
+
+            FFTcpClient serverClient = null;
+            if (Engine.Network.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
+            {
+                serverClient.onLatencyUpdate -= OnLatencyUpdate;
+            }
+        }
+
+        protected void OnLatencyUpdate(FFTcpClient a_client, double a_latency)
+        {
+            FFRoomCellWidget widget = _searchRoomPanel.RoomWidgetForEP(a_client.Remote);
+            if(widget != null)
+                widget.UpdateLatency(a_latency);
+        }
 
         internal void OnLanStatusChanged(bool a_state)
         {

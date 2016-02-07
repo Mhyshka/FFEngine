@@ -45,19 +45,22 @@ namespace FF.Handler
 
             foreach (FFTcpClient each in Engine.Network.Server.Clients.Values)
             {
-                if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
+                if (each != null)
                 {
-                    SentRequest request = new SentRequest(a_data,
-                                                           a_channel,
-                                                           a_requestId,
-                                                           a_timeoutDuration,
-                                                           a_isMandatory,
-                                                           a_isHandleByMock);
-                    request.onMessageSent += delegate { OnMessageSent(request); };
-                    request.onSucces += OnSuccess;
-                    request.onFail += OnFailure;
-                    _sentForClients.Add(each, false);
-                    _messageForClients.Add(each, request);
+                    if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
+                    {
+                        SentRequest request = new SentRequest(a_data,
+                                                               a_channel,
+                                                               a_requestId,
+                                                               a_timeoutDuration,
+                                                               a_isMandatory,
+                                                               a_isHandleByMock);
+                        request.onMessageSent += delegate { OnMessageSent(request); };
+                        request.onSucces += OnSuccess;
+                        request.onFail += OnFailure;
+                        _sentForClients.Add(each, false);
+                        _messageForClients.Add(each, request);
+                    }
                 }
             }
         }

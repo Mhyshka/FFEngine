@@ -14,7 +14,7 @@ namespace FF.Logic
     internal class MultiServerLoadingState : PongLoadingState
     {
         #region Properties
-        //protected NetworkCheck _networkCheckHandler;
+        protected SentBroadcastRequest _networkCheck;
 
         protected ManualLoadingStep _allPlayerReadyStep;
         #endregion
@@ -23,16 +23,22 @@ namespace FF.Logic
         internal override void Enter()
         {
             base.Enter();
-            //_networkCheckHandler = null;
+            _networkCheck = null;
         }
 
         internal override int Manage()
         {
-            //TODO Network Check
-            /*if (_networkCheckHandler == null && AllPlayersReady)
+            if (_networkCheck == null && AllPlayersReady)
             {
-                _networkCheckHandler = new NetworkCheck(OnNetworkCheckSuccess, OnNetworkCheckFailed, null, null);
-            }*/
+                _networkCheck = new SentBroadcastRequest(new MessageEmptyData(),
+                                                        EMessageChannel.IsAlive.ToString(),
+                                                        Engine.Network.NextRequestId,
+                                                        true,
+                                                        true,
+                                                        2f);
+                _networkCheck.onResult += OnNetworkCheckResult;
+                _networkCheck.Broadcast();
+            }
             return base.Manage();
         }
         #endregion
@@ -69,7 +75,19 @@ namespace FF.Logic
         }
         #endregion
 
-        protected void OnNetworkCheckSuccess(List<FFTcpClient> a_success, List<FFTcpClient> a_failed)
+        protected void OnNetworkCheckResult(Dictionary<FFTcpClient, ReadResponse> a_success, Dictionary<FFTcpClient, ReadResponse> a_failures)
+        {
+            if (a_failures.Count > 0)
+            {
+                OnNetworkCheckFailed();
+            }
+            else
+            {
+                OnNetworkCheckSuccess();
+            }
+        }
+
+        protected void OnNetworkCheckSuccess()
         {
             _allPlayerReadyStep.SetComplete();
             SentMessage message = new SentMessage(new MessageEmptyData(),
@@ -80,10 +98,9 @@ namespace FF.Logic
             RequestState(outState.ID);
         }
 
-        protected void OnNetworkCheckFailed(List<FFTcpClient> a_success, List<FFTcpClient> a_failed)
+        protected void OnNetworkCheckFailed()
         {
-            //TODO Network check
-            //_networkCheckHandler = null;
+            _networkCheck = null;
         }
 
         #region LoadingStep

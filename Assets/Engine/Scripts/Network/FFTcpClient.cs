@@ -117,6 +117,7 @@ namespace FF.Network
             _readMessages = new Queue<ReadMessage>();
             _readRequestToCancel = new Queue<long>();
             _sentRequestToRemove = new Queue<long>();
+            _latencyResults = new Queue<double>();
         }
 
         /// <summary>
@@ -125,13 +126,14 @@ namespace FF.Network
         internal FFTcpClient(int a_netId, IPEndPoint a_local, IPEndPoint a_remote)
         {
             _networkID = a_netId;
-            
+
             _writtenMessages = new Queue<SentMessage>();
             _pendingSentRequest = new Dictionary<long, SentRequest>();
             _pendingReadRequest = new Dictionary<long, ReadRequest>();
             _readMessages = new Queue<ReadMessage>();
             _readRequestToCancel = new Queue<long>();
             _sentRequestToRemove = new Queue<long>();
+            _latencyResults = new Queue<double>();
 
             _local = a_local;
             _remote = a_remote;
@@ -154,6 +156,7 @@ namespace FF.Network
             _readMessages = new Queue<ReadMessage>();
             _readRequestToCancel = new Queue<long>();
             _sentRequestToRemove = new Queue<long>();
+            _latencyResults = new Queue<double>();
 
             _wasConnected = true;
             _autoRetryConnection = false;
@@ -180,6 +183,8 @@ namespace FF.Network
             _didEndConnection = false;
             _didReconnect = false;
             _didLostConnection = false;
+            _latencyResults.Clear();
+            ComputeAverageLatency();
 
             if (_connectionTask != null)
                 _connectionTask.Stop();
@@ -203,6 +208,7 @@ namespace FF.Network
             onConnectionEnded = null;
             onConnectionLost = null;
             onConnectionSuccess = null;
+            onLatencyUpdate = null;
             _autoRetryConnection = false;
 
             foreach (ReadRequest each in _pendingReadRequest.Values)
@@ -220,6 +226,8 @@ namespace FF.Network
             _sentRequestToRemove.Clear();
 
             _writtenMessages.Clear();
+
+            _latencyResults.Clear();
 
             TryReadMessages();
 
@@ -253,7 +261,7 @@ namespace FF.Network
 
             QueueMessageOnWriterThread(a_response);
         }
-        
+
         /// <summary>
         /// Queue the message on the writer thread.
         /// </summary>
@@ -360,7 +368,7 @@ namespace FF.Network
             TryReadMessages();
         }
 
-       
+
 
         protected virtual void TryReadMessages()
         {
@@ -572,12 +580,12 @@ namespace FF.Network
         #region Latency
         static int MAX_LATENCY_VALUES = 10;
 
-        internal SimpleCallback onLatencyUpdate = null;
+        internal FFDoubleClientCallback onLatencyUpdate = null;
 
-        protected Queue<float> _latencyResults;
+        protected Queue<double> _latencyResults = null;
 
-        protected float _averageLatency;
-        internal float Latency
+        protected double _averageLatency = 0f;
+        internal double Latency
         {
             get
             {
@@ -585,7 +593,7 @@ namespace FF.Network
             }
         }
 
-        internal void NewLatencyValue(float a_value)
+        internal void NewLatencyValue(double a_value)
         {
             _latencyResults.Enqueue(a_value);
 
@@ -595,11 +603,14 @@ namespace FF.Network
             }
 
             ComputeAverageLatency();
+
+            if (onLatencyUpdate != null)
+                onLatencyUpdate(this, _averageLatency);
         }
 
         protected void ComputeAverageLatency()
         {
-            _averageLatency = 0f;
+            _averageLatency = 0d;
             foreach (float a_val in _latencyResults)
             {
                 _averageLatency += a_val;
@@ -609,10 +620,22 @@ namespace FF.Network
             {
                 _averageLatency /= (float)(_latencyResults.Count);
             }
-
-            if (onLatencyUpdate != null)
-                onLatencyUpdate();
         }
+        #endregion
+
+        #region Clock Sync
+        protected bool _isClockSynced = false;
+        protected TimeSpan _clockOffset;
+        internal TimeSpan ClockOffset
+        {
+            get
+            {
+                return _clockOffset;
+            }
+        }
+
+        protected double _clockSyncTimespan = 100d;//in MS
+        protected List<long> _recordedClockOffsets = new List<long>(50);
         #endregion
 
         #region Heartbeat
@@ -622,7 +645,7 @@ namespace FF.Network
         protected void HandleHeartbeat()
         {
             TimeSpan span = DateTime.Now - _lastHeartbeatTimestamp;
-            if (span.TotalMilliseconds > _heartbeatTimespan)
+            if (span.TotalMilliseconds > (_isClockSynced ? _heartbeatTimespan : _clockSyncTimespan))
             {
                 SentRequest request = new SentRequest(new MessageEmptyData(),
                                                         EMessageChannel.Heartbeat.ToString(),
@@ -638,7 +661,63 @@ namespace FF.Network
         protected void OnHeartbeatSuccessReceived(ReadResponse a_heartbeat)
         {
             MessageLongData data = a_heartbeat.Data as MessageLongData;
+            TimeSpan span = new TimeSpan(DateTime.Now.Ticks - data.Data);
+            double latency = span.TotalMilliseconds;
 
+            NewLatencyValue(latency);
+
+            if (!_isClockSynced)
+            {
+                long clockOffset = DateTime.Now.Ticks - a_heartbeat.Timestamp - (span.Ticks / 2);
+                _recordedClockOffsets.Add(clockOffset);
+
+                if (_recordedClockOffsets.Count == 30)
+                {
+                    _isClockSynced = true;
+
+                    long average = 0L;
+                    foreach (long each in _recordedClockOffsets)
+                    {
+                        average += each;
+                    }
+                    average /= _recordedClockOffsets.Count;
+
+                    long averageDistance = 0L;
+                    foreach (long each in _recordedClockOffsets)
+                    {
+                        long distance = average - each;
+                        if (distance < 0)
+                            distance = -distance;
+
+                        averageDistance += distance;
+                    }
+                    averageDistance /= _recordedClockOffsets.Count;
+
+                    long centeredAverage = 0L;
+                    int usedValue = 0;
+                    foreach (long each in _recordedClockOffsets)
+                    {
+                        long distance = average - each;
+                        if (distance < 0)
+                            distance = -distance;
+
+                        if (distance <= averageDistance * 2L)
+                        {
+                            usedValue++;
+                            centeredAverage += each;
+                        }
+                    }
+                    centeredAverage /= usedValue;
+                    _clockOffset = new TimeSpan(centeredAverage);
+                    FFLog.Log(EDbgCat.Networking, "Clock offset : " + _clockOffset.TotalSeconds.ToString(".000"));
+                }
+            }
+        }
+
+        internal TimeSpan TimeOffset(long a_timestamp)
+        {
+            TimeSpan span = new TimeSpan(DateTime.Now.Ticks - a_timestamp - _clockOffset.Ticks);
+            return span;
         }
         #endregion
     }
