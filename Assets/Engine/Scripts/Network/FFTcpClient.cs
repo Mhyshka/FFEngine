@@ -634,7 +634,7 @@ namespace FF.Network
             }
         }
 
-        protected double _clockSyncTimespan = 100d;//in MS
+        protected double _clockSyncTimespan = 100d;//in MS. Them To Us ( positive if their clock is behind, negative if its beyond )
         protected List<long> _recordedClockOffsets = new List<long>(50);
         #endregion
 
@@ -714,10 +714,24 @@ namespace FF.Network
             }
         }
 
-        internal TimeSpan TimeOffset(long a_timestamp)
+        internal TimeSpan TimeOffset(long a_remoteTimestamp)
         {
-            TimeSpan span = new TimeSpan(DateTime.Now.Ticks - a_timestamp - _clockOffset.Ticks);
+            TimeSpan span = new TimeSpan(DateTime.Now.Ticks - ConvertToLocalTime(a_remoteTimestamp));
             return span;
+        }
+
+        internal long ConvertToLocalTime(long a_remoteTimestamp)
+        {
+            long localTime = 0L;
+            localTime = a_remoteTimestamp + _clockOffset.Ticks;
+            return localTime;
+        }
+
+        internal long ConvertToRemoteTime(long a_localTimestamp)
+        {
+            long remoteTime = 0L;
+            remoteTime = a_localTimestamp - _clockOffset.Ticks;
+            return remoteTime;
         }
         #endregion
     }

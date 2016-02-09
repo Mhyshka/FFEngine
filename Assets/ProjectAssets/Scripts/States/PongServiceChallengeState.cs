@@ -10,7 +10,7 @@ namespace FF.Pong
         #endregion
 
         #region Properties
-        protected int _bounceCount = 0;
+        protected int _bounceCount = -1;
         protected int _blueTeamIndex = 0;
         protected int _purpleTeamIndex = 0;
 
@@ -32,7 +32,6 @@ namespace FF.Pong
         internal override void Enter()
         {
             base.Enter();
-            _bounceCount = -1;
             _blueTeamIndex = 0;
             _purpleTeamIndex = 0;
 

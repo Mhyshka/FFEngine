@@ -22,6 +22,7 @@ namespace FF.Pong
         internal override void Enter()
         {
             base.Enter();
+            _timeOffset = (float)new TimeSpan(_pongGm.ServiceTimestamp).TotalSeconds;
             if(_startGameReceiver == null)
                 _startGameReceiver = new GenericMessageReceiver(OnStartGame);
         }

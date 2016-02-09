@@ -224,9 +224,9 @@ namespace FF.UI
 		{
 			_root = a_rootUi;
 		}
-		
-		internal void Register(string a_panelName, FFPanel a_panel)
-		{
+
+        internal void Register(string a_panelName, FFPanel a_panel)
+        {
             //POPUPS
             if (a_panel is FFPopup && !_popupsByName.ContainsKey(a_panelName))
             {
@@ -256,8 +256,8 @@ namespace FF.UI
                     parent = parent.parent as RectTransform;
                 }
                 parent.SetParent(_root.transform, false);
-            }
-		}
+            } 
+        }
 		
 		internal void Unregister(string a_eventKey)
 		{

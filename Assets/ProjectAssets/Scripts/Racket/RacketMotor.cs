@@ -27,7 +27,6 @@ namespace FF.Pong
         [Header("Movement")]
         public float startingRatio = 1f;
 
-        public float lerpSpeed = 1f;
         public float moveTowardSpeed = 0f;
 
         public float maxPositionX = 7.5f;
@@ -72,10 +71,15 @@ namespace FF.Pong
             }
             set
             {
-                _targetRatio = value;
                 _currentRatio = value;
                 UpdatePosition();
             }
+        }
+        internal void HardSetCurrentRatio(float a_ratio)
+        {
+            CurrentRatio = a_ratio;
+            _targetRatio = a_ratio;
+            _currentController.ForceRatio(a_ratio);
         }
 
         internal ARacketComponent _currentController;
@@ -96,7 +100,6 @@ namespace FF.Pong
         {
             _currentRatio = startingRatio;
             _targetRatio = _currentRatio;
-            UpdatePosition();
 
             touchController.enabled = false;
             remoteController.enabled = false;
@@ -111,16 +114,14 @@ namespace FF.Pong
 
         void Update()
         {
-            _currentRatio = Mathf.Lerp(_currentRatio, _targetRatio, Time.deltaTime * lerpSpeed);
             _currentRatio = Mathf.MoveTowards(_currentRatio, _targetRatio, Time.deltaTime * moveTowardSpeed);
             UpdatePosition();
         }
 
         void UpdatePosition()
         {
-            Vector3 position = transform.localPosition;
-            position.x = Mathf.Lerp(-maxPositionX, maxPositionX, _currentRatio);
-            transform.localPosition = position;
+            if (_currentController != null)
+                transform.localPosition = _currentController.UpdatePosition(-maxPositionX, maxPositionX, _currentRatio);
         }
 
         internal void TrySmash()
@@ -232,7 +233,7 @@ namespace FF.Pong
         void FixedUpdate()
         {
             if (Time.time - _lastRefreshTime > RefreshInterval &&
-                Mathf.Abs(_currentRatio - _lastSentRatio) > minRatioDelta)
+                Mathf.Abs(_targetRatio - _lastSentRatio) > minRatioDelta)
             {
                 NetworkUpdate();
             }
@@ -240,23 +241,21 @@ namespace FF.Pong
 
         void NetworkUpdate()
         {
-            _lastSentRatio = _currentRatio;
+            _lastSentRatio = _targetRatio;
             _lastRefreshTime = Time.time;
 
-            //TODO racket movement
-            MessageFloatData data = new MessageFloatData(_targetRatio);
+            MessageRacketMovementData data = new MessageRacketMovementData(_currentRatio, _targetRatio);
             SentMessage message = new SentMessage(data,
                                                     EMessageChannel.RacketPosition.ToString() + channelSuffix,
                                                     false,
                                                     false);
 
-            if (!Engine.Network.IsServer && !(CurrentController is RacketNetworkController)) //Local's player racket
+            if (!(CurrentController is RacketNetworkController)) //Local's player racket
             {
-                Engine.Network.MainClient.QueueMessage(message);
-            }
-            else if (Engine.Network.IsServer)
-            {
-                Engine.Network.Server.BroadcastMessage(message);
+                if (!Engine.Network.IsServer)
+                    Engine.Network.MainClient.QueueMessage(message);
+                else
+                    Engine.Network.Server.BroadcastMessage(message);
             }
         }
         #endregion

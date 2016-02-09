@@ -42,7 +42,7 @@ namespace FF.Network.Message
                                 long a_timestamp,
                                 long a_requestId,
                                 ERequestErrorCode a_errorCode,
-                                string a_channel)
+                                int a_channel)
         {
             _data = a_data;
             _timestamp = a_timestamp;

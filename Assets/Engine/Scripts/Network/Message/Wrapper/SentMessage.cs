@@ -7,6 +7,16 @@ namespace FF.Network.Message
     internal class SentMessage : BaseMessage
     {
         #region Message Network Configuration
+        protected string _channel;
+        internal string Channel
+        {
+            get
+            {
+                return _channel;
+            }
+        }
+
+
         /// <summary>
         /// Should this message be send over & over until it's succesfully delivered.
         /// </summary>
@@ -60,6 +70,12 @@ namespace FF.Network.Message
         #endregion
 
         #region Serialization
+        public override void SerializeData(FFByteWriter stream)
+        {
+            base.SerializeData(stream);
+            stream.Write(_channel.GetHashCode());
+        }
+
         internal byte[] Serialize()
         {
             FFByteWriter stream = new FFByteWriter();

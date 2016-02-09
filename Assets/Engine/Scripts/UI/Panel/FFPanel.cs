@@ -79,17 +79,16 @@ namespace FF.UI
 				_selectables.Add(each, each.navigation.mode);
 			}
 			
-			
 			if (!hideOnLoad)
 			{
 				animator.SetTrigger("Show");
 			}
 
-			if(!debug && NeedsTobeRegister)
-			{
-				Engine.UI.Register (gameObject.name, this);
-			}
-		}
+            if (!debug && NeedsTobeRegister)
+            {
+                Engine.UI.Register(gameObject.name, this);
+            }
+        }
 	
 		protected virtual void OnDestroy()
 		{

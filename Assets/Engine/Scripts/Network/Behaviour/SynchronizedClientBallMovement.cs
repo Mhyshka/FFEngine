@@ -34,7 +34,9 @@ namespace FF.Network
         void OnMessageReceived(ReadMessage a_message)
         {
             MessageBallMovementData data = a_message.Data as MessageBallMovementData;
-            ball.RefreshMovement(data.position, data.velocity);
+            Vector3 ballPosition = data.position;
+            ballPosition += data.velocity * (float)a_message.Client.TimeOffset(a_message.Timestamp).TotalSeconds;
+            ball.RefreshMovement(ballPosition, data.velocity);
         }
         #endregion
     }

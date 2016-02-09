@@ -53,6 +53,19 @@ namespace FF.Pong
                 return _currendRoundIndex;
             }
         }
+
+        protected long _serviceTimestamp;
+        internal long ServiceTimestamp
+        {
+            get
+            {
+                return _serviceTimestamp;
+            }
+            set
+            {
+                _serviceTimestamp = value;
+            }
+        }
         #endregion
 
         #region GameMode Methods
@@ -142,7 +155,7 @@ namespace FF.Pong
         {
             foreach (RacketMotor each in Board.Rackets)
             {
-                each.CurrentRatio = 0.5f;
+                each.HardSetCurrentRatio(0.5f);
             }
         }
 

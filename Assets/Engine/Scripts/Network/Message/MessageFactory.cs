@@ -29,6 +29,7 @@ namespace FF.Network.Message
         BallMovement,
         BallCollision,
         RacketHit,
+        RacketMove,
         GoalHit
     }
 
@@ -104,6 +105,9 @@ namespace FF.Network.Message
                     break;
                 case EDataType.BallCollision:
                     data = new MessageBallCollisionData();
+                    break;
+                case EDataType.RacketMove:
+                    data = new MessageRacketMovementData();
                     break;
             }
 

@@ -9,7 +9,7 @@ namespace FF.Network.Receiver
     internal class ReceiverManager : BaseManager
     {
         #region Properties
-        protected Dictionary<string, List<BaseReceiver>> _registeredReceiver;
+        protected Dictionary<int, List<BaseReceiver>> _registeredReceiver;
 
         internal BaseReceiver RESPONSE_ALWAYS_SUCCESS = new RequestReceiverFixedResponse(ERequestErrorCode.Success, new MessageEmptyData());
         internal BaseReceiver RESPONSE_ALWAYS_FAIL = new RequestReceiverFixedResponse(ERequestErrorCode.Failed, new MessageEmptyData());
@@ -18,7 +18,7 @@ namespace FF.Network.Receiver
         #region Manager
         internal ReceiverManager()
         {
-            _registeredReceiver = new Dictionary<string, List<BaseReceiver>>();
+            _registeredReceiver = new Dictionary<int, List<BaseReceiver>>();
 
             RegisterReceiver(EMessageChannel.CancelRequest.ToString(), new CancelReceiver());
             RegisterReceiver(EMessageChannel.Response.ToString(), new ResponseReceiver());
@@ -47,12 +47,13 @@ namespace FF.Network.Receiver
         #region Register / Unregister
         internal void RegisterReceiver(string a_channel, BaseReceiver a_receiver)
         {
-            if (!_registeredReceiver.ContainsKey(a_channel))
+            int hash = a_channel.GetHashCode();
+            if (!_registeredReceiver.ContainsKey(hash))
             {
-                _registeredReceiver.Add(a_channel, new List<BaseReceiver>()); 
+                _registeredReceiver.Add(hash, new List<BaseReceiver>()); 
             }
 
-            _registeredReceiver[a_channel].Add(a_receiver);
+            _registeredReceiver[hash].Add(a_receiver);
 
             /*FFLog.LogError("Registered count : " + _registeredReceiver[a_type].Count);
             foreach (BaseReceiver each in _registeredReceiver[a_type])
@@ -64,9 +65,10 @@ namespace FF.Network.Receiver
 
         internal void UnregisterReceiver(string a_channel, BaseReceiver a_receiver)
         {
-            if (_registeredReceiver.ContainsKey(a_channel) && _registeredReceiver[a_channel].Count > 0)
+            int hash = a_channel.GetHashCode();
+            if (_registeredReceiver.ContainsKey(hash) && _registeredReceiver[hash].Count > 0)
             {
-                _registeredReceiver[a_channel].Remove(a_receiver);
+                _registeredReceiver[hash].Remove(a_receiver);
             }
             else
             {
@@ -77,9 +79,22 @@ namespace FF.Network.Receiver
 
         internal List<BaseReceiver> ReceiversForChannel(string a_channel)
         {
+            int hash = a_channel.GetHashCode();
             List<BaseReceiver> results = null;
             
-            if (_registeredReceiver.TryGetValue(a_channel, out results))
+            if (_registeredReceiver.TryGetValue(hash, out results))
+            {
+                return results;
+            }
+
+            return null;
+        }
+
+        internal List<BaseReceiver> ReceiversForChannel(int a_channelHash)
+        {
+            List<BaseReceiver> results = null;
+
+            if (_registeredReceiver.TryGetValue(a_channelHash, out results))
             {
                 return results;
             }

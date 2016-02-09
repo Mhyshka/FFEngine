@@ -50,21 +50,16 @@ namespace FF.Network.Message
     internal abstract class BaseMessage : IByteStreamSerialized
     {
         #region Properties
-        protected string _channel;
-        internal string Channel
-        {
-            get
-            {
-                return _channel;
-            }
-        }
-
         protected long _timestamp;
         internal long Timestamp
         {
             get
             {
                 return _timestamp;
+            }
+            set
+            {
+                _timestamp = value;
             }
         }
 
@@ -105,13 +100,11 @@ namespace FF.Network.Message
 
         public virtual void SerializeData(FFByteWriter stream)
         {
-            stream.Write(_channel);
             stream.Write(_timestamp);
         }
 
         public virtual void LoadFromData(FFByteReader stream)
         {
-            _channel = stream.TryReadString();
             _timestamp = stream.TryReadLong();
         }
     }

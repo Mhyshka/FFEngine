@@ -70,7 +70,7 @@ namespace FF.Network
                 a_message.Client = this;
                 a_message.PostWrite();
 
-                ReadMessage readMessage = new ReadMessage(a_message.Data, a_message.Timestamp, a_message.Channel);
+                ReadMessage readMessage = new ReadMessage(a_message.Data, a_message.Timestamp, a_message.Channel.GetHashCode());
                 _mirror.Read(readMessage);
             }
         }
@@ -82,7 +82,7 @@ namespace FF.Network
                 _pendingSentRequest.Add(a_request.RequestId, a_request);
                 a_request.Client = this;
                 a_request.PostWrite();
-                ReadRequest readRequest = new ReadRequest(a_request.Data, a_request.Timestamp, a_request.RequestId, a_request.Channel);
+                ReadRequest readRequest = new ReadRequest(a_request.Data, a_request.Timestamp, a_request.RequestId, a_request.Channel.GetHashCode());
 
                 _mirror.Read(readRequest);
             }
@@ -96,7 +96,7 @@ namespace FF.Network
                 a_response.Client = this;
                 a_response.PostWrite();
 
-                ReadResponse readMessage = new ReadResponse(a_response.Data, a_response.Timestamp, a_response.RequestId, a_response.ErrorCode, a_response.Channel);
+                ReadResponse readMessage = new ReadResponse(a_response.Data, a_response.Timestamp, a_response.RequestId, a_response.ErrorCode, a_response.Channel.GetHashCode());
                 _mirror.Read(readMessage);
             }
         }

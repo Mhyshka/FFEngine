@@ -46,9 +46,6 @@ namespace FF.Pong
 
             if (isEveryoneReady)
             {
-                SentMessage nextMessage = new SentMessage(new MessageEmptyData(),
-                                                            EMessageChannel.Next.ToString());
-                Engine.Network.Server.BroadcastMessage(nextMessage);
                 RequestState(outState.ID);
             }
 

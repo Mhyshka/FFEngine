@@ -32,7 +32,7 @@ namespace FF.Network.Message
         internal ReadRequest(MessageData a_data,
                                 long a_timestamp,
                                 long a_requestId,
-                                string a_channel)
+                                int a_channel)
         {
             _data = a_data;
             _timestamp = a_timestamp;

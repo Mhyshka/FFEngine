@@ -5,13 +5,23 @@ namespace FF.Network.Message
 {
     internal class ReadMessage : BaseMessage
     {
+        protected int _channel;
+        internal int Channel
+        {
+            get
+            {
+                return _channel;
+            }
+        }
+
+
         internal ReadMessage() : base()
         {
         }
 
         internal ReadMessage(MessageData a_data,
                                 long a_timestamp,
-                                string a_channel)
+                                int a_channel)
         {
             _data = a_data;
             _timestamp = a_timestamp;
@@ -21,6 +31,12 @@ namespace FF.Network.Message
         protected void SetData(MessageData a_data)
         {
             _data = a_data;
+        }
+
+        public override void LoadFromData(FFByteReader stream)
+        {
+            base.LoadFromData(stream);
+            _channel = stream.TryReadInt();
         }
 
         #region Deserialization

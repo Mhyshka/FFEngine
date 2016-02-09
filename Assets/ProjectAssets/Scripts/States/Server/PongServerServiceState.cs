@@ -23,6 +23,10 @@ namespace FF.Pong
         {
             base.Enter();
             _serviceRatioReceiver = new GenericMessageReceiver(OnServiceRatioReceived);
+
+            SentMessage nextMessage = new SentMessage(new MessageEmptyData(),
+                                            EMessageChannel.Next.ToString());
+            Engine.Network.Server.BroadcastMessage(nextMessage);
         }
         #endregion
 

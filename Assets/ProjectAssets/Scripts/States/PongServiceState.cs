@@ -16,6 +16,7 @@ namespace FF.Pong
         #region properties
         protected RacketMotor _serviceRacket;
         protected float _ratio = 0f;
+        protected float _timeOffset = 0f;
         #endregion
 
         internal override int ID
@@ -48,7 +49,7 @@ namespace FF.Pong
             int toReturn = base.Manage();
             if (toReturn == ID)
             {
-                _ratio = ratioPositionCurve.Evaluate(_timeElapsedSinceEnter % ratioLoopTime);
+                _ratio = ratioPositionCurve.Evaluate((_timeElapsedSinceEnter + _timeOffset) % ratioLoopTime);
                 UpdateBallPosition();
             }
             return toReturn;
