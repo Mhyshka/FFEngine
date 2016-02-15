@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 using FF.Network;
 using FF.Multiplayer;
@@ -12,7 +11,7 @@ namespace FF.UI
     internal class MultiplayerLoadingScreen : LoadingScreen
     {
         #region Inspector Properties
-        public Text tipLabel = null;
+        public UILabel tipLabel = null;
         public GameObject loadingSlotPrefab = null;
         public GameObject widgetVerticalLayout = null;
         #endregion

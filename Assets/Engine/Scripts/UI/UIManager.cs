@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace FF.UI
@@ -76,13 +75,6 @@ namespace FF.UI
 
         internal override void DoUpdate()
         {
-            GameObject selected = EventSystem.current.currentSelectedGameObject;
-            if (!Engine.Inputs.ShouldUseNavigation && selected != null)
-            {
-                if(selected.GetComponent<FFWidgetFocusKeeper>() == null)
-                    EventSystem.current.SetSelectedGameObject(null);
-            }
-
             if (_currentPopup == null && PendingPopupCount > 0)
             {
                 FFPopupData data = NextPopupToDisplay;
@@ -175,14 +167,15 @@ namespace FF.UI
 		internal void RegisterLoadingScreen(LoadingScreen a_loading)
 		{
 			_loadingScreen = a_loading;
-			
-			Transform parent = a_loading.transform;
+
+            Transform parent = a_loading.transform;
 			while(parent.parent != null)
 			{
 				parent = parent.parent;
 			}
-			a_loading.transform.SetParent(_root.transform);
-		}
+            a_loading.transform.SetParent(_root.transform);
+            GameObject.Destroy(parent.gameObject);
+        }
 		
 		internal bool HasLoadingScreen
 		{
@@ -249,13 +242,14 @@ namespace FF.UI
 
             if (a_panel.ShouldMoveToRoot)
             {
-                a_panel.Canvas.worldCamera = UiCamera;
-                RectTransform parent = a_panel.transform as RectTransform;
+                Transform parent = a_panel.transform as Transform;
                 while (parent.parent != null)
                 {
-                    parent = parent.parent as RectTransform;
+                    parent = parent.parent as Transform;
                 }
-                parent.SetParent(_root.transform, false);
+
+                a_panel.transform.SetParent(_root.transform, false);
+                GameObject.Destroy(parent.gameObject);
             } 
         }
 		
@@ -417,8 +411,8 @@ namespace FF.UI
         protected void DisplayPopup(FFPopupData a_data)
         {
             FFPopup popup = _popupsByName[a_data.popupName] as FFPopup;
-            popup.SetContent(a_data);
             popup.Show();
+            popup.SetContent(a_data);
             _currentPopup = popup;
 
             if (Engine.Game.CurrentGameMode != null && Engine.Game.CurrentGameMode.HasFocus)

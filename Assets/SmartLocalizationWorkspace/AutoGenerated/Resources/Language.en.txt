@@ -119,6 +119,9 @@
 	<data name="GAME_TITLE" xml:space="preserve">
 		<value>Welcome to PONG</value>
 	</data>
+	<data name="LOADING" xml:space="preserve">
+		<value>Loading</value>
+	</data>
 	<data name="MENU_BUY" xml:space="preserve">
 		<value>Buy</value>
 	</data>
@@ -127,6 +130,9 @@
 	</data>
 	<data name="MENU_JOIN" xml:space="preserve">
 		<value>Join</value>
+	</data>
+	<data name="MENU_NICKNAME" xml:space="preserve">
+		<value>Enter name...</value>
 	</data>
 	<data name="MENU_PLAY" xml:space="preserve">
 		<value>Play</value>

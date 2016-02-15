@@ -2,8 +2,6 @@
 using System.Collections;
 using System;
 
-using UnityEngine.UI;
-
 namespace FF.UI
 {
     internal class FFConnectionLostPopupData : FFPopupData
@@ -15,7 +13,7 @@ namespace FF.UI
     internal class FFConnectionLostPopup : FFPopup
     {
         #region Inspector Properties
-        public Text timeLabel = null;
+        public UILabel timeLabel = null;
 
         protected SimpleCallback _onCancelPressed;
         protected float _timeElapsed;

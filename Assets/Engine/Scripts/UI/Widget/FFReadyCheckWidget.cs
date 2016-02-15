@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
     internal class FFReadyCheckWidget : MonoBehaviour
     {
         #region Inspector Properties
-        public FFTween[] tweeners = null;
+        public UITweener[] tweeners = null;
         public GameObject pending = null;
         public GameObject fail = null;
         public GameObject success = null;
@@ -15,9 +13,9 @@ namespace FF.UI
 
         internal void OnEnable()
         {
-            foreach (FFTween each in tweeners)
+            foreach (UITweener each in tweeners)
             {
-                each.Reset();
+                each.ResetToBeginning();
                 each.enabled = false;
             }
         }
@@ -25,7 +23,7 @@ namespace FF.UI
         #region Show & Hide
         internal void Show()
         {
-            foreach (FFTween each in tweeners)
+            foreach (UITweener each in tweeners)
             {
                 each.PlayForward();
             }
@@ -33,7 +31,7 @@ namespace FF.UI
 
         internal void Hide()
         {
-            foreach (FFTween each in tweeners)
+            foreach (UITweener each in tweeners)
             {
                 each.PlayReverse();
             }

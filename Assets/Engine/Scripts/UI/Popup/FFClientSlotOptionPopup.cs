@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-using UnityEngine.UI;
-
-using FF.Network;
 using FF.Multiplayer;
 
 namespace FF.UI
@@ -21,8 +18,8 @@ namespace FF.UI
     internal class FFClientSlotOptionPopup : FFPopup
     {
         #region Inspector Properties
-        public Button swapButton = null;
-        public Text playerLabel = null;
+        public UIButton swapButton = null;
+        public UILabel playerLabel = null;
         #endregion
 
         #region Properties
@@ -38,6 +35,7 @@ namespace FF.UI
             FFClientSlotOptionPopupData data = a_data as FFClientSlotOptionPopupData;
 
             playerLabel.text = data.player.player.username;
+            playerLabel.MarkAsChanged();
 
             _player = data.player;
 

@@ -18,21 +18,16 @@ namespace FF.UI
 	internal class FFLoadingSlotWidget : MonoBehaviour
 	{
         #region Inspector Properties
-        public Text[] usernameLabels = null;
-
-        public GameObject baseGO = null;
-        public GameObject completeGO = null;
-        public GameObject readyGo = null;
-        public GameObject dcedGO = null;
-		
-		public FFRatingWidget rating = null;
-
-        public Text rankingLabel = null;
-
-        public GameObject kickGO = null;
+        [Header("Widgets references")]
+        public UILabel usernameLabel = null;
+        public UILabel rankingLabel = null;
+        public FFRatingWidget rating = null;
         public FFButtonEvent kickButton = null;
 
-        public Text dcTimer = null;
+        public PlayerLoadingSlotStateWidget baseState = null;
+        public PlayerLoadingSlotStateWidget completeState = null;
+        public PlayerLoadingSlotStateWidget readyState = null;
+        public PlayerLoadingSlotDcedStateWidget dcedState = null;
         #endregion
 
         #region Properties
@@ -46,93 +41,64 @@ namespace FF.UI
                 return _player;
             }
         }
+
+
+        protected PlayerLoadingSlotStateWidget _currentState;
         #endregion
+
+        void Awake()
+        {
+            _currentState = baseState;
+            LoadState(baseState);
+        }
+
         internal void SetLoading(FFNetworkPlayer a_player)
         {
             _player = a_player;
-            foreach (Text each in usernameLabels)
-            {
-                each.text = a_player.player.username;
-            }
 
-            baseGO.SetActive(true);
-            completeGO.SetActive(false);
-            readyGo.SetActive(false);
-            dcedGO.SetActive(false);
+            usernameLabel.text = a_player.player.username;
 
-            rating.gameObject.SetActive(true);
+            LoadState(baseState);
             rating.Value = a_player.player.Rating;
-
-            kickGO.SetActive(false);
         }
 
         internal void SetComplete(FFNetworkPlayer a_player, int a_rank)
         {
             _player = a_player;
 
-            foreach (Text each in usernameLabels)
-            {
-                each.text = a_player.player.username;
-            }
+            usernameLabel.text = a_player.player.username;
 
-            baseGO.SetActive(false);
-            completeGO.SetActive(true);
-            readyGo.SetActive(false);
-            dcedGO.SetActive(false);
-
-            rating.gameObject.SetActive(true);
+            LoadState(completeState);
             rating.Value = a_player.player.Rating;
-
             rankingLabel.text = a_rank.ToString();
-
-            kickGO.SetActive(false);
         }
 
         internal void SetReady(FFNetworkPlayer a_player, int a_rank)
         {
             _player = a_player;
 
-            foreach (Text each in usernameLabels)
-            {
-                each.text = a_player.player.username;
-            }
+            usernameLabel.text = a_player.player.username;
 
-            baseGO.SetActive(false);
-            completeGO.SetActive(false);
-            readyGo.SetActive(true);
-            dcedGO.SetActive(false);
-
-            rating.gameObject.SetActive(true);
+            LoadState(readyState);
             rating.Value = a_player.player.Rating;
-
             rankingLabel.text = a_rank.ToString();
-
-            kickGO.SetActive(false);
         }
 
         internal void SetDCed(FFNetworkPlayer a_player)
         {
-            if (!dcedGO.activeSelf)
+            if (_currentState != dcedState)
             {
-                foreach (Text each in usernameLabels)
-                {
-                    each.text = a_player.player.username;
-                }
+                usernameLabel.text = a_player.player.username;
 
-                baseGO.SetActive(false);
-                completeGO.SetActive(false);
-                readyGo.SetActive(false);
-                dcedGO.SetActive(true);
-
-                rating.gameObject.SetActive(false);
+                LoadState(dcedState);
 
                 if (Engine.Network.IsServer)
                 {
-                    kickGO.SetActive(true);
+                    dcedState.kickGo.SetActive(true);
                 }
                 else
                 {
-                    kickGO.SetActive(false);
+                    dcedState.kickGo.SetActive(false);
                 }
 
                 _dcedTimeElapsed = 0f;
@@ -140,9 +106,22 @@ namespace FF.UI
             }
         }
 
+
+        protected void LoadState(PlayerLoadingSlotStateWidget a_state)
+        {
+            _currentState.gameObject.SetActive(false);
+
+            _currentState = a_state;
+
+            _currentState.gameObject.SetActive(true);
+            rating.gameObject.SetActive(_currentState.needsRating);
+            rankingLabel.gameObject.SetActive(_currentState.needsRanking);
+            usernameLabel.color = _currentState.usernameColor;
+        }
+
         protected void Update()
         {
-            if (dcedGO.activeSelf)
+            if (_currentState == dcedState)
             {
                 _dcedTimeElapsed += Time.deltaTime;
                 SetTimeDCed();
@@ -152,7 +131,7 @@ namespace FF.UI
         protected void SetTimeDCed()
         {
             TimeSpan span = TimeSpan.FromSeconds(_dcedTimeElapsed);
-            dcTimer.text = string.Format("{0}:{1}", span.Minutes.ToString("00"), span.Seconds.ToString("00"));
+            dcedState.dcedTimer.text = string.Format("{0}:{1}", span.Minutes.ToString("00"), span.Seconds.ToString("00"));
         }
     }
 }

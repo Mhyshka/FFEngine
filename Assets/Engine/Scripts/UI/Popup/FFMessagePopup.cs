@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-using UnityEngine.UI;
-
 namespace FF.UI
 {
     internal class FFMessagePopupData : FFPopupData
@@ -15,8 +13,8 @@ namespace FF.UI
     internal class FFMessagePopup : FFPopup
     {
         #region Inspector Properties
-        public Text messageLabel = null;
-        public Text buttonLabel = null;
+        public UILabel messageLabel = null;
+        public UILabel buttonLabel = null;
 
         protected SimpleCallback _onOkayPressed;
         #endregion
@@ -25,9 +23,12 @@ namespace FF.UI
         {
             base.SetContent(a_data);
             FFMessagePopupData data = a_data as FFMessagePopupData;
-            
+
             messageLabel.text = data.messageContent;
+            messageLabel.MarkAsChanged();
+
             buttonLabel.text = data.buttonContent;
+            buttonLabel.MarkAsChanged();
 
             _onOkayPressed = data.onOkayPressed;
         }

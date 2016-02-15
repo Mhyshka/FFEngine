@@ -2,67 +2,111 @@
 using System.Collections;
 using FF.Network;
 
+using FF.UI;
+
 namespace FF
 {
-	internal class MainMenuState : AMenuGameState
-	{
-		#region Inspector Properties
-		#endregion
+    internal class MainMenuState : AMenuGameState
+    {
+        #region Inspector Properties
+        #endregion
 
-		#region Properties
-		#endregion
+        #region Properties
+        protected FFTitlePanel _titlePanel;
+        #endregion
 
-		#region States Methods
-		internal override int ID {
-			get {
-				return (int)EMenuStateID.Main;
-			}
-		}
+        #region States Methods
+        internal override int ID
+        {
+            get
+            {
+                return (int)EMenuStateID.Main;
+            }
+        }
 
-		internal override void Enter ()
-		{
-			base.Enter ();
-			FFLog.Log(EDbgCat.Logic,"Main menu state enter.");
-		}
+        internal override void Enter()
+        {
+            base.Enter();
+            Engine.UI.HideSpecificPanel("WifiWarningPanel");
+            _titlePanel = Engine.UI.GetPanel("MenuTitlePanel") as FFTitlePanel;
+            _titlePanel.nicknameField.onSubmit.Add(new EventDelegate(OnNicknameSubmit));
+            _titlePanel.nicknameField.onChange.Add(new EventDelegate(OnNicknameSubmit));
+        }
 
-		internal override int Manage ()
-		{
-			return base.Manage ();
-		}
+        internal override int Manage()
+        {
+            return base.Manage();
+        }
 
-		internal override void Exit ()
-		{
-			base.Exit ();
-		}
-		#endregion
+        internal override void Exit()
+        {
+            base.Exit();
 
-		#region Event Management
-		protected override void RegisterForEvent ()
-		{
-			base.RegisterForEvent ();
-			Engine.Events.RegisterForEvent ("OnPlayPressed", OnPlayPressed);
-		}
+            _titlePanel.nicknameField.onChange.Clear();
+            _titlePanel.nicknameField.onSubmit.Clear();
+        }
+        #endregion
 
-		protected override void UnregisterForEvent ()
-		{
-			base.UnregisterForEvent ();
-			Engine.Events.UnregisterForEvent ("OnPlayPressed", OnPlayPressed);
-		}
+        #region Event Management
+        protected override void RegisterForEvent()
+        {
+            base.RegisterForEvent();
+            Engine.Events.RegisterForEvent("Host", OnHostPressed);
+            Engine.Events.RegisterForEvent("Join", OnJoinPressed);
+            Engine.Events.RegisterForEvent("Buy", OnBuyPressed);
+        }
 
-		
-		internal void OnEvent(FFEventParameter a_args)
-		{
-			Debug.Log ("test event");
-			Debug.Log (a_args);
-		}
+        protected override void UnregisterForEvent()
+        {
+            base.UnregisterForEvent();
+            Engine.Events.UnregisterForEvent("Host", OnHostPressed);
+            Engine.Events.UnregisterForEvent("Join", OnJoinPressed);
+            Engine.Events.UnregisterForEvent("Buy", OnBuyPressed);
+        }
 
+        protected void OnHostPressed(FFEventParameter a_args)
+        {
+            FFLog.Log(EDbgCat.Logic, "Main menu state - OnHostPressed");
+            FFLog.Log(EDbgCat.Logic, "Game Mode Selection - OnHostPressed");
+            Engine.Game.NetPlayer.isHost = true;
+            if (Engine.NetworkStatus.IsConnectedToLan)
+            {
+                RequestState((int)EMenuStateID.GameRoomHost);
+            }
+            else
+            {
+                MenuWifiCheckState checkState = _gameMode.StateForId((int)EMenuStateID.WifiCheck) as MenuWifiCheckState;
+                checkState.outState = _gameMode.StateForId((int)EMenuStateID.GameRoomHost);
+                RequestState((int)EMenuStateID.WifiCheck);
+            }
+        }
 
-		internal void OnPlayPressed(FFEventParameter a_args)
-		{
-			FFLog.Log(EDbgCat.Logic,"Main menu state - OnPlayPressed");
-			RequestState ((int)EMenuStateID.ModeSelection);
-		}
-		#endregion
+        protected void OnJoinPressed(FFEventParameter a_args)
+        {
+            FFLog.Log(EDbgCat.Logic, "Main menu state - OnJoinPressed");
+            Engine.Game.NetPlayer.isHost = false;
+            if (Engine.NetworkStatus.IsConnectedToLan)
+            {
+                RequestState((int)EMenuStateID.SearchForRooms);
+            }
+            else
+            {
+                MenuWifiCheckState checkState = _gameMode.StateForId((int)EMenuStateID.WifiCheck) as MenuWifiCheckState;
+                checkState.outState = _gameMode.StateForId((int)EMenuStateID.SearchForRooms);
+                RequestState((int)EMenuStateID.WifiCheck);
+            }
+        }
 
-	}
+        protected void OnBuyPressed(FFEventParameter a_args)
+        {
+            FFLog.Log(EDbgCat.Logic, "Main menu state - OnBuyPressed");
+        }
+
+        internal void OnNicknameSubmit()
+        {
+            Engine.Game.Player.username = _titlePanel.nicknameField.value;
+        }
+        #endregion
+
+    }
 }

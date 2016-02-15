@@ -44,7 +44,9 @@ namespace FF.Handler
                                                            a_channel,
                                                            a_isMandatory,
                                                            a_isHandleByMock);
-                        message.onMessageSent += delegate { OnMessageSent(message); };
+                        SentMessageForClient messageForClient = new SentMessageForClient(message);
+                        messageForClient.onMessageSent += OnMessageSent;
+
                         _sentForClients.Add(each, false);
                         _messageForClients.Add(each, message);
                     }

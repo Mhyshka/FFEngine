@@ -11,11 +11,11 @@ namespace FF
     //HostList
 	internal class MenuRoomSearchState : ANavigationMenuState
 	{
-		#region Inspector Properties
-		#endregion
-		
-		#region Properties
-		protected FFSearchRoomPanel _searchRoomPanel;
+        #region Inspector Properties
+        #endregion
+
+        #region Properties
+        protected FFSearchRoomPanel _searchRoomPanel;
 		#endregion
 		
 		#region States Methods
@@ -72,13 +72,17 @@ namespace FF
                     Engine.Network.onRoomLost += OnRoomLost;
                 }
 
-                _navigationPanel.ShowLoader("Searching");
-                _navigationPanel.HideWifiWarning();
+
+                LoadingIndicatorPanel loadingIndicator = Engine.UI.GetPanel("LoadingIndicatorPanel") as LoadingIndicatorPanel;
+                loadingIndicator.SetDescription("Searching");
+                Engine.UI.RequestDisplay("LoadingIndicatorPanel");
+
+                Engine.UI.HideSpecificPanel("WifiWarningPanel");
             }
 			else
 			{
-                _navigationPanel.HideLoader();
-                _navigationPanel.ShowWifiWarning();
+                Engine.UI.HideSpecificPanel("LoadingIndicatorPanel");
+                Engine.UI.RequestDisplay("WifiWarningPanel");
             }
 		}
 
@@ -90,7 +94,7 @@ namespace FF
 
         protected void TearDown()
 		{
-            _navigationPanel.HideLoader();
+            Engine.UI.HideSpecificPanel("LoadingIndicatorPanel");
 
             if (!Engine.Network.IsLookingForRoom)// Not looking for room anymore.
             {
@@ -125,6 +129,8 @@ namespace FF
                 FFLog.LogError(EDbgCat.Logic, "Room is null");
                 return;
             }
+
+            _searchRoomPanel.ClearRoomsCells();
 
 			Room selectedRoom = a_args.data as Room;
             Engine.Network.SetMainClient(selectedRoom);
@@ -175,7 +181,7 @@ namespace FF
             {
                 Engine.Network.StopLookingForGames();
                 TearDown();
-                _navigationPanel.ShowWifiWarning();
+                Engine.UI.RequestDisplay("WifiWarningPanel");
             }
         }
 		#endregion

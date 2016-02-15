@@ -2,9 +2,6 @@ using UnityEngine;
 using System.Net;
 using System.Collections.Generic;
 
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-
 using FF.Multiplayer;
 
 namespace FF.UI
@@ -14,8 +11,6 @@ namespace FF.UI
 		#region Properties
 		private Dictionary<Room, FFRoomCellWidget> roomsCells = new Dictionary<Room, FFRoomCellWidget>();
 		public GameObject hostCellPrefab = null;
-		public VerticalLayoutGroup verticalLayout = null;
-		
 		public GameObject list = null;
 		#endregion
 
@@ -42,14 +37,16 @@ namespace FF.UI
 				{
 					lHostCell.UpdateWithRoom (a_room);
                     a_room.onRoomUpdated += lHostCell.UpdateWithRoom;
-                    lHostCell.transform.SetParent(verticalLayout.transform);
+                    lHostCell.transform.SetParent(list.transform);
                     lHostCell.transform.localPosition = Vector3.zero;
                     lHostCell.transform.localScale = Vector3.one;
                     roomsCells.Add (a_room, lHostCell);
 				}
 
                 if (roomsCells.Count == 1 && Engine.Inputs.ShouldUseNavigation)
-                    EventSystem.current.SetSelectedGameObject(lObject);
+                {
+                    UICamera.selectedObject = lObject;
+                }
 
              
             }

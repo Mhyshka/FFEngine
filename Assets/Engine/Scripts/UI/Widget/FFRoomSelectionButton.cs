@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
+
 
 using FF.Multiplayer;
 
 namespace FF.UI
-{/// <summary>
+{
+/// <summary>
 /// Custom button to place over a Unity UI button. Called FFEngine.Event.FireEvent with the set event type or event key.
 /// </summary>
-	[RequireComponent(typeof(Button))]
 	public class FFRoomSelectionButton : MonoBehaviour
 	{
 		#region Inspector Properties
@@ -19,18 +19,18 @@ namespace FF.UI
 
 		#region Properties
 		internal Room room;
-		protected Button _button;
+		protected UIButton _button;
 		#endregion
 
 		#region Methods
 		protected virtual void Start ()
 		{
-			_button = GetComponent<Button>();
-			_button.onClick.AddListener(() => OnClick());
+			_button = GetComponent<UIButton>();
+			_button.onClick.Add(new EventDelegate(OnClick));
 		}
-		#endregion
-		
-		public void OnClick()
+        #endregion
+
+        public void OnClick()
 		{
             if (enabled)
             {

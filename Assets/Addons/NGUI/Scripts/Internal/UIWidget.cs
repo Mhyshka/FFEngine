@@ -631,11 +631,24 @@ public class UIWidget : UIRect
 		}
 	}
 
-	/// <summary>
-	/// Adjust the widget's dimensions without going through the anchor validation logic.
-	/// </summary>
+    protected float _previousAlpha = 0;
+    public override void Update()
+    {
+        if (_previousAlpha != alpha)
+        {
+            _previousAlpha = alpha;
+            Invalidate(true);
+        }
 
-	public void SetDimensions (int w, int h)
+        base.Update();
+    }
+
+
+    /// <summary>
+    /// Adjust the widget's dimensions without going through the anchor validation logic.
+    /// </summary>
+
+    public void SetDimensions (int w, int h)
 	{
 		if (mWidth != w || mHeight != h)
 		{
@@ -1044,15 +1057,16 @@ public class UIWidget : UIRect
 
 	protected virtual void Awake ()
 	{
+        _previousAlpha = color.a;
 		mGo = gameObject;
 		mPlayMode = Application.isPlaying;
 	}
 
-	/// <summary>
-	/// Mark the widget and the panel as having been changed.
-	/// </summary>
+    /// <summary>
+    /// Mark the widget and the panel as having been changed.
+    /// </summary>
 
-	protected override void OnInit ()
+    protected override void OnInit ()
 	{
 		base.OnInit();
 		RemoveFromPanel();

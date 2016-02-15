@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
 	internal class FFRatingWidget : MonoBehaviour
 	{
-		public Image[] images = null;
-		public Sprite fullSprite = null;
-		public Sprite emptySprite = null;
+		public UISprite[] images = null;
+		public string fullSprite = null;
+		public string emptySprite = null;
 		public int curValue = 0;
 		
 		internal int MaxValue
@@ -42,9 +41,9 @@ namespace FF.UI
 			for(int i = 0 ; i < MaxValue; i++)
 			{
 				if(i < curValue)
-					images[i].sprite = fullSprite;
+					images[i].spriteName = fullSprite;
 				else
-					images[i].sprite = emptySprite;
+					images[i].spriteName = emptySprite;
 			}
 		}
 	}

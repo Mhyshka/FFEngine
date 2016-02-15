@@ -30,7 +30,7 @@ namespace FF.UI
 
         protected virtual void Update()
         {
-            if (_canvas.enabled && currentData != null)
+            if (gameObject.activeSelf && currentData != null)
             {
                 if (_state == EState.Showing || _state == EState.Shown)
                 {

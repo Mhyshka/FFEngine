@@ -1,8 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using System;
-using System.Collections.Generic;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
@@ -21,20 +17,14 @@ namespace FF.UI
 		public bool debug = false;
 		public bool hideOnLoad = true;
         public Animator animator = null;
-        public Selectable defaultSelectedWidget = null;
+        /*public TweenerGroup forwardTweeners = null;
+        public TweenerGroup backwardTweeners = null;*/
+
+        public UIKeyNavigation defaultSelectedWidget = null;
 		#endregion
 	
 		#region Properties
-		protected GraphicRaycaster _raycaster = null;
-		protected Canvas _canvas = null;
-        internal Canvas Canvas
-        {
-            get
-            {
-                return _canvas;
-            }
-        }
-		protected Dictionary<Selectable, Navigation.Mode> _selectables = null;
+		//protected Dictionary<Selectable, Navigation.Mode> _selectables = null;
 		internal virtual bool ShouldMoveToRoot
 		{
 			get
@@ -70,19 +60,14 @@ namespace FF.UI
             {
                 animator = GetComponent<Animator>();
             }
-			_canvas = GetComponent<Canvas>();
-			_raycaster = GetComponent<GraphicRaycaster>();
-			
-			_selectables = new Dictionary<Selectable, Navigation.Mode>();
-			foreach(Selectable each in GetComponentsInChildren<Selectable>(true))
-			{
-				_selectables.Add(each, each.navigation.mode);
-			}
-			
-			if (!hideOnLoad)
-			{
-				animator.SetTrigger("Show");
-			}
+
+            if (!hideOnLoad)
+            {
+                if (animator != null)
+                {
+                    animator.SetTrigger("Show");
+                }
+            }
 
             if (!debug && NeedsTobeRegister)
             {
@@ -102,22 +87,15 @@ namespace FF.UI
 			if(_state == EState.Hidden || _state == EState.Hidding)
 			{
                 if (!gameObject.activeSelf)
+                {
                     gameObject.SetActive(true);
+                }
 
-                _canvas.enabled = true;
-				
-				foreach(KeyValuePair<Selectable, Navigation.Mode> keyVal in _selectables)
-				{
-					Navigation nav = keyVal.Key.navigation;
-					nav.mode = keyVal.Value;
-					keyVal.Key.navigation = nav;
-				}
-				
-				if(_raycaster != null)
-					_raycaster.enabled = true;
-					
-				animator.SetBool("Forward", a_isForward);
-				animator.SetTrigger("Show");
+                if (animator != null)
+                {
+                    animator.SetBool("Forward", a_isForward);
+                    animator.SetTrigger("Show");
+                }
 					
 				_state = EState.Showing;
 				FFLog.Log(EDbgCat.UI, "Showing : " + gameObject.ToString());
@@ -134,9 +112,13 @@ namespace FF.UI
 		{
             if (_state == EState.Shown || _state == EState.Showing)
 			{
-                animator.SetBool("Forward", a_isForward);
-				animator.SetTrigger("Hide");
-				_state = EState.Hidding;
+                if (animator != null)
+                {             
+                    animator.SetBool("Forward", a_isForward);
+                    animator.SetTrigger("Hide");
+                }
+
+                _state = EState.Hidding;
 				FFLog.Log(EDbgCat.UI, "Hiding : " + gameObject.ToString());
 			}
 			else
@@ -149,17 +131,17 @@ namespace FF.UI
         internal void TrySelectWidget()
         {
             if (defaultSelectedWidget != null && (debug || Engine.Inputs.ShouldUseNavigation))
-                defaultSelectedWidget.Select();
+                defaultSelectedWidget.OnNavigate(KeyCode.None);
         }
 
         #region Transition Events
         internal PanelCallback onShown = null;
         /// <summary>
-        /// Callback from animator
+        /// Callback from animator or tweeners
         /// </summary>
         public virtual void OnShown()
 		{
-			FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
+            FFLog.Log(EDbgCat.UI, "On Shown : " + gameObject.name);
 			_state = EState.Shown;
             TrySelectWidget();
 
@@ -168,33 +150,24 @@ namespace FF.UI
         }
 
         internal PanelCallback onHidden = null;
-		/// <summary>
-		/// Callback from animator
-		/// </summary>
-		public virtual void OnHidden()
+        /// <summary>
+        /// Callback from animator or tweeners
+        /// </summary>
+        public virtual void OnHidden()
 		{
-            if (animator.GetBool("Show"))
+            if (animator != null)
             {
-                return;
+                if (animator.GetBool("Show"))
+                {
+                    return;
+                }
             }
 
             FFLog.Log(EDbgCat.UI, "On Hidden : " + gameObject.name);
             _state = EState.Hidden;
 
-            _canvas.enabled = false;
-
-            foreach (Selectable each in _selectables.Keys)
-            {
-                Navigation nav = each.navigation;
-                nav.mode = Navigation.Mode.None;
-                each.navigation = nav;
-            }
-
-            if (_raycaster != null)
-                _raycaster.enabled = false;
-
-            /*if(gameObject.activeSelf)
-                gameObject.SetActive(false);*/
+            if(gameObject.activeSelf)
+                gameObject.SetActive(false);
 
             if (onHidden != null)
                 onHidden(this);

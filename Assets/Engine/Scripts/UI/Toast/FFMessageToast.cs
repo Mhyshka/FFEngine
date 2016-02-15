@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
-using System;
 
 namespace FF.UI
 {
@@ -13,7 +11,7 @@ namespace FF.UI
 
     internal class FFMessageToast : FFToast
     {
-        public Text messageLabel = null;
+        public UILabel messageLabel = null;
 
         protected override float Duration
         {
@@ -29,6 +27,7 @@ namespace FF.UI
             base.SetContent(a_data);
             FFMessageToastData data = a_data as FFMessageToastData;
             messageLabel.text = data.messageContent;
+            messageLabel.MarkAsChanged();
         }
 
         internal static void RequestDisplay(string a_message, float a_duration = 3f)

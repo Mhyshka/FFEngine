@@ -55,9 +55,10 @@ namespace FF.Handler
                                                                a_timeoutDuration,
                                                                a_isMandatory,
                                                                a_isHandleByMock);
-                        request.onMessageSent += delegate { OnMessageSent(request); };
-                        request.onSucces += OnSuccess;
-                        request.onFail += OnFailure;
+                        SentRequestForClient messageForClient = new SentRequestForClient(request);
+                        messageForClient.onMessageSent += OnMessageSent;
+                        messageForClient.onSuccess += OnSuccess;
+                        messageForClient.onFail += OnFailure;
                         _sentForClients.Add(each, false);
                         _messageForClients.Add(each, request);
                     }
@@ -100,12 +101,12 @@ namespace FF.Handler
             }
         }
 
-        protected void OnSuccess(ReadResponse a_response)
+        protected void OnSuccess(ReadResponse a_response, SentMessage a_message)
         {
-            _success.Add(a_response.Client, a_response);
+            _success.Add(a_message.Client, a_response);
 
             if (onSuccessForClient != null)
-                onSuccessForClient(a_response.Client, a_response);
+                onSuccessForClient(a_message.Client, a_response);
 
             if (_success.Count + _failures.Count == _messageForClients.Count)
             {
@@ -115,12 +116,12 @@ namespace FF.Handler
             }
         }
 
-        protected void OnFailure(ERequestErrorCode a_errCode, ReadResponse a_response)
+        protected void OnFailure(ERequestErrorCode a_errCode, ReadResponse a_response, SentMessage a_message)
         {
-            _failures.Add(a_response.Client, a_response);
+            _failures.Add(a_message.Client, a_response);
 
             if (onFailureForClient != null)
-                onFailureForClient(a_response.Client, a_response);
+                onFailureForClient(a_message.Client, a_response);
 
             if (_success.Count + _failures.Count == _messageForClients.Count)
             {

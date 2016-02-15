@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 using System;
 
 using FF.Network;
@@ -12,9 +11,9 @@ namespace FF.UI
 	{
         #region Inspector Properties
         [Header("Widgets references")]
-        public Text usernameLabel = null;
-        public Image useTVImage = null;
-        public Image isHostImage = null;
+        public UILabel usernameLabel = null;
+        public UISprite useTVImage = null;
+        public UISprite isHostImage = null;
         public FFRatingWidget rating = null;
         public FFButtonEvent button = null;
         public FFReadyCheckWidget readyCheck = null;
@@ -27,7 +26,7 @@ namespace FF.UI
         #endregion
 
         #region Properties
-        protected Button _uiButton;
+        protected UIButton _uiButton;
 
         protected float _dcedTimeElapsed = 0f;
 		
@@ -54,7 +53,7 @@ namespace FF.UI
 
         protected void Awake()
 		{
-            _uiButton = GetComponent<Button>();
+            _uiButton = GetComponent<UIButton>();
 
             emptyState.gameObject.SetActive(false);
             usedState.gameObject.SetActive(false);
@@ -125,7 +124,7 @@ namespace FF.UI
             _currentState = a_state;
 
             _currentState.gameObject.SetActive(true);
-            _uiButton.targetGraphic = _currentState.backgroundImage;
+            _uiButton.tweenTarget = _currentState.backgroundImage.gameObject;
             rating.gameObject.SetActive(_currentState.needsRating);
             isHostImage.enabled = _currentState.needsHostIcon;
             useTVImage.enabled = _currentState.needsTvIcon;

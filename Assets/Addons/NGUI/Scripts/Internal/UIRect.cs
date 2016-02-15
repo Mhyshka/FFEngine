@@ -451,7 +451,7 @@ public abstract class UIRect : MonoBehaviour
 	/// When deriving from this class, override its OnUpdate() function instead.
 	/// </summary>
 
-	public void Update ()
+	public virtual void Update ()
 	{
 		if (!mAnchorsCached) ResetAnchors();
 

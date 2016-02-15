@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
@@ -7,7 +6,7 @@ namespace FF.UI
     {
         #region Inspector Properties
         [Header("Widgets references")]
-        public Image backgroundImage = null;
+        public UISprite backgroundImage = null;
 
         [Header("Configuration")]
         public bool needsTvIcon = false;

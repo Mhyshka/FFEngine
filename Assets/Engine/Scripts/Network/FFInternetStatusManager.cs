@@ -32,7 +32,7 @@ namespace FF.Network
                 bool newState = IsConnectedToLan;
                 if (previousState != newState)
                 {
-                    FFLog.Log("Wifi state changed.");
+                    FFLog.Log(EDbgCat.Networking, "Wifi state changed.");
                     onLanStatusChanged(newState);
                 }
             }

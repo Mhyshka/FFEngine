@@ -1,7 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using Zeroconf;
-using UnityEngine.UI;
 
 using FF.UI;
 using FF.Multiplayer;
@@ -13,18 +10,18 @@ namespace FF
     internal class FFRoomCellWidget : MonoBehaviour 
 	{
         #region Inspector Properties
-        public Sprite deviceSprite = null;
-		public Sprite tvSprite = null;
+        public string deviceSprite = null;
+		public string tvSprite = null;
 		
-		public Text gameNameLabel = null;
-		public Text playerCountLabel = null;
-        public Text spectatorCountLabel = null;
-        public Text latencyLabel = null;
-		public Image deviceImage = null;
+		public UILabel gameNameLabel = null;
+		public UILabel playerCountLabel = null;
+        public UILabel spectatorCountLabel = null;
+        public UILabel latencyLabel = null;
+		public UISprite deviceImage = null;
 		
 		public FFRoomSelectionButton button = null;
 
-        public FFTween deathTween = null;
+        public UITweener deathTween = null;
         #endregion
 
 
@@ -49,11 +46,11 @@ namespace FF
             spectatorCountLabel.text = "Spectators : " + aRoom.TotalSpectatorPlayers + " / " + aRoom.TotalSpectatorSlots;
             if (aRoom.IsSecondScreenActive)
 			{
-				deviceImage.sprite = tvSprite;
+				deviceImage.spriteName = tvSprite;
 			}
 			else
 			{
-				deviceImage.sprite = deviceSprite;
+				deviceImage.spriteName = deviceSprite;
 			}
 		}
 		
@@ -69,13 +66,13 @@ namespace FF
         internal void Destroy()
         {
             button.enabled = false;
-            deathTween.onTransitionForwardComplete += OnHidden;
+            deathTween.onFinished.Add(new EventDelegate(OnHidden));
             deathTween.PlayForward();
         }
 
         public void OnHidden()
         {
-            deathTween.onTransitionForwardComplete -= OnHidden;
+            deathTween.onFinished.Clear();
             Destroy(gameObject);
         }
         #endregion

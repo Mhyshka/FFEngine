@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 using FF.Network;
 using FF.Multiplayer;
@@ -10,15 +9,15 @@ namespace FF.UI
 	[System.Serializable]
 	internal struct UITeamRef
 	{
-        public Text teamNameLabel;
+        public UILabel teamNameLabel;
 		public PlayerSlotWidget[] slots;
 	}
 	
 	internal class FFMenuRoomPanel : FFPanel
 	{
         #region Inspector Properties
-        public Button startButton = null;
-		public Text roomNameLabel = null;
+        public UIButton startButton = null;
+		public UILabel roomNameLabel = null;
 		public UITeamRef[] teams = null;
         #endregion
 
@@ -126,11 +125,11 @@ namespace FF.UI
 
                 if (a_room.CanStart)
                 {
-                    startButton.interactable = !_isReadyChecking;
+                    startButton.isEnabled = !_isReadyChecking;
                 }
                 else
                 {
-                    startButton.interactable = false;
+                    startButton.isEnabled = false;
                 }
             }
             else

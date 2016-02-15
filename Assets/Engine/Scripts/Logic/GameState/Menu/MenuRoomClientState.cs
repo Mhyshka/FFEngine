@@ -131,11 +131,11 @@ namespace FF
         {
             if (a_state)
             {
-                _navigationPanel.HideWifiWarning();
+                Engine.UI.HideSpecificPanel("WifiWarningPanel");
             }
             else
             {
-                _navigationPanel.ShowWifiWarning();
+                Engine.UI.RequestDisplay("WifiWarningPanel");
             }
         }
 
@@ -155,6 +155,7 @@ namespace FF
         {
             Engine.UI.DismissPopup(_connectionLostPopupId);
             _connectionLostPopupId = -1;
+            Engine.UI.HideSpecificPanel("WifiWarningPanel");
         }
 
         protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
@@ -208,14 +209,21 @@ namespace FF
         {
             string message = "";
 
-            if (a_response.Data.Type == EDataType.Integer)
+            if (a_errorCode == ERequestErrorCode.Failed)
             {
-                MessageIntegerData data = a_response.Data as MessageIntegerData;
+                if (a_response.Data.Type == EDataType.Integer)
+                {
+                    MessageIntegerData data = a_response.Data as MessageIntegerData;
 
-                EErrorCodeMoveToSlot detailErrorCode = (EErrorCodeMoveToSlot)data.Data;
+                    EErrorCodeMoveToSlot detailErrorCode = (EErrorCodeMoveToSlot)data.Data;
 
-                //TODO display errorMessage
-                message = detailErrorCode.ToString();
+                    //TODO display errorMessage
+                    message = detailErrorCode.ToString();
+                }
+            }
+            else
+            {
+                message = a_errorCode.ToString();
             }
            
             FFMessageToast.RequestDisplay("Move to slot failed : " + message);
@@ -275,17 +283,23 @@ namespace FF
         {
             string message = "";
 
-            if (a_response.Data.Type == EDataType.Integer)
+            if (a_errorCode == ERequestErrorCode.Failed)
             {
-                MessageIntegerData data = a_response.Data as MessageIntegerData;
+                if (a_response.Data.Type == EDataType.Integer)
+                {
+                    MessageIntegerData data = a_response.Data as MessageIntegerData;
 
-                EErrorCodeSwapSlot detailErrorCode = (EErrorCodeSwapSlot)data.Data;
+                    EErrorCodeSwapSlot detailErrorCode = (EErrorCodeSwapSlot)data.Data;
 
-                //TODO display errorMessage
-                message = detailErrorCode.ToString();
+                    //TODO display errorMessage
+                    message = detailErrorCode.ToString();
+                }
             }
-            
-
+            else
+            {
+                message = a_errorCode.ToString();
+            }
+        
             Engine.UI.DismissPopup(_swapPopupId);
             _swapPopupId = -1;
             FFMessageToast.RequestDisplay("Swap failed : " + message);

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.EventSystems;
 
 namespace FF.UI
 {
@@ -8,8 +7,6 @@ namespace FF.UI
 	{
         #region Inspector properties
         public Camera uiCamera = null;
-		public TouchInputModule touchModule = null;
-		public StandaloneInputModule standaloneModule = null;
 		#endregion
 
 		
@@ -21,21 +18,6 @@ namespace FF.UI
 		
 		internal void ConfigureEnabledInput()
 		{
-#if !UNITY_EDITOR
-			if(Engine.Inputs.ShouldUseNavigation)
-			{
-				touchModule.enabled = false;
-				standaloneModule.enabled = true;
-			}
-			else
-			{
-				touchModule.enabled = true;
-				standaloneModule.enabled = false;
-			}
-#else
-			touchModule.enabled = false;
-			standaloneModule.enabled = true;
-#endif
 		}
 	}
 }

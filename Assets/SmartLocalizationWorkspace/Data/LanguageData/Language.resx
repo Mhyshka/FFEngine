@@ -119,6 +119,9 @@
 	<data name="GAME_TITLE" xml:space="preserve">
 		<value>Flaming Pong</value>
 	</data>
+	<data name="LOADING" xml:space="preserve">
+		<value>Loading</value>
+	</data>
 	<data name="MENU_BUY" xml:space="preserve">
 		<value>Menu Title Buy</value>
 	</data>
@@ -130,5 +133,8 @@
 	</data>
 	<data name="MENU_PLAY" xml:space="preserve">
 		<value>Play</value>
+	</data>
+	<data name="MENU_NICKNAME" xml:space="preserve">
+		<value>Nickname title</value>
 	</data>
 </root>

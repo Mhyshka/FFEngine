@@ -136,9 +136,9 @@ namespace FF.Network.Receiver
 
         protected void OnFail(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            SentResponse response = new SentResponse(a_response.Data,
+            SentResponse response = new SentResponse(a_response != null ? a_response.Data : new MessageEmptyData(),
                                                     _request.RequestId,
-                                                    a_response.ErrorCode,
+                                                    a_errorCode,
                                                     true);
             _client.QueueResponse(response);
         }

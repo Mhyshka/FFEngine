@@ -24,6 +24,10 @@ namespace FF
     internal delegate void ReadMessageCallback(ReadMessage a_readMessage);
     internal delegate void ReadResponseCallback(ReadResponse a_readMessage);
 
+    internal delegate void MessageSentCallback(SentMessage a_message);
+    internal delegate void RequestSuccessForMessageCallback(ReadResponse a_readResponse, SentMessage a_message);
+    internal delegate void RequestFailForMessageCallback(ERequestErrorCode a_errorCode, ReadResponse a_readResponse, SentMessage a_message);
+
     internal delegate void FFIntClientCallback(FFTcpClient a_client, int a_value);
     internal delegate void FFDoubleClientCallback(FFTcpClient a_client, double a_val);
     internal delegate void FFClientCallback(FFTcpClient a_client);

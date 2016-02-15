@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.EventSystems;
 
 namespace FF
 {
@@ -131,13 +130,13 @@ namespace FF
         #region Focus Popup
         internal virtual void OnLostFocus()
         {
-            _previousFocus = EventSystem.current.currentSelectedGameObject;
+            _previousFocus = UICamera.selectedObject;
         }
 
         internal virtual void OnGetFocus()
         {
-            if(_previousFocus != null)
-                EventSystem.current.SetSelectedGameObject(_previousFocus);
+            if (_previousFocus != null)
+                UICamera.selectedObject = _previousFocus;
         }
         #endregion
     }

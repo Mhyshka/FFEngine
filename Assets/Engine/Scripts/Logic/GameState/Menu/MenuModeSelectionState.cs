@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 using FF.UI;
 
@@ -31,10 +30,10 @@ namespace FF
 				_gameModeSelectionPanel = Engine.UI.GetPanel ("MenuModeSelectionPanel") as FFModeSelectionPanel;
 				
 			_gameModeSelectionPanel.SetPlayerName (Engine.Game.Player.username);
-            _gameModeSelectionPanel.playerNameInputField.onEndEdit.AddListener(delegate { OnEndEdit(_gameModeSelectionPanel.playerNameInputField); });
+            //_gameModeSelectionPanel.playerNameInputField.onEndEdit.AddListener(delegate { OnEndEdit(_gameModeSelectionPanel.playerNameInputField); });
 
             _navigationPanel.SetTitle ("Get Ready.");
-            _navigationPanel.HideWifiWarning();
+            Engine.UI.HideSpecificPanel("WifiWarningPanel");
         }
 
 		internal override int Manage ()
@@ -98,10 +97,10 @@ namespace FF
             }
 		}
 
-        internal void OnEndEdit(InputField a_inputField)
+        /*internal void OnEndEdit(InputField a_inputField)
         {
             Engine.Game.Player.username = _gameModeSelectionPanel.PlayerName;
-        }
+        }*/
         #endregion
 
         #region focus

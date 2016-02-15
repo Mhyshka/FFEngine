@@ -1,14 +1,13 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
     internal class LoadingScreen : FFPanel
     {
         #region Inspector Properties
-        public Slider loadingProgress = null;
-        public Text loadingDescription = null;
+        public UISlider loadingProgress = null;
+        public UILabel loadingDescription = null;
         #endregion
         protected override void Awake()
         {

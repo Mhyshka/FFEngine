@@ -1,6 +1,5 @@
 ﻿
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace FF.UI
 {
@@ -8,7 +7,7 @@ namespace FF.UI
     {
         #region Inspector Properties
         [Header("Widgets references")]
-        public Text dcedTimer = null;
+        public UILabel dcedTimer = null;
         #endregion
     }
 }

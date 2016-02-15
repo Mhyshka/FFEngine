@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 namespace FF.UI
 {
@@ -9,14 +7,7 @@ namespace FF.UI
 	{
 		#region Inspector Properties
 		public GameObject backButton = null;
-		public Text title = null;
-        public Animator wifiWarningAnimator = null;
-        public Animator loaderAnimator = null;
-        public Text loaderText = null;
-
-        protected bool _loaderIsShown = false;
-
-        protected bool _wifiWarningIsShown = false;
+		public UILabel title = null;
 		#endregion
 
 		internal void SetTitle (string newTitle)
@@ -26,48 +17,7 @@ namespace FF.UI
 		
 		internal void FocusBackButton()
 		{
-			EventSystem.current.SetSelectedGameObject(backButton);
+            UICamera.selectedObject = backButton;
 		}
-
-        internal void ShowWifiWarning()
-        {
-            //FFLog.LogError("Try Show wifi warning");
-            if (!_wifiWarningIsShown)
-            {
-                FFLog.Log("Showing wifi warning");
-                wifiWarningAnimator.SetTrigger("Show");
-                _wifiWarningIsShown = true;
-            }
-        }
-
-        internal void HideWifiWarning()
-        {
-            //FFLog.LogError("Try Hide wifi warning");
-            if (_wifiWarningIsShown)
-            {
-                FFLog.Log("Hiding wifi warning");
-                wifiWarningAnimator.SetTrigger("Hide");
-                _wifiWarningIsShown = false;
-            }
-        }
-
-        internal void ShowLoader(string a_message)
-        {
-            if (!_loaderIsShown)
-            {
-                loaderAnimator.SetTrigger("Show");
-                _loaderIsShown = true;
-                loaderText.text = a_message;
-            }
-        }
-
-        internal void HideLoader()
-        {
-            if (_loaderIsShown)
-            {
-                loaderAnimator.SetTrigger("Hide");
-                _loaderIsShown = false;
-            }
-        }
     }
 }

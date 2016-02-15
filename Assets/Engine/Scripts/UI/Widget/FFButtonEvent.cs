@@ -1,15 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
 
 namespace FF.UI
 {/// <summary>
 /// Custom button to place over a Unity UI button. Called FFEngine.Event.FireEvent with the set event type or event key.
 /// </summary>
-	[RequireComponent(typeof(Button))]
+    [RequireComponent(typeof(BoxCollider))]
 	public class FFButtonEvent : MonoBehaviour
 	{
-		#region Inspector Properties
+        #region Inspector Properties
+        public bool onDragEnd = true;
 		public bool debug = false;
 		
 		public bool canTriggerWhileTransitionning = false;
@@ -21,21 +21,14 @@ namespace FF.UI
 		public string eventKey = "";
 		
 		internal object Data = null;
-		#endregion
-
-		#region Properties
-		protected Button _button;
         #endregion
 
-        #region Methods
-        protected virtual void Start()
+        void Awake()
         {
-            _button = GetComponent<Button>();
-            _button.onClick.AddListener(() => OnClick());
+            GetComponent<UIButton>().onClick.Add(new EventDelegate(OnButtonClicked));
         }
-		#endregion
-		
-		public void OnClick()
+
+		public void OnButtonClicked()
 		{
 #if !RELEASE
 			if(debug)

@@ -1,5 +1,6 @@
 ﻿
-namespace SmartLocalization.Editor{
+namespace SmartLocalization.Editor
+{
 using UnityEngine.UI;
 using UnityEngine;
 using UnityEditor;

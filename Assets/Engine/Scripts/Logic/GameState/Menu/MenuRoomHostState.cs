@@ -88,7 +88,7 @@ namespace FF
 
         internal override void GoBack()
         {
-            SentBroadcastMessage broadcastFarewell = new SentBroadcastMessage(new MessageEmptyData(),
+            SentBroadcastMessage broadcastFarewell = new SentBroadcastMessage(new MessageIntegerData((int)EFarewellCode.Shuttingdown),
                                                                                 EMessageChannel.Farewell.ToString(),
                                                                                 false,
                                                                                 false,
@@ -175,11 +175,11 @@ namespace FF
         {
             if (a_state)
             {
-                _navigationPanel.HideWifiWarning();
+                Engine.UI.HideSpecificPanel("WifiWarningPanel");
             }
             else
             {
-                _navigationPanel.ShowWifiWarning();
+                Engine.UI.RequestDisplay("WifiWarningPanel");
             }
         }
 
