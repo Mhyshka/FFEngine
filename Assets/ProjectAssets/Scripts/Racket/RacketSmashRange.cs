@@ -29,7 +29,6 @@ namespace FF.Pong
         {
             if (a_collider.GetComponent<BallCollider>() != null)
             {
-                Debug.LogError("True");
                 _isInSmashRange = true;
             }
         }
@@ -38,7 +37,6 @@ namespace FF.Pong
         {
             if (a_collider.GetComponent<BallCollider>() != null)
             {
-                Debug.LogError("False");
                 didSmash = false;
                 _isInSmashRange = false;
             }

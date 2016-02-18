@@ -59,7 +59,6 @@ namespace FF.Network
 		{
 			while(_shouldRun &&  Client != null && Client.Connected && _stream != null)
 			{
-                
 				if(_shouldRun && _stream.CanRead && _stream.DataAvailable)
 				{
 					Read ();

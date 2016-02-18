@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 using FF.Network.Message;
 using FF.Network.Receiver;
+using FF.Network;
 using FF.Pong;
+using FF.UI;
 
 namespace FF.Logic
 {
@@ -17,6 +19,21 @@ namespace FF.Logic
         #endregion
 
         #region State Methods
+        internal override void Enter()
+        {
+            base.Enter();
+            _connectionLostPopupId = -1;
+        }
+
+        internal override void Exit()
+        {
+            base.Exit();
+            if (_connectionLostPopupId != -1)
+            {
+                Engine.UI.DismissPopup(_connectionLostPopupId);
+                _connectionLostPopupId = -1;
+            }
+        }
         #endregion
 
         #region Events
@@ -27,6 +44,11 @@ namespace FF.Logic
             _receiver = new GenericMessageReceiver(OnEveryoneReady);
             Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingComplete.ToString(),
                                             _receiver);
+
+            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
+            Engine.Network.MainClient.onConnectionSuccess += OnReconnection;
+            Engine.Network.MainClient.onConnectionLost += OnConnectionLost;
+            Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
         }
 
         protected override void UnregisterForEvent()
@@ -37,7 +59,55 @@ namespace FF.Logic
             Engine.Game.Loading.onLoadingProgressReceived -= OnLoadingProgressReceived;
             Engine.Receiver.UnregisterReceiver(EMessageChannel.LoadingComplete.ToString(),
                                                 _receiver);
+
+            if (Engine.Network.MainClient != null)
+            {
+                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+                Engine.Network.MainClient.onConnectionSuccess -= OnReconnection;
+                Engine.Network.MainClient.onConnectionLost -= OnConnectionLost;
+                Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
+            }
         }
+
+        #region Client Callbacks
+        protected int _connectionLostPopupId = -1;
+        protected void OnConnectionLost(FFTcpClient a_client)
+        {
+            _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel, UIManager.POPUP_PRIO_HIGH);
+        }
+
+        protected void OnReconnection(FFTcpClient a_client)
+        {
+            if (_connectionLostPopupId != -1)
+            {
+                Engine.UI.DismissPopup(_connectionLostPopupId);
+                _connectionLostPopupId = -1;
+            }
+            _connectionLostPopupId = -1;
+        }
+
+        protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
+        {
+            Engine.Network.SetNoMainClient();
+            if (_connectionLostPopupId != -1)
+            {
+                Engine.UI.DismissPopup(_connectionLostPopupId);
+                _connectionLostPopupId = -1;
+            }
+            RequestGameMode("MenuGameMode");
+        }
+
+        protected void OnConnectionLostPopupCancel()
+        {
+            Engine.Network.CloseMainClient();
+            if (_connectionLostPopupId != -1)
+            {
+                Engine.UI.DismissPopup(_connectionLostPopupId);
+                _connectionLostPopupId = -1;
+            }
+            RequestGameMode("MenuGameMode");
+        }
+        #endregion
 
         protected void OnLoadingProgressReceived()
         {

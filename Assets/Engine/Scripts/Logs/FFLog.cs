@@ -29,13 +29,13 @@ internal class FFLog
 	internal static EDbgLevel DBG_LEVEL = EDbgLevel.Debug;
     internal static EDbgCat[] DBG_CAT = new EDbgCat[]
     { 
-        /*EDbgCat.Zeroconf,
+        /*EDbgCat.Zeroconf,*/
         EDbgCat.Networking,
-        EDbgCat.Receiver,
+        /*EDbgCat.Receiver,
         EDbgCat.Message,
-        EDbgCat.Serialization,
+        EDbgCat.Serialization,*/
         EDbgCat.Socket,
-        EDbgCat.Handler,
+        /*EDbgCat.Handler,
         EDbgCat.UI,
         EDbgCat.Logic,
         EDbgCat.Input*/

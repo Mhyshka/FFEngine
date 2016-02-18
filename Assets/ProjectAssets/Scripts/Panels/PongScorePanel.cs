@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 using FF.UI;
 
@@ -8,13 +7,13 @@ namespace FF.Pong
 	internal class PongScorePanel : FFPanel
 	{
         #region Inspector Properties
-        public Text playerNameLabel = null;
+        public UILabel playerNameLabel = null;
         public FFRatingWidget goalScored = null;
 
         public Color blueTeamNameColor = Color.blue;
         public Color purpleTeamNameColor = Color.green;
 
-        public Text commentLabel = null;
+        public UILabel commentLabel = null;
         #endregion
 
         #region Properties

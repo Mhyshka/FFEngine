@@ -6,8 +6,10 @@ using FF.Handler;
 using FF.Network;
 using FF.Network.Message;
 using FF.Multiplayer;
+using FF.UI;
 
 using FF.Pong;
+
 
 namespace FF.Logic
 {
@@ -49,6 +51,8 @@ namespace FF.Logic
             base.RegisterForEvent();
             
             Engine.Game.Loading.onLoadingCompleteReceived += OnLoadingCompleteReceived;
+
+            Engine.Events.RegisterForEvent("Kick", OnKickPlayerPressed);
         }
 
         protected override void UnregisterForEvent()
@@ -57,7 +61,35 @@ namespace FF.Logic
             Engine.Game.Loading.UnregisterLoadingComplete();
             
             Engine.Game.Loading.onLoadingCompleteReceived -= OnLoadingCompleteReceived;
+
+            Engine.Events.UnregisterForEvent("Kick", OnKickPlayerPressed);
         }
+
+        #region Kick
+        protected int _kickConfirmPopup = -1;
+        protected FFNetworkPlayer _kickTarget = null;
+        protected void OnKickPlayerPressed(FFEventParameter a_args)
+        {
+            _kickTarget = a_args.data as FFNetworkPlayer;
+            if (_kickTarget != null)
+            {
+                _kickConfirmPopup = FFYesNoPopup.RequestDisplay("Kick " + _kickTarget.player.username,
+                                            "Kick", "Keep", OnKickConfirm, OnKickCancel);
+            }
+        }
+
+        protected void OnKickConfirm()
+        {
+            Engine.Network.Server.RemoveLostClient(_kickTarget.ID);
+            Engine.Game.CurrentRoom.RemovePlayer(_kickTarget.ID);
+            Engine.UI.DismissPopup(_kickConfirmPopup);
+        }
+
+        protected void OnKickCancel()
+        {
+            Engine.UI.DismissPopup(_kickConfirmPopup);
+        }
+        #endregion
 
         protected void OnLoadingCompleteReceived()
         {
@@ -93,7 +125,7 @@ namespace FF.Logic
             SentMessage message = new SentMessage(new MessageEmptyData(),
                                                     EMessageChannel.LoadingComplete.ToString(),
                                                     true,
-                                                    true);
+                                                    false);
             Engine.Network.Server.BroadcastMessage(message);
             RequestState(outState.ID);
         }
@@ -117,6 +149,7 @@ namespace FF.Logic
             {
                 bool isReady = true;
                 PlayerDictionary<PlayerLoadingWrapper> loadingWrappers = Engine.Game.Loading.PlayersLoadingState;
+                //Debug.LogError("Count : " + loadingWrappers.Count);
                 foreach (KeyValuePair<int, PlayerLoadingWrapper> each in loadingWrappers)
                 {
                     isReady = isReady && each.Value.state == UI.ELoadingState.Ready;//Ready

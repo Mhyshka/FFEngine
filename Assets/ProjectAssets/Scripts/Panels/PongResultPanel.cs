@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 using System.Collections.Generic;
 
@@ -14,7 +13,7 @@ namespace FF.Pong
         #region Inspector Properties
         public List<PlayerSlotWidget> leftSidePlayers = null;
         public List<PlayerSlotWidget> rightSidePlayers = null;
-        public Text headerLabel = null;
+        public UILabel headerLabel = null;
         public PongSuccessWidget successWidget = null;
         #endregion
 

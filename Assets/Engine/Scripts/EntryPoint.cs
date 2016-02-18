@@ -18,9 +18,11 @@ namespace FF
 			SceneManager.LoadSceneAsync("UI", LoadSceneMode.Additive);
             SceneManager.LoadSceneAsync("MultiplayerLoadingScreen", LoadSceneMode.Additive);
             Engine.Game.RequestGameMode(mainScene);
+            Application.targetFrameRate = 1000;
+            //Application.targetFrameRate = 300;
 
 #if UNITY_ANDROID
-            Application.targetFrameRate = 200;
+            //Application.targetFrameRate = 200;
 #endif
         }
 
@@ -32,7 +34,17 @@ namespace FF
 		void Update()
 		{
 			_engine.DoUpdate();
-		}
+
+            _timeElapsed += Time.deltaTime;
+            _frameCount++;
+            if (_timeElapsed > 0.5f)
+            {
+                _framerate = Mathf.RoundToInt(_frameCount / _timeElapsed);
+
+                _frameCount = 0;
+                _timeElapsed = 0f;
+            }
+        }
 
         void FixedUpdate()
         {
@@ -55,5 +67,16 @@ namespace FF
 		{
 			_engine.OnApplicationPause(a_isPause);
 		}
+
+        protected float _timeElapsed;
+        protected int _frameCount = 0;
+
+        protected int _framerate;
+        void OnGUI()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("FPS : " + _framerate);
+            GUILayout.EndHorizontal();
+        }
 	}
 }

@@ -48,8 +48,12 @@ namespace FF.UI
 
         void Awake()
         {
+            completeState.gameObject.SetActive(false);
+            dcedState.gameObject.SetActive(false);
+            readyState.gameObject.SetActive(false);
+            baseState.gameObject.SetActive(false);
+
             _currentState = baseState;
-            LoadState(baseState);
         }
 
         internal void SetLoading(FFNetworkPlayer a_player)

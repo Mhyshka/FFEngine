@@ -38,8 +38,8 @@ namespace FF.Logic
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-
-            Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+            if(Engine.Game.CurrentRoom != null)
+                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
         }
 
         protected void OnEveryoneReady(ReadMessage a_message)

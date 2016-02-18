@@ -9,7 +9,6 @@ namespace FF.UI
 	public class FFButtonEvent : MonoBehaviour
 	{
         #region Inspector Properties
-        public bool onDragEnd = true;
 		public bool debug = false;
 		
 		public bool canTriggerWhileTransitionning = false;
@@ -25,10 +24,11 @@ namespace FF.UI
 
         void Awake()
         {
-            GetComponent<UIButton>().onClick.Add(new EventDelegate(OnButtonClicked));
+            /*UIButton button = GetComponent<UIButton>();
+            button.onClick.Add(new EventDelegate(OnButtonClicked));*/
         }
 
-		public void OnButtonClicked()
+		public void OnClick()
 		{
 #if !RELEASE
 			if(debug)

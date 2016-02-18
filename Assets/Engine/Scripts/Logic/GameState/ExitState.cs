@@ -29,7 +29,7 @@ namespace FF
 		internal override void Enter ()
 		{
 			base.Enter ();
-			_finalized = false;
+            _finalized = false;
             if (Engine.UI.HasLoadingScreen)
             {
                 Engine.UI.DisplayLoading();

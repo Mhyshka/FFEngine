@@ -10,8 +10,9 @@ using FF.Network.Message;
 namespace FF.Multiplayer
 {	
 	internal delegate void RoomCallback(Room a_room);
-	
-	internal class Room : IByteStreamSerialized
+    internal delegate void RoomPlayerCallback(Room a_room, FFNetworkPlayer a_player);
+
+    internal class Room : IByteStreamSerialized
 	{
 		#region Properties
 		internal string roomName;
@@ -27,6 +28,8 @@ namespace FF.Multiplayer
 		internal IPEndPoint serverEndPoint;
 		
 		internal RoomCallback onRoomUpdated = null;
+        internal RoomPlayerCallback onPlayerRemoved = null;
+        internal RoomPlayerCallback onPlayerAdded = null;
 
         internal Dictionary<int, FFNetworkPlayer> players = null;
 
@@ -49,6 +52,9 @@ namespace FF.Multiplayer
         internal void TearDown()
         {
             onRoomUpdated = null;
+            onPlayerRemoved = null;
+            onPlayerAdded = null;
+
             if (Engine.Network.IsServer)
             {
                 Engine.Network.Server.onClientLost -= OnClientConnectionLost;
@@ -121,6 +127,9 @@ namespace FF.Multiplayer
             teams[a_teamIndex].Slots[a_slotIndex].SetPlayer(a_player);
             if (onRoomUpdated != null)
 				onRoomUpdated(this);
+
+            if (onPlayerAdded != null)
+                onPlayerAdded(this, a_player);
         }
         #endregion
 
@@ -151,6 +160,9 @@ namespace FF.Multiplayer
 
                 if (onRoomUpdated != null)
                     onRoomUpdated(this);
+
+                if (onPlayerRemoved != null)
+                    onPlayerRemoved(this, player);
             }
             else
             {

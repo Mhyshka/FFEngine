@@ -65,6 +65,24 @@ namespace FF.Network
             return client;
         }
 
+        internal IPEndPoint EndpointForId(int a_id)
+        {
+            IPEndPoint ep = null;
+            _idMapping.TryGetValue(a_id, out ep);
+            return ep;
+        }
+
+        internal FFTcpClient ClientForID(int a_id)
+        {
+            FFTcpClient client = null;
+            IPEndPoint ep = null;
+            if (_idMapping.TryGetValue(a_id, out ep))
+            {
+                client = ClientForEP(ep);
+            }
+            return client;
+        }
+
         internal List<FFTcpClient> GetPlayersClients()
         {
             List<FFTcpClient> targetClients = new List<FFTcpClient>();
@@ -413,6 +431,7 @@ namespace FF.Network
 			
 			FFLog.LogError(EDbgCat.Networking, "Disconnected Client : " + a_endPoint.ToString());
 		}
+
         protected void OnClientDisconnection(FFTcpClient a_client, string a_reason)
         {
             DisconnectClient(a_client.Remote);
@@ -421,10 +440,20 @@ namespace FF.Network
         private void DisconnectClientOnMt(FFTcpClient a_client)
         {
             _clients.Remove(a_client.Remote);
+            _idMapping.Remove(a_client.NetworkID);
             UnregisterClientCallback(a_client);
             a_client.Close();
             if (onClientRemoved != null)
                 onClientRemoved(a_client);
+        }
+
+        /// <summary>
+        /// Cleanly remove a lost client
+        /// </summary>
+        internal void RemoveLostClient(int a_networkId)
+        {
+            _clients.Remove(_idMapping[a_networkId]);
+            _idMapping.Remove(a_networkId);
         }
         #endregion
 
@@ -489,8 +518,6 @@ namespace FF.Network
                 _replacedClients.Add(ep);
                 _idMapping[a_client.NetworkID] = a_client.Remote;
                 _endPointMapping[a_client.Remote] = a_client.NetworkID;
-                /*if(onPlayerReplaced != null)
-                    onPlayerReplaced(ep);*/
             }
             else
             {

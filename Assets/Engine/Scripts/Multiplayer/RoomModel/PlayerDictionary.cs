@@ -23,11 +23,14 @@ namespace FF.Multiplayer
 
             if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.onClientAdded += OnClientConnected;
-                Engine.Network.Server.onClientRemoved += OnClientDisconnected;
+                Engine.Game.CurrentRoom.onPlayerAdded += OnPlayerAdded;
+                Engine.Game.CurrentRoom.onPlayerRemoved += OnPlayerRemoved;
             }
         }
 
+        /// <summary>
+        /// Constructor for deserialization only
+        /// </summary>
         internal PlayerDictionary(bool a_empty) : base()
         {
             if (!a_empty)
@@ -41,21 +44,21 @@ namespace FF.Multiplayer
             Clear();
             if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.onClientAdded -= OnClientConnected;
-                Engine.Network.Server.onClientRemoved -= OnClientDisconnected;
+                Engine.Game.CurrentRoom.onPlayerAdded = null;
+                Engine.Game.CurrentRoom.onPlayerRemoved = null;
             }
         }
         #endregion
 
         #region Events
-        internal void OnClientConnected(FFTcpClient a_client)
+        protected void OnPlayerAdded(Room a_room, FFNetworkPlayer a_player)
         {
-            Add(a_client.NetworkID, new T());
+            Add(a_player.ID, new T());
         }
 
-        internal void OnClientDisconnected(FFTcpClient a_client)
+        protected void OnPlayerRemoved(Room a_room, FFNetworkPlayer a_player)
         {
-            Remove(a_client.NetworkID);
+            Remove(a_player.ID);
         }
         #endregion
 

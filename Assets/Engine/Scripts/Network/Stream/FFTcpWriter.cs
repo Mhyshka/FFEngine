@@ -76,22 +76,12 @@ namespace FF.Network
 				if(_shouldRun && _toSendMessages.Count > 0)
 				{
                     SentMessage toSend;
-					lock(_toSendMessages)
-					{
-						toSend = _toSendMessages.Peek();
-					}
-
-                    if (Write(toSend) || !toSend.IsMandatory)
-					{
-                        _ffClient.QueueWrittenMessage(toSend);
-                        if (_finalMessageRef == toSend)
-                            break;
-
-						lock(_toSendMessages)
-						{
-							_toSendMessages.Dequeue();
-						}
-					}
+                    lock (_toSendMessages)
+                    {
+                        toSend = _toSendMessages.Peek();
+                    }
+                    if (TrySendMessage(toSend))
+                        break;
                 }
 				else
 				{
@@ -100,8 +90,22 @@ namespace FF.Network
 			}
 			FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
 		}
-		
 
+        protected bool TrySendMessage(SentMessage toSend)
+        {
+            if (Write(toSend) || !toSend.IsMandatory)
+            {
+                _ffClient.QueueWrittenMessage(toSend);
+                if (_finalMessageRef == toSend)
+                    return true;
+
+                lock (_toSendMessages)
+                {
+                    _toSendMessages.Dequeue();
+                }
+            }
+            return false;
+        }
 		#endregion
 	}
 }

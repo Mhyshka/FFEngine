@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace FF.Pong
 {
     internal class PongSuccessWidget : MonoBehaviour
     {
         #region Inspector Properties
-        public Text successLabel = null;
-        public Text playerLabel = null;
+        public UILabel successLabel = null;
+        public UILabel playerLabel = null;
         public FFTween showTween = null;
         public Color blueSideColor = Color.blue;
         public Color purpleSideColor = Color.cyan;

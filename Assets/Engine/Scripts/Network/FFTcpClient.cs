@@ -203,7 +203,6 @@ namespace FF.Network
 
         internal virtual void Close()
         {
-            FFLog.Log(EDbgCat.Networking, "Closing Client");
             Stop();
             onConnectionEnded = null;
             onConnectionLost = null;
@@ -475,12 +474,12 @@ namespace FF.Network
                 }
                 catch (SocketException e)
                 {
-                    FFLog.LogWarning("Couldn't connect to server." + e.Message);
+                    FFLog.LogWarning(EDbgCat.Networking, "Couldn't connect to server." + e.Message);
                 }
             }
             else
             {
-                FFLog.LogWarning("Couldn't connect to server : Not lan network.");
+                FFLog.LogWarning(EDbgCat.Networking, "Couldn't connect to server : Not lan network.");
             }
             return false;
         }
@@ -515,7 +514,7 @@ namespace FF.Network
 
         internal virtual void ConnectionFailed()
         {
-            FFLog.Log(EDbgCat.Networking, "Connection Failed.");
+            //FFLog.Log(EDbgCat.Networking, "Connection Failed.");
             _isConnecting = false;
             _connectionTryCount++;
             FFTcpClient main = Engine.Network.MainClient;
@@ -571,8 +570,10 @@ namespace FF.Network
             _didEndConnection = false;
             if (onConnectionLost != null)
                 onConnectionLost(this);
+            
             if (onConnectionEnded != null)
                 onConnectionEnded(this, _endReason);
+
             Close();
         }
         #endregion

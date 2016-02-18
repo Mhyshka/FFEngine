@@ -14,6 +14,7 @@ namespace FF.UI
         public UILabel tipLabel = null;
         public GameObject loadingSlotPrefab = null;
         public GameObject widgetVerticalLayout = null;
+        public UIGrid playersGrid = null;
         #endregion
 
         #region Properties
@@ -49,16 +50,16 @@ namespace FF.UI
                     else
                         slotWidget.SetLoading(each);
 
-                    FFEventParameter args = new FFEventParameter();
-                    args.data = each.ID;
-                    slotWidget.kickButton.Data = args;
+                    slotWidget.kickButton.Data = each;
 
-                    newSlotGo.transform.SetParent(widgetVerticalLayout.transform);
-                    newSlotGo.transform.localPosition = Vector3.zero;
+                    playersGrid.AddChild(newSlotGo.transform);
+                    newSlotGo.transform.localRotation = Quaternion.identity;
                     newSlotGo.transform.localScale = Vector3.one;
+                    
                     _slotWidgetsById.Add(each.ID, slotWidget);
                 }
             }
+            playersGrid.Reposition();
         }
 
         internal void ClearLoading()
@@ -76,6 +77,7 @@ namespace FF.UI
             _slotWidgetsById.Remove(target.Player.ID);
             if (target != null)
                 Destroy(target.gameObject);
+            playersGrid.Reposition();
         }
         #endregion
 
@@ -110,6 +112,20 @@ namespace FF.UI
                         }
                     }
                 }
+            }
+
+            List<int> toRemove = new List<int>();
+            foreach (int id in _slotWidgetsById.Keys)
+            {
+                if (!a_room.players.ContainsKey(id))
+                {
+                    toRemove.Add(id);
+                }
+            }
+
+            foreach (int each in toRemove)
+            {
+                RemovePlayer(each);
             }
         }
 
