@@ -36,28 +36,16 @@ namespace FF.Multiplayer
 			}
 		}
 
-        protected IPEndPoint _ipEndPoint;
-        internal IPEndPoint IpEndPoint
-        {
-            get
-            {
-                if (Engine.Network.IsServer && ID == Engine.Network.NetworkID)
-                    return FFTcpServer.s_MockEP;
-                else
-                    return _ipEndPoint;
-            }
-            set
-            {
-                _ipEndPoint = value;
-            }
-        }
-
-        internal int _playerID = -1;
+        protected int _playerID = -1;
         internal int ID
         {
             get
             {
                 return _playerID;
+            }
+            set
+            {
+                _playerID = value;
             }
         }
         #endregion
@@ -73,11 +61,6 @@ namespace FF.Multiplayer
             _playerID = a_playerId;
 			player = a_player;
 		}
-
-        internal void SetEP(IPEndPoint a_ep)
-        {
-            _ipEndPoint = a_ep;
-        }
 		#endregion
 		
 		#region Serialization

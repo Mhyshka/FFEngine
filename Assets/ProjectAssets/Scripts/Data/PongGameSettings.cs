@@ -11,12 +11,12 @@ namespace FF.Pong
         public int requiredPointsToWin = 5;
 
         [Header("Ball")]
-        public float ballBaseVelocity = 12f;
-        public float smashSpeedMultiplier = 1.5f;
+        public BallSettings ballSettings = null;
 
-        /*[Header("Racket")]
-        public float lerpSpeed = 5f;
-        public float moveSpeed = 1f;*/
+        [Header("Racket")]
+        public RacketSettings racketSettings = null;
+
+
         #endregion
 
         /*[MenuItem("Game Data/New PongGameSettings")]

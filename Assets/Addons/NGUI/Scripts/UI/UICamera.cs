@@ -2326,8 +2326,12 @@ public class UICamera : MonoBehaviour
 				}
 				else if (currentTouch.clickNotification == ClickNotification.BasedOnDelta && click < mag)
 				{
-					// We've dragged far enough to cancel the click
-					currentTouch.clickNotification = ClickNotification.None;
+                    UIButton button = hoveredObject.GetComponent<UIButton>();
+                    if (button == null || !button.dragHighlight)
+                    {
+                        // We've dragged far enough to cancel the click
+                        currentTouch.clickNotification = ClickNotification.None;
+                    }
 				}
 			}
 		}

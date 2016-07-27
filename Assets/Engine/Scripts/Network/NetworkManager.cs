@@ -16,36 +16,76 @@ namespace FF.Network
     {
         private static string GAME_PROTOCOL = "_pong._tcp.";
 
-        #region Server Properties
-        protected FFTcpServer _server;
-        internal FFTcpServer Server
+        /// <summary>
+        /// Size 3 : 1.0.0
+        /// </summary>
+        protected FFVersion _version;
+        internal FFVersion NetworkVersion
         {
             get
             {
-                return _server;
+                if (_version == null)
+                    _version = new FFVersion(1, 0, 0);
+                return _version;
+            }
+        }
+
+        #region Server Properties
+        protected FFTcpServer _tcpServer;
+        internal FFTcpServer TcpServer
+        {
+            get
+            {
+                return _tcpServer;
+            }
+        }
+
+        protected FFGameServer _gameServer;
+        internal FFGameServer GameServer
+        {
+            get
+            {
+                return _gameServer;
             }
         }
         #endregion
 
         #region Client Properties
-        protected Dictionary<IPEndPoint, FFTcpClient> _clients;
-        internal Dictionary<IPEndPoint, FFTcpClient> Clients
-        {
-            get
-            {
-                return _clients;
-            }
-        }
-
-        protected Dictionary<IPEndPoint, Room> _rooms;
-       
-
-        protected FFTcpClient _mainClient;
-        internal FFTcpClient MainClient
+        protected FFClientWrapper _mainClient;
+        internal FFClientWrapper MainClient
         {
             get
             {
                 return _mainClient;
+            }
+        }
+
+        /// <summary>
+        /// Returns the loopback client ID if server.
+        /// Returns the main client ID if client.
+        /// </summary>
+        internal int NetworkId
+        {
+            get
+            {
+                if (IsServer)
+                {
+                    return _tcpServer.LoopbackClient.NetworkID;
+                }
+                else if (_mainClient != null)
+                {
+                    return _mainClient.NetworkID;
+                }
+
+                return -1;
+            }
+        }
+
+        internal FFNetworkPlayer NetPlayer
+        {
+            get
+            {
+                return CurrentRoom.PlayerForId(NetworkId);
             }
         }
 
@@ -60,47 +100,43 @@ namespace FF.Network
         }
         #endregion
 
-        #region Player properties
-        protected int _networkID = -1;
-        protected bool _wasGenerated = false;
-        internal int NetworkID
+        #region Room Manager
+        protected Room _currentRoom;
+        internal Room CurrentRoom
         {
             get
             {
-                if (!_wasGenerated)
-                {
-                    _wasGenerated = true;
-                    string toHash = NetworkIP.ToString() + UnityEngine.Random.Range(int.MinValue, int.MaxValue).ToString();
-                    _networkID = toHash.GetHashCode();
-                    FFLog.Log(EDbgCat.Networking, "Generated new NetworkID : " + _networkID.ToString());
-                }
-                return _networkID;
+                return _currentRoom;
             }
         }
-		#endregion
-		
-		
-		#region Manager
-		internal NetworkManager()
+
+        protected ClientRoomManager _clientRoomManager;
+        internal ClientRoomManager ClientRoomManager
+        {
+            get
+            {
+                return _clientRoomManager;
+            }
+        }
+
+        protected ServerRoomManager _serverRoomManager;
+        #endregion
+
+        #region Manager
+        internal NetworkManager()
 		{
 			_mainClient = null;
-			_clients = new Dictionary<IPEndPoint, FFTcpClient>();
-			_rooms = new Dictionary<IPEndPoint, Room>();
-		}
+            _clientRoomManager = new ClientRoomManager(this);
+            _serverRoomManager = new ServerRoomManager();
+        }
 
         internal override void TearDown()
         {
-			StopBroadcastingGame();
-			StopLookingForGames();
-			StopServer();
-			
-			foreach(IPEndPoint endpoint in _clients.Keys)
-			{
-				_clients[endpoint].Close();
-			}
-			_clients.Clear();
-			
-			_rooms.Clear();
+            _clientRoomManager.TearDown();
+            _serverRoomManager.TearDown();
+
+            if(IsServer)
+			    StopServer();
 			
 			if(_mainClient != null)
 				_mainClient.Close();
@@ -108,49 +144,74 @@ namespace FF.Network
 	
 		internal override void DoFixedUpdate()
 		{
-            foreach (FFTcpClient each in _clients.Values)
-            {
-                if (each != null)
-                    each.DoUpdate();
-            }
+            if (_tcpServer != null)
+				_tcpServer.DoUpdate();
 
-            if (_didStopLookingForGames)
-            {
-                _didStopLookingForGames = false;
-                _rooms.Clear();
-                foreach (FFTcpClient client in _clients.Values)
-                {
-                    if (client != _mainClient)
-                        client.Close();
-                }
-                _clients.Clear();
-            }
+            _clientRoomManager.DoUpdate();
+            _serverRoomManager.DoUpdate();
 
-            if (_server != null)
-				_server.DoUpdate();
-				
-			if(_mainClient != null)
-			{
-				_mainClient.DoUpdate();
-			}
+            if (_mainClient != null)
+                _mainClient.DoUpdate();
 		}
-		#endregion
-		
-		#region IP
-		internal IPAddress NetworkIP
+        #endregion
+
+        #region IP
+        protected int _preferedPort = 0;
+        internal int PreferedPort
+        {
+            set
+            {
+                _preferedPort = value;
+            }
+            get
+            {
+                return _preferedPort;
+            }
+        }
+
+        protected IPAddress _preferedNetworkAddress = null;
+        internal IPAddress PreferedNetworkAddress
+        {
+            set
+            {
+                if (NetworkAddresses.Contains(value))
+                {
+                    _preferedNetworkAddress = value;
+                }
+                else
+                {
+                    FFLog.LogWarning(EDbgCat.Networking, "Couldn't set prefered network address : " + value.ToString());
+                }
+            }
+            get
+            {
+                if (_preferedNetworkAddress == null)
+                {
+                    List<IPAddress> addresses = NetworkAddresses;
+                    if (addresses.Count > 0)
+                        _preferedNetworkAddress = addresses[0];
+                    else
+                        _preferedNetworkAddress = IPAddress.Loopback;
+                }
+
+                return _preferedNetworkAddress;
+            }
+        }
+
+		internal List<IPAddress> NetworkAddresses
 		{
 			get
 			{
 				IPAddress[] ipAddresses = Dns.GetHostAddresses (Dns.GetHostName());
+                List<IPAddress> addresses = new List<IPAddress>();
 				foreach(IPAddress each in ipAddresses)
 				{
 					if(each.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(each))
 					{
-						return each;
-					}
+                        addresses.Add(each);
+                    }
 				}
-				
-				return IPAddress.Loopback;
+				return addresses;
 			}
 		}
 		#endregion
@@ -161,244 +222,160 @@ namespace FF.Network
 		{
 			get
 			{
-				return _server != null;
+				return _tcpServer != null && _gameServer != null;
 			}
 		}
-		
-		internal void StartBroadcastingGame(string a_roomName = "My Zeroconf Room")
-		{
-			if(_server == null)
-			{
-				_server = new FFTcpServer(NetworkIP);
 
-                Engine.Game.NetPlayer.SetEP(_server.LocalEndpoint);
-				
-				Engine.Game.PrepareRoom(a_roomName);
-				ZeroconfManager.Instance.Host.onStartAdvertisingSuccess += OnStartAdvertisingSuccess;
-				ZeroconfManager.Instance.Host.onStartAdvertisingFailed += OnStartAdvertisingFailed;
-				ZeroconfManager.Instance.Host.StartAdvertising(GAME_PROTOCOL, a_roomName, _server.Port);
-			}
-			else
-			{
-				FFLog.LogWarning(EDbgCat.Networking, "You're trying to start another server.");
-			}
-			
-		}
-		
-		internal void StopBroadcastingGame()
-		{
-			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
-			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
-			if(_server != null)
-			{
-				ZeroconfManager.Instance.Host.StopAdvertising();
-                //_server.PauseAcceptingConnections();
-			}
-			else
-			{
-				FFLog.LogWarning(EDbgCat.Networking, "Server wasn't running.");
-			}
-		}
-		
-		internal void StopServer()
-		{
-			if(_server != null)
-			{
-				_server.Close();
-				_server = null;
-			}
-		}
-        #endregion
-
-        #region Zeroconf Host
-        protected void OnStartAdvertisingSuccess()
-		{
-			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
-			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
-			_server.StartAcceptingConnections();
-			FFLog.Log(EDbgCat.Networking, "Start advertising success. Awaiting connections.");
-		}
-		
-		protected void OnStartAdvertisingFailed()
-		{
-			ZeroconfManager.Instance.Host.onStartAdvertisingSuccess -= OnStartAdvertisingSuccess;
-			ZeroconfManager.Instance.Host.onStartAdvertisingFailed -= OnStartAdvertisingFailed;
-			StopServer();
-			FFLog.LogWarning(EDbgCat.Networking, "Start advertising failed. Closing server.");
-		}
-        #endregion
-
-        #region Client
-        internal MessagePlayerData SetMainClient(Room a_room)
+        internal void StartServer(string a_roomName = "My Zeroconf Room")
         {
-            if (_clients.TryGetValue(a_room.serverEndPoint, out _mainClient))
+            if (_tcpServer == null)
             {
-                Engine.Game.NetPlayer.SetEP(_mainClient.Local);
-                Engine.Game.SetCurrentRoom(a_room);
+                _tcpServer = new FFTcpServer(PreferedNetworkAddress, PreferedPort);
+                _gameServer = new FFGameServer(_tcpServer);
+
+                _currentRoom = _serverRoomManager.PrepareRoom(a_roomName);
+
+                FFNetworkPlayer netPlayer = new FFNetworkPlayer(_tcpServer.LoopbackClient.NetworkID,
+                                                                Engine.Game.Player);
+                netPlayer.isHost = true;
+                _currentRoom.SetPlayer(new SlotRef(0, 0),
+                                        netPlayer);
+
+
+                _serverRoomManager.RegisterReceivers();
             }
             else
             {
-                FFLog.LogError(EDbgCat.Networking, "Trying to connect main client while already used.");
+                FFLog.LogWarning(EDbgCat.Networking, "You're trying to start another server.");
             }
-
-            return null;
         }
 
-        internal void CloseMainClient()
-        {
-            if (_mainClient != null)
-                _mainClient.Close();
-            SetNoMainClient();
-        }
-
-        internal void SetNoMainClient()
-        {
-            _mainClient = null;
-            Engine.Game.CurrentRoom.TearDown();
-            Engine.Game.SetCurrentRoom(null);
-        }
-
-        internal void TryCloseClient(IPEndPoint a_endpoint)
-        {
-            FFTcpClient client = null;
-            if (_clients.TryGetValue(a_endpoint, out client))
+        internal void StopServer()
+		{
+			if(_tcpServer != null)
+			{
+				_tcpServer.Close();
+				_tcpServer = null;
+			}
+            if (_gameServer != null)
             {
-                client.Close();
-                _clients.Remove(client.Remote);
-                _rooms.Remove(client.Remote);
+                _gameServer.Close();
+                _gameServer = null;
             }
+            _serverRoomManager.UnregisterReceivers();
 
-            if (_mainClient != null && _mainClient.Remote == a_endpoint)
+            if (_currentRoom != null)
             {
-                SetNoMainClient();
-                _clients.Remove(client.Remote);
-                _rooms.Remove(client.Remote);
+                _currentRoom.TearDown();
+                _currentRoom = null;
             }
+        }
+
+        internal void StartBroadcastingGame(string a_gameName)
+        {
+            if (IsServer)
+            {
+                _serverRoomManager.StartBroadcastingGame(GAME_PROTOCOL, a_gameName, _tcpServer.Port, OnBroadcastingStartSuccess, null);
+            }
+            else
+            {
+                FFLog.LogWarning(EDbgCat.Networking, "Can't start broadcasting game : server isn't start. Call StartServer first.");
+            }
+        }
+
+        internal void StopBroadcastingGame()
+        {
+            if (IsServer)
+            {
+                _serverRoomManager.StopBroadcastingGame();
+            }
+            else
+            {
+                FFLog.LogWarning(EDbgCat.Networking, "Can't stop broadcasting game : server isn't start. Call StartServer first.");
+            }
+        }
+
+        protected void OnBroadcastingStartSuccess()
+        {
+            if(IsServer)
+                _tcpServer.ResumeAcceptingConnections();
         }
         #endregion
 
-        #region Zeroconf Clients
-        protected bool _isLookingForRoom;
-        internal bool IsLookingForRoom
-        {
-            get
-            {
-                return _isLookingForRoom;
-            }
-        }
-
+        #region Client
         internal void StartLookingForGames()
-		{
-			ZeroconfManager.Instance.Client.onStartDiscoverySuccess += OnStartDiscoverySuccess;
-			ZeroconfManager.Instance.Client.onStartDiscoveryFailed += OnStartDiscoveryFailed;
-			ZeroconfManager.Instance.Client.StartDiscovery(GAME_PROTOCOL);
-            _isLookingForRoom = true;
-            _didStopLookingForGames = false;
+        {
+            _clientRoomManager.StartLookingForGames(GAME_PROTOCOL);
         }
 
-        protected bool _didStopLookingForGames = false;
         internal void StopLookingForGames()
-		{
-            _isLookingForRoom = false;
-            ZeroconfManager.Instance.Client.StopDiscovery();
-			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
-			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
-			ZeroconfManager.Instance.Client.onRoomAdded -= OnServiceFound;
-			ZeroconfManager.Instance.Client.onRoomLost -= OnServiceLost;
-            _didStopLookingForGames = true;
-		}
+        {
+            _clientRoomManager.StopLookingForGames();
+        }
 
-		protected void OnStartDiscoverySuccess()
-		{
-			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
-			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
-			FFLog.Log(EDbgCat.Networking, "Start discovery success. Looking for rooms.");
-			
-			ZeroconfManager.Instance.Client.onRoomAdded += OnServiceFound;
-			ZeroconfManager.Instance.Client.onRoomLost += OnServiceLost;
-		}
-		
-		protected void OnStartDiscoveryFailed()
-		{
-			ZeroconfManager.Instance.Client.onStartDiscoverySuccess -= OnStartDiscoverySuccess;
-			ZeroconfManager.Instance.Client.onStartDiscoveryFailed -= OnStartDiscoveryFailed;
-			FFLog.LogWarning(EDbgCat.Networking, "Start discovery failed.");
-		}
-		#endregion
-		
-		#region Room Discovery
-		protected FFTcpClient ContactRoom(ZeroconfRoom a_room)
-		{
-			FFTcpClient newClient = new FFTcpClient(NetworkID,
-                                                    new IPEndPoint(NetworkIP,0),
-			                                    	 a_room.EndPoint);
-			newClient.Connect();
-			return newClient;
-		}
-		
-		protected void OnServiceFound(ZeroconfRoom a_room)
-		{
-			_clients.Add(a_room.EndPoint, ContactRoom(a_room));
-			FFLog.Log(EDbgCat.Networking, "New room : " + a_room.roomName.ToString() + " - " + a_room.EndPoint.ToString());
-		}
-		
-		internal Multiplayer.RoomCallback onRoomLost;
-		protected void OnServiceLost(ZeroconfRoom a_room)
-		{
-            FFLog.Log(EDbgCat.Networking, "Trying to remove room : " + a_room.roomName.ToString());
-            if (a_room.EndPoint != null)
+        /// <summary>
+        /// Extract room & client matching given endpoint and set the CurrentRoom & MainClient value.
+        /// </summary>
+        internal void JoinRoom(IPEndPoint a_roomEndpoint)
+        {
+            if (_currentRoom == null)
             {
-                FFTcpClient client = null;
-                if (_clients.TryGetValue(a_room.EndPoint, out client))
-                {
-                    _clients[a_room.EndPoint].Close();
-                    _clients.Remove(a_room.EndPoint);
-                }
-
-                Room room = null;
-                if (_rooms.TryGetValue(a_room.EndPoint, out room))
-                {
-                    if (onRoomLost != null)
-                        onRoomLost(room);
-                    _rooms.Remove(a_room.EndPoint);
-                }
+                _clientRoomManager.JoinRoom(a_roomEndpoint,
+                                            ref _currentRoom,
+                                            ref _mainClient);
             }
-		}
+            else
+            {
+                FFLog.LogError(EDbgCat.Networking, "Can't join two room at the same time.");
+            }
+        }
+
+        /// <summary>
+        /// Kill current room & close main client
+        /// </summary>
+        internal void LeaveCurrentRoom(bool a_needsEvent = false)
+        {
+            if (_currentRoom != null)
+            {
+                _currentRoom.TearDown();
+                _currentRoom = null;
+
+                _clientRoomManager.LeaveCurrentRoom();
+            }
+            else
+            {
+                FFLog.LogError(EDbgCat.Networking, "Can't leave current room -> Not set.");
+            }
+
+            if (_mainClient != null)
+            {            
+                if(!a_needsEvent)
+                    _mainClient.onConnectionEnded = null;
+                _mainClient.Close();
+                _mainClient = null;
+            }
+            else
+            {
+                FFLog.LogError(EDbgCat.Networking, "Can't close main client -> Not set.");
+            }
+
+        }
+
+        #region Direct Connect
+        internal FFClientWrapper DirectConnect(IPEndPoint a_endpoint)
+        {
+            _mainClient = new FFClientWrapper(new IPEndPoint(PreferedNetworkAddress, 0),
+                                                            a_endpoint);
+            _mainClient.Connect();
+            return _mainClient;
+        }
+
+        internal void DirectConnectSetRoom(Room a_room)
+        {
+            _currentRoom = a_room;
+            _clientRoomManager.RegisterRoomReceivers();
+        }
         #endregion
-
-
-        #region Room
-        internal Multiplayer.RoomCallback onNewRoomReceived;
-
-        internal void OnRoomInfosReceived(Room a_room)
-		{
-			//CURRENT ROOM UPDATED
-			if(_mainClient != null && a_room.serverEndPoint == _mainClient.Remote)
-			{
-				FFLog.Log(EDbgCat.Networking, "Updating main room infos");
-				Engine.Game.CurrentRoom.UpdateWithRoom(a_room);
-                if (Engine.Game.CurrentRoom.GetPlayerForId(NetworkID) == null)
-                {
-                    _mainClient.EndConnection("Removed from room");
-                }
-			}
-			else if(_rooms.ContainsKey(a_room.serverEndPoint))//A room in the list was updated
-			{
-				FFLog.Log(EDbgCat.Networking, "Updating room infos");
-				_rooms[a_room.serverEndPoint].UpdateWithRoom(a_room);
-			}
-			else//A new room can be display in the list
-			{
-				FFLog.Log(EDbgCat.Networking, "New room infos received");
-				_rooms.Add(a_room.serverEndPoint,a_room);
-				if(onNewRoomReceived != null)
-					onNewRoomReceived(a_room);
-			}
-		}
-        #endregion
-
-        #region Message Handlers
-
         #endregion
     }
 }

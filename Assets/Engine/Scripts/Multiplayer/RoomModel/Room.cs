@@ -5,6 +5,7 @@ using System.Net;
 using System;
 
 using FF.Network;
+using FF.Handler;
 using FF.Network.Message;
 
 namespace FF.Multiplayer
@@ -16,7 +17,6 @@ namespace FF.Multiplayer
 	{
 		#region Properties
 		internal string roomName;
-		internal List<Team> teams;
 		internal bool IsSecondScreenActive
 		{
 			get
@@ -31,21 +31,23 @@ namespace FF.Multiplayer
         internal RoomPlayerCallback onPlayerRemoved = null;
         internal RoomPlayerCallback onPlayerAdded = null;
 
-        internal Dictionary<int, FFNetworkPlayer> players = null;
 
-        protected HashSet<int> _bannedId = null;
+        protected HashSet<IPAddress> _bannedIps = null;
 		#endregion
 		
 		public Room()
 		{
-			teams = new List<Team> ();
-            players = new Dictionary<int, FFNetworkPlayer>();
-            _bannedId = new HashSet<int>();
+			_teams = new List<Team> ();
+            _players = new Dictionary<int, FFNetworkPlayer>();
+            _bannedIps = new HashSet<IPAddress>();
+
+            _dcedPlayerIds = new HashSet<int>();
 
             if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.onClientLost += OnClientConnectionLost;
-                Engine.Network.Server.onClientReconnection += OnClientReconnection;
+                Engine.Network.GameServer.onClientConnectionLost += OnClientConnectionLost;
+                Engine.Network.GameServer.onClientReconnected += OnClientReconnection;
+                Engine.Network.GameServer.onClientRemoved += OnClientRemoved;
             } 
         }
 
@@ -57,228 +59,79 @@ namespace FF.Multiplayer
 
             if (Engine.Network.IsServer)
             {
-                Engine.Network.Server.onClientLost -= OnClientConnectionLost;
-                Engine.Network.Server.onClientReconnection -= OnClientReconnection;
+                Engine.Network.GameServer.onClientConnectionLost -= OnClientConnectionLost;
+                Engine.Network.GameServer.onClientReconnected -= OnClientReconnection;
+                Engine.Network.GameServer.onClientRemoved -= OnClientRemoved;
             } 
         }
 
-		#region Accessing Player
-		internal FFNetworkPlayer GetPlayerForEndpoint(IPEndPoint a_endpoint)
-		{
-            FFNetworkPlayer player = null;
-            foreach (FFNetworkPlayer each in players.Values)
+        #region Teams
+        protected List<Team> _teams;
+
+        internal void AddTeam(Team a_teamToAdd)
+        {
+            _teams.Add(a_teamToAdd);
+            a_teamToAdd.teamIndex = _teams.Count - 1;
+        }
+
+        internal List<Team> Teams
+        {
+            get
             {
-                if (each.IpEndPoint == a_endpoint)
+                return _teams;
+            }
+        }
+        #endregion
+
+
+        #region Slots
+        #region Properties
+        internal bool IsFull
+        {
+            get
+            {
+                return SlotsLeft == 0;
+            }
+        }
+
+        internal int SlotsLeft
+        {
+            get
+            {
+                return TotalSlots - TotalPlayers;
+            }
+        }
+
+        internal int TotalSlots
+        {
+            get
+            {
+                int count = 0;
+                foreach (Team each in _teams)
                 {
-                    player = each;
+                    count += each.TotalSlots;
+                }
+                return count;
+            }
+        }
+
+        internal virtual Slot NextAvailableSlot()
+        {
+            Slot slot = null;
+            foreach (Team aTeam in _teams)
+            {
+                if (!aTeam.IsFull)
+                {
+                    slot = aTeam.NextAvailableSlot();
                     break;
                 }
             }
-
-            if(player == null)
-                FFLog.LogWarning(EDbgCat.Networking, "Couldn't found player in room for EP : " + a_endpoint);
-
-            return player;
-		}
-
-        internal FFNetworkPlayer GetPlayerForId(int a_networkId)
-        {
-            FFNetworkPlayer player = null;
-            if (!players.TryGetValue(a_networkId, out player))
-            {
-                FFLog.LogWarning(EDbgCat.Networking, "Couldn't found player in room for ID : " + a_networkId);
-            }
-
-            return player;
+            return slot;
         }
-
-        internal FFNetworkPlayer GetPlayerForSlot(SlotRef a_ref)
-        {
-            return GetSlotForRef(a_ref).netPlayer;
-        }
-
-        internal bool IsBanned(int a_id)
-        {
-            return _bannedId.Contains(a_id);
-        }
-
-        internal void BanId(int a_id)
-        {
-            _bannedId.Add(a_id);
-        }
-
-        internal void UnbanId(int a_id)
-        {
-            _bannedId.Remove(a_id);
-        }
-        #endregion
-
-        #region Add Player
-        internal void SetPlayer(SlotRef a_slotRef, FFNetworkPlayer a_player)
-        {
-            SetPlayer(a_slotRef.teamIndex, a_slotRef.slotIndex, a_player);
-        }
-
-        internal void SetPlayer (int a_teamIndex, int a_slotIndex, FFNetworkPlayer a_player)
-		{
-            FFLog.Log(EDbgCat.Networking, "Adding player to room : " + a_player.IpEndPoint.ToString() + " id : " + a_player.ID.ToString());
-            players.Add(a_player.ID, a_player);
-
-            teams[a_teamIndex].Slots[a_slotIndex].SetPlayer(a_player);
-            if (onRoomUpdated != null)
-				onRoomUpdated(this);
-
-            if (onPlayerAdded != null)
-                onPlayerAdded(this, a_player);
-        }
-        #endregion
-
-        #region Removing Player
-        internal void RemovePlayer (int a_teamIndex, int a_slotIndex)
-		{
-            RemovePlayer(new SlotRef(a_teamIndex, a_slotIndex));
-		}
-
-        internal void RemovePlayer(SlotRef a_slotRef)
-        {
-            FFNetworkPlayer player = GetPlayerForSlot(a_slotRef);
-            if (player != null)
-                RemovePlayer(player.ID);
-            else
-                FFLog.LogError("No player in slot : " + a_slotRef.ToString());
-        }
-
-        internal void RemovePlayer(int a_ID)
-        {
-            FFNetworkPlayer player = null;
-            if (players.TryGetValue(a_ID, out player))
-            {
-                players.Remove(player.ID);
-                player.slot.netPlayer = null;
-
-                FFLog.Log("Removing player : " + player.ID.ToString());
-
-                if (onRoomUpdated != null)
-                    onRoomUpdated(this);
-
-                if (onPlayerRemoved != null)
-                    onPlayerRemoved(this, player);
-            }
-            else
-            {
-                FFLog.LogError(EDbgCat.Networking, "Couldn't remove player for ID : " + a_ID);
-            }
-        }
-        #endregion
-
-        #region Moving Player
-        internal void MovePlayer(SlotRef from, SlotRef to)
-		{
-			if(teams[to.teamIndex].Slots[to.slotIndex].netPlayer == null)
-			{
-				if(teams[from.teamIndex].Slots[from.slotIndex].netPlayer != null)
-				{
-                    FFNetworkPlayer player = teams[from.teamIndex].Slots[from.slotIndex].netPlayer;
-                    GetSlotForRef(to).SetPlayer(player);
-                    GetSlotForRef(from).netPlayer = null;
-					if(onRoomUpdated != null)
-						onRoomUpdated(this);
-				}
-				
-			}
-		}
-
-        internal void SwapPlayers(SlotRef a_firstPlayer, SlotRef a_secondPlayer)
-        {
-            Slot firstSlot = GetSlotForRef(a_firstPlayer);
-            Slot secondSlot = GetSlotForRef(a_secondPlayer);
-            if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
-            {
-                FFNetworkPlayer tmp = firstSlot.netPlayer;
-                firstSlot.SetPlayer(secondSlot.netPlayer);
-                secondSlot.SetPlayer(tmp);
-
-                if (onRoomUpdated != null)
-                    onRoomUpdated(this);
-            }
-        }
-
-        internal void SwapPlayers(int a_firstPlayer, int a_secondPlayer)
-        {
-            FFNetworkPlayer firstPlayer = GetPlayerForId(a_firstPlayer);
-            FFNetworkPlayer secondPlayer = GetPlayerForId(a_secondPlayer);
-            if (firstPlayer != null && secondPlayer != null)
-            {
-                Slot firstSlot = firstPlayer.slot;
-                Slot secondSlot = secondPlayer.slot;
-
-                if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
-                {
-                    firstSlot.SetPlayer(firstPlayer);
-                    secondSlot.SetPlayer(secondPlayer);
-
-                    if (onRoomUpdated != null)
-                        onRoomUpdated(this);
-                }
-            }
-        }
-        #endregion
-
-        #region Teams Management
-        internal void AddTeam(Team a_teamToAdd)
-		{
-			teams.Add(a_teamToAdd);
-			a_teamToAdd.teamIndex = teams.Count-1;
-		}
-		#endregion
-		
-		#region Slots Properties
-		internal bool IsFull
-		{
-			get
-			{
-				return SlotsLeft == 0;
-			}
-		}
-		
-		internal int SlotsLeft
-		{
-			get
-			{
-				return TotalSlots - TotalPlayers;
-			}
-		}
-
-        internal int TotalSlots
-		{
-			get
-			{
-				int count = 0;
-				foreach(Team each in teams)
-				{
-					count += each.TotalSlots;
-				}
-				return count;
-			}
-		}
-		
-		internal virtual Slot NextAvailableSlot()
-		{
-			Slot slot = null;
-			foreach(Team aTeam in teams)
-			{
-				if(!aTeam.IsFull)
-				{
-					slot = aTeam.NextAvailableSlot();
-					break;
-				}
-			}
-			return slot;	
-		}
 
         internal Slot GetSlotForRef(SlotRef a_ref)
         {
-            return teams[a_ref.teamIndex].Slots[a_ref.slotIndex];
+            return _teams[a_ref.teamIndex].Slots[a_ref.slotIndex];
         }
         #endregion
 
@@ -290,13 +143,101 @@ namespace FF.Multiplayer
                 return TotalSlots - TotalPlayableSlots;
             }
         }
+        #endregion
+
+        #region Players
+        internal int TotalPlayableSlots
+        {
+            get
+            {
+                int count = 0;
+                foreach (Team each in _teams)
+                {
+                    count += each.TotalPlayableSlots;
+                }
+                return count;
+            }
+        }
+        #endregion
+        #endregion
+
+        #region Players
+        protected Dictionary<int, FFNetworkPlayer> _players = null;
+        internal Dictionary<int, FFNetworkPlayer> Players
+        {
+            get
+            {
+                return _players;
+            }
+        }
+
+        #region Getters
+        internal List<int> GetPlayersIds(bool a_includeSpectators = true)
+        {
+            List<int> ids = new List<int>();
+            foreach (FFNetworkPlayer each in _players.Values)
+            {
+                if (each.slot.isPlayableSlot || a_includeSpectators)
+                    ids.Add(each.ID);
+            }
+            return ids;
+        }
+
+        internal FFNetworkPlayer PlayerForId(int a_networkId)
+        {
+            FFNetworkPlayer player = null;
+            if (!_players.TryGetValue(a_networkId, out player))
+            {
+                FFLog.LogWarning(EDbgCat.Room, "Couldn't found player in room for ID : " + a_networkId);
+            }
+
+            return player;
+        }
+
+        internal List<FFNetworkPlayer> DcedPlayers
+        {
+            get
+            {
+                List<FFNetworkPlayer> players = new List<FFNetworkPlayer>();
+                foreach (Team aTeam in _teams)
+                {
+                    foreach (Slot aSlot in aTeam.Slots)
+                    {
+                        if (aSlot.netPlayer != null && aSlot.netPlayer.isDced)
+                        {
+                            players.Add(aSlot.netPlayer);
+                        }
+                    }
+                }
+                return players;
+            }
+        }
+
+        internal FFNetworkPlayer GetPlayerForSlot(SlotRef a_ref)
+        {
+            return GetSlotForRef(a_ref).netPlayer;
+        }
+
+        internal int TotalPlayers
+        {
+            get
+            {
+                int count = 0;
+                foreach (Team aTeam in _teams)
+                {
+                    count += aTeam.TotalPlayers;
+                }
+
+                return count;
+            }
+        }
 
         internal int TotalSpectatorPlayers
         {
             get
             {
                 int count = 0;
-                foreach (Team aTeam in teams)
+                foreach (Team aTeam in _teams)
                 {
                     foreach (Slot aSlot in aTeam.Slots)
                     {
@@ -311,52 +252,132 @@ namespace FF.Multiplayer
         }
         #endregion
 
-        #region Players
-
-        internal int TotalPlayers
+        #region Add
+        internal void SetPlayer(SlotRef a_slotRef, FFNetworkPlayer a_player)
         {
-            get
+            SetPlayer(a_slotRef.teamIndex, a_slotRef.slotIndex, a_player);
+        }
+
+        internal void SetPlayer(int a_teamIndex, int a_slotIndex, FFNetworkPlayer a_player)
+        {
+            FFLog.Log(EDbgCat.Room, "Adding player to room - id : " + a_player.ID.ToString());
+            _players.Add(a_player.ID, a_player);
+
+            _teams[a_teamIndex].Slots[a_slotIndex].SetPlayer(a_player);
+
+            UpdateRoom();
+
+            if (onPlayerAdded != null)
+                onPlayerAdded(this, a_player);
+        }
+        #endregion
+
+        #region Removing Player
+        internal void RemovePlayer(int a_teamIndex, int a_slotIndex)
+        {
+            RemovePlayer(new SlotRef(a_teamIndex, a_slotIndex));
+        }
+
+        internal void RemovePlayer(SlotRef a_slotRef)
+        {
+            FFNetworkPlayer player = GetPlayerForSlot(a_slotRef);
+            if (player != null)
+                RemovePlayer(player.ID);
+            else
+                FFLog.LogError(EDbgCat.Room, "No player in slot : " + a_slotRef.ToString());
+        }
+
+        internal void RemovePlayer(int a_ID, bool a_disconnectClient = true)
+        {
+            FFNetworkPlayer player = null;
+            if (_players.TryGetValue(a_ID, out player))
             {
-                int count = 0;
-                foreach (Team aTeam in teams)
+                _players.Remove(player.ID);
+                player.slot.netPlayer = null;
+
+                FFLog.Log(EDbgCat.Room, "Removing player : " + player.ID.ToString());
+
+                if (a_disconnectClient)
+                    Engine.Network.GameServer.RemoveAndDisconnectClient(a_ID);
+
+                UpdateRoom();
+
+                if (onPlayerRemoved != null)
+                    onPlayerRemoved(this, player);
+            }
+            else
+            {
+                FFLog.LogWarning(EDbgCat.Room, "Couldn't remove player for ID : " + a_ID);
+            }
+        }
+        #endregion
+
+        #region Moving Player
+        internal void MovePlayer(SlotRef from, SlotRef to)
+        {
+            if (_teams[to.teamIndex].Slots[to.slotIndex].netPlayer == null)
+            {
+                if (_teams[from.teamIndex].Slots[from.slotIndex].netPlayer != null)
                 {
-                    count += aTeam.TotalPlayers;
+                    FFNetworkPlayer player = _teams[from.teamIndex].Slots[from.slotIndex].netPlayer;
+                    GetSlotForRef(to).SetPlayer(player);
+                    GetSlotForRef(from).netPlayer = null;
+                    UpdateRoom();
                 }
 
-                return count;
             }
         }
 
-        internal int TotalPlayableSlots
+        internal void SwapPlayers(SlotRef a_firstPlayer, SlotRef a_secondPlayer)
         {
-            get
+            Slot firstSlot = GetSlotForRef(a_firstPlayer);
+            Slot secondSlot = GetSlotForRef(a_secondPlayer);
+            if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
             {
-                int count = 0;
-                foreach (Team each in teams)
-                {
-                    count += each.TotalPlayableSlots;
-                }
-                return count;
+                FFNetworkPlayer tmp = firstSlot.netPlayer;
+                firstSlot.SetPlayer(secondSlot.netPlayer);
+                secondSlot.SetPlayer(tmp);
+
+                UpdateRoom();
             }
         }
 
-        internal List<FFNetworkPlayer> DcedPlayers
+        internal void SwapPlayers(int a_firstPlayer, int a_secondPlayer)
         {
-            get
+            FFNetworkPlayer firstPlayer = PlayerForId(a_firstPlayer);
+            FFNetworkPlayer secondPlayer = PlayerForId(a_secondPlayer);
+            if (firstPlayer != null && secondPlayer != null)
             {
-                List<FFNetworkPlayer> players = new List<FFNetworkPlayer>();
-                foreach (Team aTeam in teams)
+                Slot firstSlot = firstPlayer.slot;
+                Slot secondSlot = secondPlayer.slot;
+
+                if (firstSlot.netPlayer != null && secondSlot.netPlayer != null)
                 {
-                    foreach (Slot aSlot in aTeam.Slots)
-                    {
-                        if (aSlot.netPlayer != null && aSlot.netPlayer.isDced)
-                        {
-                            players.Add(aSlot.netPlayer);
-                        }
-                    }
+                    firstSlot.SetPlayer(firstPlayer);
+                    secondSlot.SetPlayer(secondPlayer);
+
+                    UpdateRoom();
                 }
-                return players;
             }
+        }
+        #endregion
+        #endregion
+       
+
+        #region Ban
+        internal bool IsBanned(IPAddress a_ip)
+        {
+            return _bannedIps.Contains(a_ip);
+        }
+
+        internal void BanIP(IPAddress a_ip)
+        {
+            _bannedIps.Add(a_ip);
+        }
+
+        internal void UnbanId(IPAddress a_ip)
+        {
+            _bannedIps.Remove(a_ip);
         }
         #endregion
 
@@ -368,7 +389,7 @@ namespace FF.Multiplayer
                 return true;
 #else
                 bool canStart = true;
-                foreach (Team each in teams)
+                foreach (Team each in Teams)
                 {
                     canStart = canStart && each.CanStart;
                 }
@@ -378,78 +399,121 @@ namespace FF.Multiplayer
             }
         }
 
-        internal void UpdateWithRoom(Room a_room)
+        #region Serialization
+        public void SerializeData(FFByteWriter stream)
 		{
-			teams = a_room.teams;
+			stream.Write(roomName);
+			stream.Write(_teams);
+		}
+		
+		public void LoadFromData(FFByteReader stream)
+		{
+            roomName = stream.TryReadString();
+            _teams = stream.TryReadObjectList<Team>();
+		}
+
+        internal void UpdateWithRoom(Room a_room)
+        {
+            _teams = a_room._teams;
             UpdatePlayers();
 
-            if (onRoomUpdated != null)
-				onRoomUpdated(this);
-		}
+            UpdateRoom();
+        }
 
         internal void UpdatePlayers()
         {
-            players.Clear();
-            foreach (Team aTeam in teams)
+            _players.Clear();
+            foreach (Team aTeam in _teams)
             {
                 foreach (Slot aSlot in aTeam.Slots)
                 {
                     FFNetworkPlayer curPlayer = aSlot.netPlayer;
                     if (curPlayer != null)
                     {
-                        players.Add(curPlayer.ID, curPlayer);
+                        _players.Add(curPlayer.ID, curPlayer);
                     }
                 }
             }
         }
-		
-#region Serialization
-		public void SerializeData(FFByteWriter stream)
-		{
-			stream.Write(roomName);
-			stream.Write(teams);
-		}
-		
-		public void LoadFromData(FFByteReader stream)
-		{
-            roomName = stream.TryReadString();
-            teams = stream.TryReadObjectList<Team>();
+        #endregion
 
-		}
-#endregion
-
-#region Client Callbacks
-        void OnClientReconnection(FFTcpClient a_client)
+        #region GameServer Callbacks
+        void OnClientReconnection(int a_id)
         {
-            FFLog.Log(EDbgCat.Networking, "OnClientReconnection : " + a_client.NetworkID.ToString());
+            FFLog.Log(EDbgCat.Room, "OnClientReconnection : " + a_id.ToString());
             FFNetworkPlayer player = null;
-            if (players.TryGetValue(a_client.NetworkID, out player))
+            if (_players.TryGetValue(a_id, out player))
             {
                 player.isDced = false;
-                if (onRoomUpdated != null)
-                    onRoomUpdated(this);
+
+                UpdateRoom();
             }
         }
 
-        void OnClientConnectionLost(FFTcpClient a_client)
+        void OnClientConnectionLost(int a_id)
         {
-            FFLog.Log(EDbgCat.Networking, "OnClientConnectionLost : " + a_client.NetworkID.ToString());
+            FFLog.Log(EDbgCat.Room, "OnClientConnectionLost : " + a_id.ToString());
             FFNetworkPlayer player = null;
-            if (players.TryGetValue(a_client.NetworkID, out player))
+            if (_players.TryGetValue(a_id, out player))
             {
                 player.isDced = true;
-                if(onRoomUpdated != null)
-                    onRoomUpdated(this);
+
+                UpdateRoom();
             }
         }
 
-        internal void OnNetworkIdReceived(FFTcpClient a_client)
+        void OnClientRemoved(int a_id)
         {
-            if (players.ContainsKey(a_client.NetworkID))
+            RemovePlayer(a_id);
+        }
+
+        protected void UpdateRoom(bool a_broadcast = true)
+        {
+            if (onRoomUpdated != null)
+                onRoomUpdated(this);
+
+            if (a_broadcast && Engine.Network.IsServer)
             {
-                RemovePlayer(a_client.NetworkID);
+                MessageRoomData roomInfo = new MessageRoomData(this);
+                SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.GameServer.GetClientsIds(),
+                                                                        roomInfo,
+                                                                        EMessageChannel.RoomInfos.ToString());
+                message.Broadcast();
             }
         }
-#endregion
+        #endregion
+
+        #region In-Game Deconnection Handling
+        protected HashSet<int> _dcedPlayerIds = null; 
+        internal void EnableHandleDeconnectionOnly()
+        {
+            Engine.Network.GameServer.onClientConnectionLost += OnInGameDeconnection;
+            Engine.Network.GameServer.onClientReconnected += OnInGameReconnection;
+            Engine.Network.GameServer.EnableReconnectionOnlyMode();
+        }
+
+        internal void DisableHandleDeconnectionOnly()
+        {
+            Engine.Network.GameServer.onClientConnectionLost -= OnInGameDeconnection;
+            Engine.Network.GameServer.onClientReconnected -= OnInGameReconnection;
+            Engine.Network.GameServer.DisableReconnectionOnlyMode();
+        }
+
+        protected void OnInGameDeconnection(int a_id)
+        {
+            _dcedPlayerIds.Add(a_id);
+            Engine.Network.TcpServer.ResumeAcceptingConnections();
+        }
+
+        protected void OnInGameReconnection(int a_id)
+        {
+            _dcedPlayerIds.Remove(a_id);
+
+            if (_dcedPlayerIds.Count == 0)
+            {
+                Engine.Network.TcpServer.PauseAcceptingConnections();
+            }
+        }
+        #endregion
     }
 }

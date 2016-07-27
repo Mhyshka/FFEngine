@@ -72,10 +72,12 @@ namespace FF
         protected int _frameCount = 0;
 
         protected int _framerate;
+        internal static float s_latency;
         void OnGUI()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("FPS : " + _framerate);
+            GUILayout.Label("Latency : " + s_latency);
             GUILayout.EndHorizontal();
         }
 	}

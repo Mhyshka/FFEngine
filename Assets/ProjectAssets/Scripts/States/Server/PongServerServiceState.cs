@@ -4,6 +4,7 @@ using System.Collections;
 using FF.Logic;
 using System;
 
+using FF.Handler;
 using FF.Network.Receiver;
 using FF.Network.Message;
 
@@ -15,55 +16,46 @@ namespace FF.Pong
         #endregion
 
         #region properties
-        protected GenericMessageReceiver _serviceRatioReceiver = null;
         #endregion
 
         #region State Methods
         internal override void Enter()
         {
             base.Enter();
-            _serviceRatioReceiver = new GenericMessageReceiver(OnServiceRatioReceived);
-
-            SentMessage nextMessage = new SentMessage(new MessageEmptyData(),
-                                            EMessageChannel.Next.ToString());
-            Engine.Network.Server.BroadcastMessage(nextMessage);
+            SentBroadcastMessage nextMessage = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                        new MessageEmptyData(),
+                                                                        EMessageChannel.Next.ToString());
+            nextMessage.Broadcast();
         }
         #endregion
 
-        #region EventManagement
-        protected override void RegisterForEvent()
-        {
-            base.RegisterForEvent();
-            Engine.Receiver.RegisterReceiver(EMessageChannel.ServiceRatio.ToString(), _serviceRatioReceiver);
-        }
-
-        protected override void UnregisterForEvent()
-        {
-            base.UnregisterForEvent();
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.ServiceRatio.ToString(), _serviceRatioReceiver);
-        }
-        #endregion
-
-        protected void OnServiceRatioReceived(ReadMessage a_message)
-        {
-            MessageFloatData data = a_message.Data as MessageFloatData;
-            LaunchBall(data.Data);
-            RequestState((int)EPongGameState.Gameplay);
-        }
 
         protected override void OnServicePlayerSmash()
         {
-            LaunchBall(_ratio);
-            RequestState((int)EPongGameState.Gameplay);
+            base.OnServicePlayerSmash();
+            BroadcastServiceToPlayers(DateTime.Now.Ticks);
         }
 
-        protected void LaunchBall(float a_ratio)
+        protected override void OnServiceLaunchReceived(ReadMessage a_message)
         {
-            float signedRatio = a_ratio * 2f - 1f;
+            base.OnServiceLaunchReceived(a_message);
+            BroadcastServiceToPlayers(a_message.Timestamp);
+        }
 
-            _pongGm.ball.Launch(signedRatio,
-                                ServiceRacket.maxBounceFactorX,
-                                ServiceRacket.side);
+        protected void BroadcastServiceToPlayers(long a_timestamp)
+        {
+            //Broadcast to players.
+            MessageBallMovementData movementData = new MessageBallMovementData(_pongGm.serverPlayerId,
+                                                                                _pongGm.ball.transform.position,
+                                                                                _pongGm.ball.ballRigidbody.velocity);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    movementData,
+                                                                    EMessageChannel.ServiceLaunch.ToString(),
+                                                                    false,
+                                                                    false,
+                                                                    5f,
+                                                                    a_timestamp);
+            message.Broadcast();
         }
     }
 }

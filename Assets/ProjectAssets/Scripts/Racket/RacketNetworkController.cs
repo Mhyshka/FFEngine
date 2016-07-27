@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 
+using FF.Handler;
 using FF.Network.Receiver;
 using FF.Network.Message;
 
@@ -30,14 +31,14 @@ namespace FF.Pong
 
             //TODO smash
             //Engine.Receiver.RegisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.RegisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.channelSuffix, _targetRatioReceiver);
+            Engine.Receiver.RegisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.PlayerId.ToString(), _targetRatioReceiver);
         }
 
         internal override void TearDown()
         {
             //TODO smash
             //Engine.Receiver.UnregisterReceiver(EDataType.M_TrySmash, _trySmashReceiver);
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.channelSuffix, _targetRatioReceiver);
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.RacketPosition.ToString() + motor.PlayerId.ToString(), _targetRatioReceiver);
         }
 
         internal override Vector3 UpdatePosition(float a_minPositionX, float a_maxPositionX, float a_currentRatio)
@@ -59,22 +60,24 @@ namespace FF.Pong
             MessageRacketMovementData data = a_readMessage.Data as MessageRacketMovementData;
             
 
-            float deltatime = (float)a_readMessage.Client.TimeOffset(a_readMessage.Timestamp).TotalSeconds;
+            float deltatime = (float)a_readMessage.Client.Clock.TimeOffset(a_readMessage.Timestamp).TotalSeconds;
             //Debug.LogError("Racket deltatime : " + deltatime);
             float curRatio = Mathf.MoveTowards(data.CurrentRatio,
                                                 data.TargetRatio,
-                                                deltatime * motor.moveTowardSpeed);
+                                                deltatime * RacketMotor.Settings.moveSpeed);
             motor.CurrentRatio = curRatio;
             motor.TargetRatio = data.TargetRatio;
 
             if (Engine.Network.IsServer)
             {
-                SentMessage message = new SentMessage(data,
-                                                    EMessageChannel.RacketPosition.ToString() + motor.channelSuffix,
-                                                    false,
-                                                    false);
-                message.Timestamp = a_readMessage.Client.ConvertToLocalTime(a_readMessage.Timestamp);
-                Engine.Network.Server.BroadcastMessage(message);
+                SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                        data,
+                                                                        EMessageChannel.RacketPosition.ToString() + motor.PlayerId.ToString(),
+                                                                        false,
+                                                                        false,
+                                                                        5f,
+                                                                        a_readMessage.Client.Clock.ConvertRemoteToLocalTime(a_readMessage.Timestamp));
+                message.Broadcast();
             }
         }
 

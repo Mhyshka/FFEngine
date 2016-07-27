@@ -45,19 +45,17 @@ namespace FF
         {
             base.Enter();
             InitNetwork();
+            Engine.Network.StartServer(Engine.Game.Player.username + "'s game");
             Engine.Network.StartBroadcastingGame(Engine.Game.Player.username + "'s game");
 
             FFLog.Log(EDbgCat.Logic, "Game Room Host state enter.");
             _slotOptionPopupId = -1;
 
             _roomPanel = Engine.UI.GetPanel("MenuRoomPanel") as FFMenuRoomPanel;
-
+            _roomPanel.SetRoomEndpoint(Engine.Network.TcpServer.LocalEndpoint);
             _navigationPanel.SetTitle("Game Lobby");
 
-            OnRoomUpdate(Engine.Game.CurrentRoom);
-            //Engine.Inputs.EnableServerMode();
-
-            //Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            OnRoomUpdate(Engine.Network.CurrentRoom);
         }
 
         private void InitNetwork()
@@ -86,22 +84,27 @@ namespace FF
                 Engine.Network.StopServer();
         }
 
+        SentBroadcastMessage _broadcastFarewell;
         internal override void GoBack()
         {
-            SentBroadcastMessage broadcastFarewell = new SentBroadcastMessage(new MessageIntegerData((int)EFarewellCode.Shuttingdown),
-                                                                                EMessageChannel.Farewell.ToString(),
-                                                                                false,
-                                                                                false,
-                                                                                2f);
-            broadcastFarewell.onEveryMessageSent += OnShutdownComplete;
-            broadcastFarewell.onTimeout += delegate { OnShutdownComplete(); };
-            broadcastFarewell.Broadcast();
+            if (_broadcastFarewell == null)
+            {
+                _broadcastFarewell = new SentBroadcastMessage(Engine.Network.GameServer.GetClientsIds(),
+                                                                                    new MessageIntegerData((int)EFarewellCode.Shuttingdown),
+                                                                                    EMessageChannel.Farewell.ToString(),
+                                                                                    false,
+                                                                                    false,
+                                                                                    2f);
+                _broadcastFarewell.onEveryMessageSent += OnShutdownComplete;
+                _broadcastFarewell.onTimeout += delegate { OnShutdownComplete(); };
+                _broadcastFarewell.Broadcast();
+            }
         }
 
         internal void OnShutdownComplete()
         {
             base.GoBack();
-            Engine.Inputs.DisableServerMode();
+            _broadcastFarewell = null;
         }
         #endregion
 
@@ -112,9 +115,7 @@ namespace FF
             Engine.Events.RegisterForEvent(FFEventType.Next, OnNext);
             Engine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
 
-            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
-            Engine.Network.Server.onClientAdded += OnClientAdded;
-            Engine.Network.Server.onClientReconnection += OnClientReconnected;
+            Engine.Network.CurrentRoom.onRoomUpdated += OnRoomUpdate;
 
             RegisterReceiver();
         }
@@ -143,11 +144,9 @@ namespace FF
             Engine.Events.UnregisterForEvent("SlotSelected", OnSlotSelected);
             Engine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
 
-            if (Engine.Network.Server != null)
+            if (Engine.Network.TcpServer != null)
             {
-                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
-                Engine.Network.Server.onClientAdded -= OnClientAdded;
-                Engine.Network.Server.onClientReconnection -= OnClientReconnected;
+                Engine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
             }
 
             UnregisterReceiver();
@@ -186,11 +185,6 @@ namespace FF
         protected void OnRoomUpdate(Room a_room)
         {
             _roomPanel.UpdateWithRoom(a_room);
-
-            MessageRoomData roomInfo = new MessageRoomData(Engine.Game.CurrentRoom);
-            SentMessage message = new SentMessage(roomInfo,
-                                                    EMessageChannel.RoomInfos.ToString());
-            Engine.Network.Server.BroadcastMessage(message);
         }
 
         #region UI Callback
@@ -198,8 +192,9 @@ namespace FF
         {
             SlotRef selectedSlot = (SlotRef)a_args.data;
 
-            FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForSlot(selectedSlot);
-            if (player != Engine.Game.NetPlayer)
+            FFNetworkPlayer player = Engine.Network.CurrentRoom.GetPlayerForSlot(selectedSlot);
+            
+            if (player != Engine.Network.NetPlayer)
             {
                 if (player != null)
                 {
@@ -208,26 +203,12 @@ namespace FF
                 else
                 {
                     SlotRef from = new SlotRef();
-                    from.slotIndex = Engine.Game.NetPlayer.slot.slotIndex;
-                    from.teamIndex = Engine.Game.NetPlayer.slot.team.teamIndex;
+                    from.slotIndex = Engine.Network.NetPlayer.slot.slotIndex;
+                    from.teamIndex = Engine.Network.NetPlayer.slot.team.teamIndex;
 
-                    Engine.Game.CurrentRoom.MovePlayer(from, selectedSlot);
+                    Engine.Network.CurrentRoom.MovePlayer(from, selectedSlot);
                 }
             }
-        }
-        #endregion
-
-        #region Client Callbacks
-        protected void OnClientAdded(FFTcpClient a_newClient)
-        {
-            /*FFMessageRoomInfo roomInfo = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom);
-            a_newClient.QueueMessage(roomInfo);*/
-        }
-
-        protected void OnClientReconnected(FFTcpClient a_recoClient)
-        {
-            /*FFMessageRoomInfo roomInfo = new FFMessageRoomInfo(FFEngine.Network.CurrentRoom); // Already done from OnRoomUpdate
-            a_recoClient.QueueMessage(roomInfo);*/
         }
         #endregion
 
@@ -239,7 +220,7 @@ namespace FF
             FFLog.Log(EDbgCat.Logic, "On Player Kick");
             if (!_targetPlayer.isDced)
             {
-                FFTcpClient client = Engine.Network.Server.ClientForEP(_targetPlayer.IpEndPoint);
+                FFNetworkClient client = Engine.Network.GameServer.ClientForId(_targetPlayer.ID);
                 MessageBoolData data = new MessageBoolData(false);
                 SentMessage message = new SentMessage(data,
                                                         EMessageChannel.RemovedFromRoom.ToString());
@@ -248,7 +229,7 @@ namespace FF
             }
             else
             {
-                Engine.Game.CurrentRoom.RemovePlayer(_targetPlayer.SlotRef);
+                Engine.Network.CurrentRoom.RemovePlayer(_targetPlayer.SlotRef);
             }
 
             Engine.UI.DismissPopup(_slotOptionPopupId);
@@ -259,10 +240,11 @@ namespace FF
         {
             _targetPlayer = a_player;
             FFLog.Log(EDbgCat.Logic, "On Player Ban");
+
+            FFNetworkClient client = Engine.Network.GameServer.ClientForId(_targetPlayer.ID);
             if (!_targetPlayer.isDced)
             {
-                Engine.Game.CurrentRoom.BanId(_targetPlayer.ID);
-                FFTcpClient client = Engine.Network.Server.ClientForEP(_targetPlayer.IpEndPoint);
+                Engine.Network.CurrentRoom.BanIP(client.Remote.Address);
 
                 MessageBoolData data = new MessageBoolData(true);
                 SentMessage message = new SentMessage(data,
@@ -272,8 +254,8 @@ namespace FF
             }
             else
             {
-                Engine.Game.CurrentRoom.BanId(_targetPlayer.ID);
-                Engine.Game.CurrentRoom.RemovePlayer(_targetPlayer.SlotRef);
+                Engine.Network.CurrentRoom.BanIP(client.Remote.Address);
+                Engine.Network.CurrentRoom.RemovePlayer(_targetPlayer.SlotRef);
             }
 
             Engine.UI.DismissPopup(_slotOptionPopupId);
@@ -282,7 +264,7 @@ namespace FF
 
         protected void OnRemoveSent()
         {
-            Engine.Game.CurrentRoom.RemovePlayer(_targetPlayer.ID);
+            Engine.Network.CurrentRoom.RemovePlayer(_targetPlayer.ID);
         }
         #endregion
 
@@ -290,7 +272,7 @@ namespace FF
         SentRequest _swapRequest;
         internal void OnPlayerOptionSwap(FFNetworkPlayer a_player)
         {
-            FFTcpClient client = Engine.Network.Server.ClientForEP(a_player.IpEndPoint);
+            FFNetworkClient client = Engine.Network.GameServer.ClientForId(a_player.ID);
             if (client != null)
             {
                 Engine.UI.DismissPopup(_slotOptionPopupId);
@@ -306,7 +288,7 @@ namespace FF
                 _swapRequest.onSucces += OnSwapSuccess;
                 _swapRequest.onFail += OnSwapFailed;
 
-                Engine.Network.Server.LoopbackClient.Mirror.QueueRequest(_swapRequest);
+                Engine.Network.TcpServer.LoopbackClient.Mirror.QueueRequest(_swapRequest);
             }
             else
                 FFLog.Log("Couldn't swap, client not found.");
@@ -359,33 +341,35 @@ namespace FF
         #region Start & Network Check
         internal void OnNext(FFEventParameter a_args)
         {
-            Engine.Network.Server.PauseAcceptingConnections();
+            Engine.Network.TcpServer.PauseAcceptingConnections();
             _roomPanel.StartReadyCheck();
 
             UnregisterReceiver();
             RegisterForbiddenReceiver();
 
-            SentBroadcastRequest broadcastIsIdle = new SentBroadcastRequest(new MessageEmptyData(),
-                                                                                EMessageChannel.IsIdle.ToString(),
-                                                                                Engine.Network.NextRequestId,
-                                                                                true,
-                                                                                true,
-                                                                                2f);
+            SentBroadcastRequest broadcastIsIdle = new SentBroadcastRequest(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                            new MessageEmptyData(),
+                                                                            EMessageChannel.IsIdle.ToString(),
+                                                                            Engine.Network.NextRequestId,
+                                                                            true,
+                                                                            true,
+                                                                            2f);
             broadcastIsIdle.onFailureForClient += OnClientCheckFailed;
             broadcastIsIdle.onSuccessForClient += OnClientCheckSucceed;
             broadcastIsIdle.onResult += OnCheckResult;
             broadcastIsIdle.Broadcast();
         }
 
-        internal void OnCheckResult(Dictionary<FFTcpClient, ReadResponse> succeed, Dictionary<FFTcpClient, ReadResponse> failed)
+        internal void OnCheckResult(Dictionary<FFNetworkClient, ReadResponse> succeed, Dictionary<FFNetworkClient, ReadResponse> failed)
         {
             if (failed.Count > 0)
             {
                 //failure
+                Engine.Network.TcpServer.ResumeAcceptingConnections();
+
                 RegisterReceiver();
                 UnregisterForbiddenReceiver();
 
-                Engine.Network.Server.ResumeAcceptingConnections();
                 FFMessageToast.RequestDisplay("Some player aren't ready.");
                 _roomPanel.StopReadyCheck();
             }
@@ -397,15 +381,19 @@ namespace FF
                 RegisterReceiver();
                 UnregisterForbiddenReceiver();
 
-                SentMessage message = new SentMessage(new MessageEmptyData(),
-                                                        EMessageChannel.StartGame.ToString());
-                Engine.Network.Server.BroadcastMessage(message);
+                SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                        new MessageEmptyData(),
+                                                                        EMessageChannel.StartGame.ToString());
+                message.Broadcast();
+
+                Engine.Network.GameServer.KeepPlayersOnly(Engine.Network.CurrentRoom.GetPlayersIds());
+                Engine.Network.CurrentRoom.EnableHandleDeconnectionOnly();
 
                 RequestMultiGameMode("PongServerGameMode");
             }
         }
 
-        internal void OnClientCheckSucceed(FFTcpClient a_client, ReadResponse a_response)
+        internal void OnClientCheckSucceed(FFNetworkClient a_client, ReadResponse a_response)
         {
             PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)
@@ -414,7 +402,7 @@ namespace FF
             }
         }
 
-        internal void OnClientCheckFailed(FFTcpClient a_client, ReadResponse a_response)
+        internal void OnClientCheckFailed(FFNetworkClient a_client, ReadResponse a_response)
         {
             PlayerSlotWidget slotWidget = _roomPanel.SlotForId(a_client.NetworkID);
             if (slotWidget != null)

@@ -170,6 +170,22 @@ namespace FF
                 Write(0);
             }
         }
+
+        internal void Write(int[] a_array)
+        {
+            if (a_array != null)
+            {
+                Write(a_array.Length);
+                foreach (int each in a_array)
+                {
+                    Write(each);
+                }
+            }
+            else
+            {
+                Write(0);
+            }
+        }
         #endregion
 
         #region Unity

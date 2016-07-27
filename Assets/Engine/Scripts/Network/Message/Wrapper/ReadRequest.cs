@@ -46,8 +46,11 @@ namespace FF.Network.Message
 
         internal void OnCanceled()
         {
-            if (onCanceled != null)
-                onCanceled();
+            SimpleCallback copy = onCanceled;
+            onCanceled = null;
+
+            if (copy != null)
+                copy();
 
             OnComplete();
         }

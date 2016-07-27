@@ -3,6 +3,7 @@ using System.Collections;
 
 using FF.Network.Receiver;
 using FF.Network.Message;
+using System;
 
 namespace FF.Pong
 {
@@ -14,74 +15,90 @@ namespace FF.Pong
         #region Properties
         #endregion
 
-        #region Unity Main
-        void Awake()
+        internal override void OnTriggerEnter(Collider a_other)
         {
-            NetworkInit();
+            IBallContact contact = a_other.GetComponent<IBallContact>();
+            if (contact != null)
+            {
+                color.RandomizeNewColor();
+                hitFx.Play(color.CurrentColor,
+                            transform.position,
+                            a_other.transform.forward);
+                lightManager.OnHit();
+
+                RacketCollider racket = contact as RacketCollider;
+
+                //FFLog.LogError("Contact GO : " + contact.ToString());
+                if (racket == null ||
+                    _lastLocalHitInfo.playerId != racket.motor.PlayerId)
+                {
+                    Vector3 velocity = contact.BounceOff(transform.position, ballRigidbody.velocity);
+                    SetVelocity(velocity);
+
+                    if (racket != null)
+                    {
+                        _lastLocalHitInfo.playerId = racket.motor.PlayerId;
+                        _lastLocalHitInfo.position = transform.position;
+                        _lastLocalHitInfo.velocity = velocity;
+                        _lastLocalHitInfo.timestamp = System.DateTime.Now.Ticks;
+                    }
+
+                    /*if (racket != null)
+                        FFLog.LogError("Last ID : " + _lastRacketId + " / current : " + racket.motor.PlayerId);*/
+
+                    //Is Local Racket
+                    if (racket != null &&
+                        racket.motor.PlayerId == Engine.Network.NetPlayer.ID)
+                    {
+                        //Debug.LogError("Sending collision" + velocity.ToString());
+
+                        SendNetworkMovementMessage();
+                    }
+                }
+            }
         }
 
-        void OnDestroy()
-        {
-            NetworkTearDown();
-        }
-        #endregion
 
-        internal void OnCollision(Vector3 a_position, Vector3 a_normal)
+        protected void SendNetworkMovementMessage()
         {
-            color.RandomizeNewColor();
-            hitFx.Play(color.CurrentColor,
-                a_position,
-                a_normal);
-            lightManager.OnHit();
-        }
-
-        internal void RefreshMovement(Vector3 a_position, Vector3 a_velocity)
-        {
-            ballRigidbody.MovePosition(a_position);
-            SetVelocity(a_velocity);
+            MessageBallMovementData collisionData = new MessageBallMovementData(Engine.Network.NetPlayer.ID,
+                                                                                transform.position,
+                                                                                ballRigidbody.velocity);
+            SentMessage message = new SentMessage(collisionData,
+                                                    EMessageChannel.BallMovement.ToString(),
+                                                    true);
+            Engine.Network.MainClient.QueueMessage(message);
         }
 
         #region Network
-        protected GenericMessageReceiver _collisionReceiver;
-        protected GenericMessageReceiver _racketHitReceiver;
         protected GenericMessageReceiver _goalHitReceiver;
 
-        internal void NetworkInit()
+        internal override void NetworkInit()
         {
-            _collisionReceiver = new GenericMessageReceiver (OnBallCollisionReceived);
-            _racketHitReceiver = new GenericMessageReceiver (OnRacketHitReceived);
-            _goalHitReceiver = new GenericMessageReceiver (OnGoalHitReceived);
-
-            Engine.Receiver.RegisterReceiver(EMessageChannel.BallCollision.ToString(), _collisionReceiver);
-            Engine.Receiver.RegisterReceiver(EMessageChannel.RacketHit.ToString(), _racketHitReceiver);
+            base.NetworkInit();
+            if(_goalHitReceiver == null)
+                _goalHitReceiver = new GenericMessageReceiver(OnGoalHitReceived);
+            
             Engine.Receiver.RegisterReceiver(EMessageChannel.GoalHit.ToString(), _goalHitReceiver);
         }
 
-        internal void NetworkTearDown()
+        internal override void ForceNetworkMovementSync()
         {
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.BallCollision.ToString(), _collisionReceiver);
-            Engine.Receiver.UnregisterReceiver(EMessageChannel.RacketHit.ToString(), _racketHitReceiver);
+            SendNetworkMovementMessage();
+        }
+
+        internal override void NetworkTearDown()
+        {
+            base.NetworkTearDown();
             Engine.Receiver.UnregisterReceiver(EMessageChannel.GoalHit.ToString(), _goalHitReceiver);
-        }
-
-        protected void OnBallCollisionReceived(ReadMessage a_message)
-        {
-            MessageBallCollisionData data = a_message.Data as MessageBallCollisionData;
-            OnCollision(data.position, data.normal);
-        }
-
-        protected void OnRacketHitReceived(ReadMessage a_message)
-        {
-            MessageIntegerData data = a_message.Data as MessageIntegerData;//RacketID
-            RacketMotor motor = _pongGm.Board.RacketForId(data.Data);
-            OnRacketHit(motor);
         }
 
         protected void OnGoalHitReceived(ReadMessage a_message)
         {
             MessageIntegerData data = a_message.Data as MessageIntegerData;//ESide
             ESide side = (ESide)data.Data;
-            OnGoal(side);
+            if(onGoal != null)
+                onGoal(side);
         }
         #endregion
     }

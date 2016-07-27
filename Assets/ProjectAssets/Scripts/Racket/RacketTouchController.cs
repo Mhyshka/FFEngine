@@ -71,8 +71,8 @@ namespace FF.Pong
             RaycastHit hit = FindBoardHit(mainCamera, UnityEngine.Input.GetTouch(_touchId).position);
             if(hit.collider != null)
             {
-                float value = Mathf.InverseLerp(-motor.maxPositionX, 
-                                                motor.maxPositionX,
+                float value = Mathf.InverseLerp(-RacketMotor.Settings.maxPositionX,
+                                                RacketMotor.Settings.maxPositionX,
                                                 hit.point.x);
                 motor.TargetRatio = value;
             }

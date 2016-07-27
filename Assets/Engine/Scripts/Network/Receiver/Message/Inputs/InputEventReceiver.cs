@@ -15,7 +15,7 @@ namespace FF.Network.Receiver
             {
                 if (_message.Data.Type == EDataType.InputEvent)
                 {
-                    MessageInputEventData inputEventData = _message.Data as MessageInputEventData;
+                    /*MessageInputEventData inputEventData = _message.Data as MessageInputEventData;
                     InputEventNetwork input = Engine.Inputs.ManagerForClient(_client.NetworkID).EventForKey(inputEventData.eventKey) as InputEventNetwork;
                     if (input != null)
                     {
@@ -27,7 +27,7 @@ namespace FF.Network.Receiver
                     else
                     {
                         Debug.LogError("Input is null");
-                    }
+                    }*/
                 }
             }
            

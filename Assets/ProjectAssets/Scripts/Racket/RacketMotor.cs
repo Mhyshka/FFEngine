@@ -1,17 +1,36 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using FF.Handler;
 using FF.Network.Message;
 
 namespace FF.Pong
 {
     internal delegate void RacketMotorCallback(RacketMotor a_motor);
 
+    [System.Serializable]
+    internal class RacketSettings
+    {
+        [Header("Service")]
+        [Tooltip("Ball displacement up and down during service.")]
+        public float serviceMaxOffsetX = 0.5f;
+
+        [Header("Movement")]
+        [Tooltip("Max x and -x position on the field for this GO")]
+        public float maxPositionX = 7.5f;
+        public float moveSpeed = 5f;
+
+        [Header("Hit")]
+        [Tooltip("The max angle at which the ball can bounce off. In degree")]
+        public float maxBounceAngle = 60f;
+    }
+
     internal class RacketMotor : MonoBehaviour
     {
+        internal static RacketSettings Settings = null;
+
         #region Inspector Properties
         [Header("Ball Snap")]
-        public float maxOffsetX = 0.5f;
         public Transform ballSnapLocator = null;
 
         #region References
@@ -20,30 +39,25 @@ namespace FF.Pong
         public RacketMouseController mouseController = null;
         public RacketRemoteController remoteController = null;
         public RacketNetworkController networkController = null;
-        public RacketSmashRange smashRange = null;
+        public RacketSmashTiming smashTiming = null;
         #endregion
 
         #region Movement
         [Header("Movement")]
         public float startingRatio = 1f;
 
-        public float moveTowardSpeed = 0f;
-
-        public float maxPositionX = 7.5f;
-        #endregion
-
-        #region References
-        [Header("Bounce")]
-        [Range(0.2f,1f)]
-        public float maxBounceFactorX = 0.5f;
-
-        [Range(1f, 2f)]
-        public float smashVelocityMultiplier = 1.5f;
         #endregion
         #endregion
 
         #region NetworkProperties
-        internal int clientId;
+        protected int _playerId = -1;
+        internal int PlayerId
+        {
+            get
+            {
+                return _playerId;
+            }
+        }
         internal ABall ball;
         internal ESide side;
         #endregion
@@ -79,7 +93,10 @@ namespace FF.Pong
         {
             CurrentRatio = a_ratio;
             _targetRatio = a_ratio;
-            _currentController.ForceRatio(a_ratio);
+            if (_currentController != null)
+            {
+                _currentController.ForceRatio(a_ratio);
+            }
         }
 
         internal ARacketComponent _currentController;
@@ -90,9 +107,6 @@ namespace FF.Pong
                 return _currentController;
             }
         }
-
-        internal SimpleCallback onTrySmash = null;
-        internal SimpleCallback onDidSmash = null;
         #endregion
 
         #region Main
@@ -114,50 +128,26 @@ namespace FF.Pong
 
         void Update()
         {
-            _currentRatio = Mathf.MoveTowards(_currentRatio, _targetRatio, Time.deltaTime * moveTowardSpeed);
+            _currentRatio = Mathf.MoveTowards(_currentRatio, _targetRatio, Time.deltaTime * Settings.moveSpeed);
             UpdatePosition();
         }
 
         void UpdatePosition()
         {
             if (_currentController != null)
-                transform.localPosition = _currentController.UpdatePosition(-maxPositionX, maxPositionX, _currentRatio);
+                transform.localPosition = _currentController.UpdatePosition(-Settings.maxPositionX, Settings.maxPositionX, _currentRatio);
         }
+        #endregion
 
+        #region Smash
+        internal SimpleCallback onTrySmash = null;
+        internal SimpleCallback onDidSmash = null;
         internal void TrySmash()
         {
-            if (!smashRange.didSmash)
+            if (smashTiming.TrySmash())
             {
-                if (smashRange.IsInSmashRange)
-                {
-                    smashRange.didSmash = true;
-
-                    if (onDidSmash != null)
-                        onDidSmash();
-
-                    /*if (!Engine.Network.IsServer && clientId == Engine.Network.NetworkID)
-                    {
-                        Network.Message.MessageDidSmash message = new Network.Message.MessageDidSmash(-1);
-                        Engine.Network.MainClient.QueueMessage(message);
-                    }*/
-                }
-                else
-                {
-                    if (onTrySmash != null)
-                        onTrySmash();
-
-                    //TODO smash
-                    /*if (Engine.Network.IsServer)
-                    {
-                        Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
-                        Engine.Network.Server.BroadcastMessage(message);
-                    }
-                    else if (clientId == Engine.Network.NetworkID)
-                    {
-                        Network.Message.MessageTrySmash message = new Network.Message.MessageTrySmash(clientId);
-                        Engine.Network.MainClient.QueueMessage(message);
-                    }*/
-                }
+                if (onTrySmash != null)
+                    onTrySmash();
             }
         }
         #endregion
@@ -165,12 +155,12 @@ namespace FF.Pong
         #region Enable & Disable
         internal void Init(int a_clientId, ABall a_ball)
         {
-            clientId = a_clientId;
+            _playerId = a_clientId;
             ball = a_ball;
 
-            if (clientId == Engine.Network.NetworkID)
+            if (_playerId == Engine.Network.NetworkId)
             {
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_STANDALONE
                 _currentController = mouseController;
 #else
                 if (Engine.Inputs.HasJoystickConnected)
@@ -184,28 +174,24 @@ namespace FF.Pong
                 _currentController = networkController;
                 Enable();
             }
-
-            Multiplayer.FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForId(clientId);
-            if (player.slot.team.teamIndex == GameConstants.BLUE_TEAM_INDEX)
-            {
-                side = ESide.Left;
-            }
-            else if (player.slot.team.teamIndex == GameConstants.PURPLE_TEAM_INDEX)
-            {
-                side = ESide.Right;
-            }
         }
 
         internal void Enable()
         {
-            _currentController.Activate();
-            _currentController.enabled = true;
+            if (_currentController != null)
+            {
+                _currentController.Activate();
+                _currentController.enabled = true;
+            }
         }
 
         internal void Disable()
         {
-            _currentController.TearDown();
-            _currentController.enabled = false;
+            if (_currentController != null)
+            {
+                _currentController.TearDown();
+                _currentController.enabled = false;
+            }
         }
         #endregion
 
@@ -213,7 +199,6 @@ namespace FF.Pong
         [Header("Network")]
         public int refreshPerSecond = 20;
         public float minRatioDelta = 0.02f;
-        public string channelSuffix = "_L_0";
 
         protected float _lastSentRatio = 0f;
         protected float _lastRefreshTime = 0f;
@@ -245,17 +230,27 @@ namespace FF.Pong
             _lastRefreshTime = Time.time;
 
             MessageRacketMovementData data = new MessageRacketMovementData(_currentRatio, _targetRatio);
-            SentMessage message = new SentMessage(data,
-                                                    EMessageChannel.RacketPosition.ToString() + channelSuffix,
-                                                    false,
-                                                    false);
+           
 
             if (!(CurrentController is RacketNetworkController)) //Local's player racket
             {
                 if (!Engine.Network.IsServer)
+                {
+                    SentMessage message = new SentMessage(data,
+                                                   EMessageChannel.RacketPosition.ToString() + _playerId.ToString(),
+                                                   false,
+                                                   false);
                     Engine.Network.MainClient.QueueMessage(message);
+                }
                 else
-                    Engine.Network.Server.BroadcastMessage(message);
+                {
+                    SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                            data,
+                                                                            EMessageChannel.RacketPosition.ToString() + _playerId.ToString(),
+                                                                            false,
+                                                                            false);
+                    message.Broadcast();
+                }
             }
         }
         #endregion

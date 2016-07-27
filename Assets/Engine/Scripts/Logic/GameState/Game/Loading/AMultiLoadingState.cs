@@ -24,7 +24,7 @@ namespace FF.Logic
             _loadingScreen = Engine.UI.LoadingScreen as MultiplayerLoadingScreen;
             _loadingScreen.PrepareView();
 
-            OnRoomUpdate(Engine.Game.CurrentRoom);
+            OnRoomUpdate(Engine.Network.CurrentRoom);
         }
         #endregion
 
@@ -32,14 +32,14 @@ namespace FF.Logic
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
-            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
+            Engine.Network.CurrentRoom.onRoomUpdated += OnRoomUpdate;
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
-            if(Engine.Game.CurrentRoom != null)
-                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+            if(Engine.Network.CurrentRoom != null)
+                Engine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
         }
 
         protected void OnEveryoneReady(ReadMessage a_message)

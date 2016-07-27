@@ -15,42 +15,49 @@ namespace FF.Handler
         internal FFBoolByClientsCallback onTimeout = null;
         #endregion
 
-        protected Dictionary<FFTcpClient, SentMessage> _messageForClients;
-        protected Dictionary<FFTcpClient, bool> _sentForClients;
+        protected Dictionary<FFNetworkClient, SentMessage> _messageForClients;
+        protected Dictionary<FFNetworkClient, bool> _sentForClients;
         protected int _messageSentCount = 0;
 
         protected float _timeoutDuration = 0f;
         protected float _timeElapsed = 0f;
 
-        internal SentBroadcastMessage(MessageData a_data,
-                                string a_channel,
-                                bool a_isMandatory = true,
-                                bool a_isHandleByMock = false,
-                                float a_timeoutDuration = 5f)
+        internal SentBroadcastMessage(List<int> a_ids,
+                                    MessageData a_data,
+                                    string a_channel,
+                                    bool a_isMandatory = true,
+                                    bool a_isHandleByMock = false,
+                                    float a_timeoutDuration = 5f,
+                                    long a_timestamp = -1L)
         {
             _timeElapsed = 0f;
             _timeoutDuration = a_timeoutDuration;
             _messageSentCount = 0;
-            _sentForClients = new Dictionary<FFTcpClient, bool>();
-            _messageForClients = new Dictionary<FFTcpClient, SentMessage>();
+            _sentForClients = new Dictionary<FFNetworkClient, bool>();
+            _messageForClients = new Dictionary<FFNetworkClient, SentMessage>();
 
-            foreach (FFTcpClient each in Engine.Network.Server.Clients.Values)
+            foreach (int id in a_ids)
             {
-                if (each != null)
+                FFNetworkClient client = Engine.Network.GameServer.ClientForId(id);
+                /*if (client != null && client.IsConnected)
+                {*/
+                if (a_isHandleByMock || client != Engine.Network.TcpServer.LoopbackClient)
                 {
-                    if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
-                    {
-                        SentMessage message = new SentMessage(a_data,
-                                                           a_channel,
-                                                           a_isMandatory,
-                                                           a_isHandleByMock);
-                        SentMessageForClient messageForClient = new SentMessageForClient(message);
-                        messageForClient.onMessageSent += OnMessageSent;
+                    SentMessage message = new SentMessage(a_data,
+                                                        a_channel,
+                                                        a_isMandatory,
+                                                        a_isHandleByMock);
 
-                        _sentForClients.Add(each, false);
-                        _messageForClients.Add(each, message);
-                    }
+                    if (a_timestamp != -1L)
+                        message.Timestamp = a_timestamp;
+
+                    SentMessageForClient messageForClient = new SentMessageForClient(message);
+                    messageForClient.onMessageSent += OnMessageSent;
+
+                    _sentForClients.Add(client, false);
+                    _messageForClients.Add(client, message);
                 }
+               // }
             }
         }
 
@@ -64,9 +71,13 @@ namespace FF.Handler
                 Complete();
             }
 
-            foreach (KeyValuePair<FFTcpClient, SentMessage> pair in _messageForClients)
+            foreach (KeyValuePair<FFNetworkClient, SentMessage> pair in _messageForClients)
             {
                 pair.Key.QueueMessage(pair.Value);
+                if (!pair.Key.IsConnected)
+                {
+                    OnMessageSent(pair.Value);
+                }
             }
         }
 

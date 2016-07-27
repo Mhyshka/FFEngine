@@ -53,6 +53,7 @@ namespace FF
             base.RegisterForEvent();
             Engine.Events.RegisterForEvent("Host", OnHostPressed);
             Engine.Events.RegisterForEvent("Join", OnJoinPressed);
+            Engine.Events.RegisterForEvent("Settings", OnSettingsPressed);
             Engine.Events.RegisterForEvent("Buy", OnBuyPressed);
         }
 
@@ -61,6 +62,7 @@ namespace FF
             base.UnregisterForEvent();
             Engine.Events.UnregisterForEvent("Host", OnHostPressed);
             Engine.Events.UnregisterForEvent("Join", OnJoinPressed);
+            Engine.Events.UnregisterForEvent("Settings", OnSettingsPressed);
             Engine.Events.UnregisterForEvent("Buy", OnBuyPressed);
         }
 
@@ -68,7 +70,6 @@ namespace FF
         {
             FFLog.Log(EDbgCat.Logic, "Main menu state - OnHostPressed");
             FFLog.Log(EDbgCat.Logic, "Game Mode Selection - OnHostPressed");
-            Engine.Game.NetPlayer.isHost = true;
             if (Engine.NetworkStatus.IsConnectedToLan)
             {
                 RequestState((int)EMenuStateID.GameRoomHost);
@@ -84,7 +85,6 @@ namespace FF
         protected void OnJoinPressed(FFEventParameter a_args)
         {
             FFLog.Log(EDbgCat.Logic, "Main menu state - OnJoinPressed");
-            Engine.Game.NetPlayer.isHost = false;
             if (Engine.NetworkStatus.IsConnectedToLan)
             {
                 RequestState((int)EMenuStateID.SearchForRooms);
@@ -100,6 +100,11 @@ namespace FF
         protected void OnBuyPressed(FFEventParameter a_args)
         {
             FFLog.Log(EDbgCat.Logic, "Main menu state - OnBuyPressed");
+        }
+
+        protected void OnSettingsPressed(FFEventParameter a_args)
+        {
+            RequestState((int)EMenuStateID.Settings);
         }
 
         internal void OnNicknameSubmit()

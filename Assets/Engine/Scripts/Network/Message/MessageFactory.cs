@@ -18,6 +18,8 @@ namespace FF.Network.Message
         Float,
         Bool,
         String,
+        IntegerArray,
+        Version,
 
         InputEvent,
         Room,
@@ -27,7 +29,6 @@ namespace FF.Network.Message
         LoadingProgress,
 
         BallMovement,
-        BallCollision,
         RacketHit,
         RacketMove,
         GoalHit
@@ -66,6 +67,9 @@ namespace FF.Network.Message
                 case EDataType.Integer:
                     data = new MessageIntegerData();
                     break;
+                case EDataType.IntegerArray:
+                    data = new MessageIntegerArrayData();
+                    break;
                 case EDataType.Long:
                     data = new MessageLongData();
                     break;
@@ -77,6 +81,10 @@ namespace FF.Network.Message
                     break;
                 case EDataType.Bool:
                     data = new MessageBoolData();
+                    break;
+
+                case EDataType.Version:
+                    data = new MessageVersionData();
                     break;
 
                 case EDataType.InputEvent:
@@ -102,9 +110,6 @@ namespace FF.Network.Message
 
                 case EDataType.BallMovement:
                     data = new MessageBallMovementData();
-                    break;
-                case EDataType.BallCollision:
-                    data = new MessageBallCollisionData();
                     break;
                 case EDataType.RacketMove:
                     data = new MessageRacketMovementData();

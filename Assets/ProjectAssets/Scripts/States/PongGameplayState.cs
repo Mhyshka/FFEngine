@@ -36,6 +36,7 @@ namespace FF.Pong
         internal override void Exit()
         {
             base.Exit();
+            _pongGm.ball.Stop();
         }
         #endregion
 
@@ -43,6 +44,7 @@ namespace FF.Pong
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
+            _pongGm.ball.NetworkInit();
             _pongGm.ball.onGoal += OnGoal;
             _pongGm.ball.onRacketHit += OnRacketHit;
 
@@ -53,6 +55,7 @@ namespace FF.Pong
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
+            _pongGm.ball.NetworkTearDown();
             _pongGm.ball.onGoal -= OnGoal;
             _pongGm.ball.onRacketHit -= OnRacketHit;
 
@@ -74,7 +77,7 @@ namespace FF.Pong
         protected virtual void OnRacketHit(RacketMotor a_racket)
         {
             _pongGm.CurrentRound.rallyCount++;
-            _pongGm.CurrentRound.strikerId = a_racket.clientId;
+            _pongGm.CurrentRound.strikerId = a_racket.PlayerId;
         }
 
         protected virtual void OnSmash()
@@ -82,7 +85,7 @@ namespace FF.Pong
             _pongGm.CurrentRound.isSmash = true;
             _pongGm.CurrentRound.smashCount++;
 
-            _pongGm.ball.Smash();
+            _pongGm.ball.PostSmash();
         }
         #endregion
     }

@@ -55,7 +55,7 @@ namespace FF.Pong
         void DisplayScore()
         {
             PongRoundData round = _pongGm.CurrentRound;
-            FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForId(round.strikerId);
+            FFNetworkPlayer player = Engine.Network.CurrentRoom.PlayerForId(round.strikerId);
             ESide playerSide = player.slot.team.teamIndex == GameConstants.BLUE_TEAM_INDEX ? ESide.Left : ESide.Right;
             _scorePanel.SetScore(player.player.username,
                                     playerSide,

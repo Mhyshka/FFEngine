@@ -37,11 +37,10 @@ namespace FF
             _timeElapsedSinceEnter = 0f;
 			_requestedStateId = -1;
 			
-			//TODO : debug editor script. Temporary
-			foreach(string each in panelNamesToShow)
+			/*foreach(string each in panelNamesToShow)
 			{
 				FFLog.Log(EDbgCat.UI, "Requesting panel " + each + " from " + this.GetType().ToString());
-			}
+			}*/
             //debug editor script. Temporary
 
             if (panelsToShow != 0)

@@ -24,11 +24,11 @@ namespace FF.UI
 
         void Awake()
         {
-            /*UIButton button = GetComponent<UIButton>();
-            button.onClick.Add(new EventDelegate(OnButtonClicked));*/
+            UIButton button = GetComponent<UIButton>();
+            button.onClick.Add(new EventDelegate(ForwardClick));
         }
 
-		public void OnClick()
+		public void ForwardClick()
 		{
 #if !RELEASE
 			if(debug)

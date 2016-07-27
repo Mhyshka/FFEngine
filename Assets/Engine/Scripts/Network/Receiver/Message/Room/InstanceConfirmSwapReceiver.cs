@@ -43,7 +43,7 @@ namespace FF.Network.Receiver
                                                    _request.RequestId,
                                                    errorCode);
                     }
-                    else if (Engine.Game.NetPlayer.IsBusy)
+                    else if (Engine.Network.NetPlayer.IsBusy)
                     {
                         errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeSwapSlot.PlayerIsBusy;
@@ -53,7 +53,7 @@ namespace FF.Network.Receiver
                     }
                     else
                     {
-                        Engine.Game.NetPlayer.busyCount++;
+                        Engine.Network.NetPlayer.busyCount++;
                         _client.onConnectionLost += OnConnectionLostWaiting;
                         _popupId = FFYesNoPopup.RequestDisplay(_data.StringData + " would like to swap position with you.",
                                                                 "Accept",
@@ -72,7 +72,7 @@ namespace FF.Network.Receiver
             }
         }
 
-        protected void OnConnectionLostWaiting(FFTcpClient a_client)
+        protected void OnConnectionLostWaiting(FFNetworkClient a_client)
         {
             _request.FailWithoutResponse(ERequestErrorCode.Canceled);
             OnReceiverComplete();
@@ -111,7 +111,7 @@ namespace FF.Network.Receiver
         {
             _client.onConnectionLost -= OnConnectionLostWaiting;
             Engine.UI.DismissPopup(_popupId);
-            Engine.Game.NetPlayer.busyCount--;
+            Engine.Network.NetPlayer.busyCount--;
         }
         #endregion
     }

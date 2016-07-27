@@ -1,16 +1,34 @@
 ﻿#define DEBUG_LOG
 
 using UnityEngine;
+using System;
 using System.Collections;
 
 internal enum EDbgCat
 {
-	Zeroconf,
+    //Networking
+    Zeroconf,
+
+    Client,
+    ClientClock,
+    ClientConnection,
+    ClientIdentification,
+
 	Networking,
+    Room,
+    RoomDiscovery,
+    RoomBroadcast,
+
+    ServerTcp,
+    ServerGame,
+    ServerMock,
+    ServerListening,
+
     Receiver,
     Message,
     Socket,
-    Serialization,
+    NetworkSerialization,
+
     Handler,
 	UI,
 	Logic,
@@ -26,19 +44,37 @@ internal enum EDbgLevel
 
 internal class FFLog
 {
+    protected static bool SHOW_TIMESTAMP = true;
+
 	internal static EDbgLevel DBG_LEVEL = EDbgLevel.Debug;
     internal static EDbgCat[] DBG_CAT = new EDbgCat[]
-    { 
-        /*EDbgCat.Zeroconf,*/
-        EDbgCat.Networking,
-        /*EDbgCat.Receiver,
+    {
+        /*EDbgCat.Zeroconf,
+
+        EDbgCat.Client,
+        EDbgCat.ClientClock,
+        EDbgCat.ClientConnection,
+        EDbgCat.ClientIdentification,
+
+        /*EDbgCat.Networking,
+        EDbgCat.Room,
+        EDbgCat.RoomDiscovery,
+        EDbgCat.RoomBroadcast,*/
+
+        /*EDbgCat.ServerTcp,
+        EDbgCat.ServerGame,*/
+        //EDbgCat.ServerMock,
+        /*EDbgCat.ServerListening,
+
+        EDbgCat.Receiver,
         EDbgCat.Message,
-        EDbgCat.Serialization,*/
         EDbgCat.Socket,
-        /*EDbgCat.Handler,
+        EDbgCat.NetworkSerialization,
+
+        EDbgCat.Handler,
         EDbgCat.UI,
-        EDbgCat.Logic,
-        EDbgCat.Input*/
+        EDbgCat.Logic,*/
+        //EDbgCat.Input
     };
 
     internal static bool HasCatEnable(EDbgCat a_cat)
@@ -57,7 +93,8 @@ internal class FFLog
 	
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug && HasCatEnable(a_cat))
-			Debug.Log(a_cat.ToString() + " : " + a_text);
+			Debug.Log((SHOW_TIMESTAMP ? DateTime.Now.ToLongTimeString() : "") + " - " +
+                        a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
@@ -65,7 +102,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
-			Debug.Log(a_tag + " : " + a_text);
+			Debug.Log((SHOW_TIMESTAMP ? DateTime.Now.ToLongTimeString() : "") + " - " +
+                        a_tag + " : " + a_text);
 #endif
 	}
 	
@@ -73,7 +111,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Debug)
-			Debug.Log(a_text);
+			Debug.Log((SHOW_TIMESTAMP ? DateTime.Now.ToLongTimeString() : "") + " - " +
+                        a_text);
 #endif
 	}
 	#endregion
@@ -83,7 +122,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning && HasCatEnable(a_cat))
-			Debug.LogWarning(a_cat.ToString() + " : " + a_text);
+			Debug.LogWarning((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " +
+                                a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
@@ -91,7 +131,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
-			Debug.LogWarning(a_tag + " : " + a_text);
+			Debug.LogWarning((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " +
+                                a_tag + " : " + a_text);
 #endif
 	}
 	
@@ -99,7 +140,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Warning)
-			Debug.LogWarning(a_text);
+			Debug.LogWarning((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " +
+                                a_text);
 #endif
 	}
 	#endregion
@@ -109,7 +151,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Error && HasCatEnable(a_cat))
-			Debug.LogError(a_cat.ToString() + " : " + a_text);
+			Debug.LogError((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " +
+                            a_cat.ToString() + " : " + a_text);
 #endif
 	}
 	
@@ -117,7 +160,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
-			Debug.LogError(a_tag + " : " + a_text);
+			Debug.LogError((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " +
+                            a_tag + " : " + a_text);
 #endif
 	}
 	
@@ -125,7 +169,8 @@ internal class FFLog
 	{
 #if DEBUG_LOG
 		if((int)DBG_LEVEL <= (int)EDbgLevel.Error)
-			Debug.LogError(a_text);
+			Debug.LogError((SHOW_TIMESTAMP ? DateTime.Now.ToShortTimeString() : "") + " - " + 
+                            a_text);
 #endif
 	}
 	#endregion

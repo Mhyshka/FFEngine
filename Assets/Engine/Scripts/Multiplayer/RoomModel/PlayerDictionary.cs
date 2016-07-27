@@ -16,15 +16,15 @@ namespace FF.Multiplayer
         #region Construction
         internal PlayerDictionary() : base()
         {
-            foreach (int id in Engine.Game.CurrentRoom.players.Keys)
+            foreach (int id in Engine.Network.CurrentRoom.Players.Keys)
             {
                 Add(id, new T());
             }
 
             if (Engine.Network.IsServer)
             {
-                Engine.Game.CurrentRoom.onPlayerAdded += OnPlayerAdded;
-                Engine.Game.CurrentRoom.onPlayerRemoved += OnPlayerRemoved;
+                Engine.Network.CurrentRoom.onPlayerAdded += OnPlayerAdded;
+                Engine.Network.CurrentRoom.onPlayerRemoved += OnPlayerRemoved;
             }
         }
 
@@ -44,8 +44,8 @@ namespace FF.Multiplayer
             Clear();
             if (Engine.Network.IsServer)
             {
-                Engine.Game.CurrentRoom.onPlayerAdded = null;
-                Engine.Game.CurrentRoom.onPlayerRemoved = null;
+                Engine.Network.CurrentRoom.onPlayerAdded = null;
+                Engine.Network.CurrentRoom.onPlayerRemoved = null;
             }
         }
         #endregion

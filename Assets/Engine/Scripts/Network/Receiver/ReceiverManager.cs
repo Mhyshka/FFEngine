@@ -23,15 +23,10 @@ namespace FF.Network.Receiver
             RegisterReceiver(EMessageChannel.CancelRequest.ToString(), new CancelReceiver());
             RegisterReceiver(EMessageChannel.Response.ToString(), new ResponseReceiver());
 
-            RegisterReceiver(EMessageChannel.RoomInfos.ToString(), new RoomInfosReceiver());
-
             RegisterReceiver(EMessageChannel.Heartbeat.ToString(), new HeartbeatReceiver());
 
             RegisterReceiver(EMessageChannel.IsIdle.ToString(), new IsIdleReceiver());
             RegisterReceiver(EMessageChannel.IsAlive.ToString(), RESPONSE_ALWAYS_SUCCESS);
-
-            RegisterReceiver(EMessageChannel.Farewell.ToString(), new FarewellReceiver());
-            RegisterReceiver(EMessageChannel.LeavingRoom.ToString(), new LeavingRoomReceiver());
         }
 
         internal override void TearDown()

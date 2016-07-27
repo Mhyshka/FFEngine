@@ -47,20 +47,20 @@ namespace FF.Network.Message
             //Header
             short value = stream.TryReadShort();
             EHeaderType headerType = (EHeaderType)value;
-            FFLog.Log(EDbgCat.Serialization, "Deserializing header type : " + headerType.ToString());
+            FFLog.Log(EDbgCat.NetworkSerialization, "Deserializing header type : " + headerType.ToString());
             ReadMessage message = MessageFactory.CreateMessage(headerType);
             message.LoadFromData(stream);
 
             //Data
             value = stream.TryReadShort();
             EDataType dataType = (EDataType)value;
-            FFLog.Log(EDbgCat.Serialization, "Deserializing data type : " + dataType.ToString());
+            FFLog.Log(EDbgCat.NetworkSerialization, "Deserializing data type : " + dataType.ToString());
             MessageData data = MessageFactory.CreateData(dataType);
 
             if (data != null)
                 data.LoadFromData(stream);
             else
-                FFLog.LogError(EDbgCat.Serialization, "Unkown message type : " + dataType.ToString());
+                FFLog.LogError(EDbgCat.NetworkSerialization, "Unkown message type : " + dataType.ToString());
 
             message.SetData(data);
 

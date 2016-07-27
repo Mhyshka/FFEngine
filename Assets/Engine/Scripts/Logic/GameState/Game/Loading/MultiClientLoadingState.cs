@@ -45,9 +45,9 @@ namespace FF.Logic
             Engine.Receiver.RegisterReceiver(EMessageChannel.LoadingComplete.ToString(),
                                             _receiver);
 
-            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
-            Engine.Network.MainClient.onConnectionSuccess += OnReconnection;
-            Engine.Network.MainClient.onConnectionLost += OnConnectionLost;
+            Engine.Network.CurrentRoom.onRoomUpdated += OnRoomUpdate;
+            Engine.Network.MainClient.onReconnection += OnReconnection;
+            Engine.Network.MainClient.onConnectionEnded += OnConnectionLost;
             Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
         }
 
@@ -62,8 +62,8 @@ namespace FF.Logic
 
             if (Engine.Network.MainClient != null)
             {
-                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
-                Engine.Network.MainClient.onConnectionSuccess -= OnReconnection;
+                Engine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+                Engine.Network.MainClient.onReconnection -= OnReconnection;
                 Engine.Network.MainClient.onConnectionLost -= OnConnectionLost;
                 Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
             }
@@ -71,12 +71,12 @@ namespace FF.Logic
 
         #region Client Callbacks
         protected int _connectionLostPopupId = -1;
-        protected void OnConnectionLost(FFTcpClient a_client)
+        protected void OnConnectionLost(FFNetworkClient a_client)
         {
             _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel, UIManager.POPUP_PRIO_HIGH);
         }
 
-        protected void OnReconnection(FFTcpClient a_client)
+        protected void OnReconnection()
         {
             if (_connectionLostPopupId != -1)
             {
@@ -86,9 +86,9 @@ namespace FF.Logic
             _connectionLostPopupId = -1;
         }
 
-        protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
+        protected void OnConnectionEnded(FFNetworkClient a_client)
         {
-            Engine.Network.SetNoMainClient();
+            Engine.Network.LeaveCurrentRoom();
             if (_connectionLostPopupId != -1)
             {
                 Engine.UI.DismissPopup(_connectionLostPopupId);
@@ -99,7 +99,7 @@ namespace FF.Logic
 
         protected void OnConnectionLostPopupCancel()
         {
-            Engine.Network.CloseMainClient();
+            Engine.Network.LeaveCurrentRoom();
             if (_connectionLostPopupId != -1)
             {
                 Engine.UI.DismissPopup(_connectionLostPopupId);
@@ -111,7 +111,7 @@ namespace FF.Logic
 
         protected void OnLoadingProgressReceived()
         {
-            OnRoomUpdate(Engine.Game.CurrentRoom);
+            OnRoomUpdate(Engine.Network.CurrentRoom);
         }
 
 

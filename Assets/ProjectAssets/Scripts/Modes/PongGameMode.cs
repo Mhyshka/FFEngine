@@ -34,7 +34,7 @@ namespace FF.Pong
             }
         }
 
-        internal int serviceClientId = 0;
+        internal int serverPlayerId = 0;
 
         protected PongMatchData _score;
         internal PongMatchData Score
@@ -77,8 +77,8 @@ namespace FF.Pong
 
         protected void LoadGameSettings()
         {
-            ball.baseSpeed = gameSettings.ballBaseVelocity;
-            ball.smashSpeedMultiplier = gameSettings.smashSpeedMultiplier;
+            ABall.Settings = gameSettings.ballSettings;
+            RacketMotor.Settings = gameSettings.racketSettings;
         }
 
         internal void OnLoadingComplete()
@@ -106,14 +106,14 @@ namespace FF.Pong
         {
             List<FFNetworkPlayer> players;
 
-            players = Engine.Game.CurrentRoom.teams[GameConstants.BLUE_TEAM_INDEX].Players;
+            players = Engine.Network.CurrentRoom.Teams[GameConstants.BLUE_TEAM_INDEX].Players;
             for(int i = 0; i < players.Count; i++)
             {
                 _board.blueRackets[i].Init(players[i].ID, ball);
             }
 
             
-            players = Engine.Game.CurrentRoom.teams[GameConstants.PURPLE_TEAM_INDEX].Players;
+            players = Engine.Network.CurrentRoom.Teams[GameConstants.PURPLE_TEAM_INDEX].Players;
             for (int i = 0; i < players.Count; i++)
             {
                 _board.purpleRackets[i].Init(players[i].ID, ball);
@@ -124,7 +124,7 @@ namespace FF.Pong
         {
             get
             {
-                return Board.RacketForId(Engine.Network.NetworkID);
+                return Board.RacketForId(Engine.Network.NetPlayer.ID);
             }
         }
         #endregion
@@ -144,7 +144,7 @@ namespace FF.Pong
 
         internal void NewMatch()
         {
-            serviceClientId = 0;
+            serverPlayerId = 0;
             _score = new PongMatchData(gameSettings.requiredPointsToWin);
             _currendRoundIndex = 0;
             _board.blueLifeLights.ResetLives();
@@ -164,7 +164,7 @@ namespace FF.Pong
             _currendRoundIndex++;
             ball.ResetBall();
             PongServiceChallengeState serviceChal = _states[(int)EPongGameState.ServiceChallenge] as PongServiceChallengeState;
-            serviceClientId = serviceChal.NextServerId();
+            serverPlayerId = serviceChal.NextServerId();
             EnableGameplay();
             ResetRackets();
         }

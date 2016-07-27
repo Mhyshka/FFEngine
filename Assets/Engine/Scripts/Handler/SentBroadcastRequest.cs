@@ -23,14 +23,15 @@ namespace FF.Handler
         internal FFClientsBroadcastCallback onResult = null;
         #endregion
 
-        protected Dictionary<FFTcpClient, SentRequest> _messageForClients;
-        protected Dictionary<FFTcpClient, bool> _sentForClients;
+        protected Dictionary<FFNetworkClient, SentRequest> _messageForClients;
+        protected Dictionary<FFNetworkClient, bool> _sentForClients;
         protected int _messageSentCount = 0;
 
-        protected Dictionary<FFTcpClient, ReadResponse> _success;
-        protected Dictionary<FFTcpClient, ReadResponse> _failures;
+        protected Dictionary<FFNetworkClient, ReadResponse> _success;
+        protected Dictionary<FFNetworkClient, ReadResponse> _failures;
 
-        internal SentBroadcastRequest(MessageData a_data,
+        internal SentBroadcastRequest(List<int> a_ids, 
+                                MessageData a_data,
                                 string a_channel,
                                 long a_requestId,
                                 bool a_isMandatory = true,
@@ -38,31 +39,32 @@ namespace FF.Handler
                                 float a_timeoutDuration = 5f)
         {
             _messageSentCount = 0;
-            _sentForClients = new Dictionary<FFTcpClient, bool>();
-            _messageForClients = new Dictionary<FFTcpClient, SentRequest>();
-            _success = new Dictionary<FFTcpClient, ReadResponse>();
-            _failures = new Dictionary<FFTcpClient, ReadResponse>();
+            _sentForClients = new Dictionary<FFNetworkClient, bool>();
+            _messageForClients = new Dictionary<FFNetworkClient, SentRequest>();
+            _success = new Dictionary<FFNetworkClient, ReadResponse>();
+            _failures = new Dictionary<FFNetworkClient, ReadResponse>();
 
-            foreach (FFTcpClient each in Engine.Network.Server.Clients.Values)
+            foreach (int id in a_ids)
             {
-                if (each != null)
+                FFNetworkClient client = Engine.Network.GameServer.ClientForId(id);
+                /*if (client != null && client.IsConnected)
+                {*/
+                if (a_isHandleByMock || client != Engine.Network.TcpServer.LoopbackClient)
                 {
-                    if (a_isHandleByMock || each != Engine.Network.Server.LoopbackClient)
-                    {
-                        SentRequest request = new SentRequest(a_data,
-                                                               a_channel,
-                                                               a_requestId,
-                                                               a_timeoutDuration,
-                                                               a_isMandatory,
-                                                               a_isHandleByMock);
-                        SentRequestForClient messageForClient = new SentRequestForClient(request);
-                        messageForClient.onMessageSent += OnMessageSent;
-                        messageForClient.onSuccess += OnSuccess;
-                        messageForClient.onFail += OnFailure;
-                        _sentForClients.Add(each, false);
-                        _messageForClients.Add(each, request);
-                    }
+                    SentRequest request = new SentRequest(a_data,
+                                                            a_channel,
+                                                            a_requestId,
+                                                            a_timeoutDuration,
+                                                            a_isMandatory,
+                                                            a_isHandleByMock);
+                    SentRequestForClient messageForClient = new SentRequestForClient(request);
+                    messageForClient.onMessageSent += OnMessageSent;
+                    messageForClient.onSuccess += OnSuccess;
+                    messageForClient.onFail += OnFailure;
+                    _sentForClients.Add(client, false);
+                    _messageForClients.Add(client, request);
                 }
+                //}
             }
         }
 
@@ -79,9 +81,15 @@ namespace FF.Handler
                 Complete();
             }
 
-            foreach (KeyValuePair<FFTcpClient, SentRequest> pair in _messageForClients)
+            foreach (KeyValuePair<FFNetworkClient, SentRequest> pair in _messageForClients)
             {
                 pair.Key.QueueRequest(pair.Value);
+
+                if (!pair.Key.IsConnected)
+                {
+                    OnMessageSent(pair.Value);
+                    OnFailure(ERequestErrorCode.Timeout, null, pair.Value);
+                }
             }
         }
 

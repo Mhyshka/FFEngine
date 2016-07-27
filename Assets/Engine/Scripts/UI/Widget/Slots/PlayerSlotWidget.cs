@@ -77,7 +77,7 @@ namespace FF.UI
             }
             else
             {
-                if (a_player.ID == Engine.Network.NetworkID)
+                if (a_player.ID == Engine.Network.NetworkId)
                 {
                     SetSelf(a_player);
                 }
@@ -136,8 +136,11 @@ namespace FF.UI
         protected void SetDCed(FFNetworkPlayer a_player)
         {
             usernameLabel.text = a_player.player.username;
+
+            if(dcedState != _currentState)
+                _dcedTimeElapsed = 0f;
+
             LoadState(dcedState);
-            _dcedTimeElapsed = 0f;
             SetTimeDCed();
         }
 

@@ -50,11 +50,11 @@ namespace FF.Pong
             {
                 each.gameObject.SetActive(false);
             }
-            for (int i = 0; i < a_room.teams[GameConstants.BLUE_TEAM_INDEX].Players.Count; i++)
+            for (int i = 0; i < a_room.Teams[GameConstants.BLUE_TEAM_INDEX].Players.Count; i++)
             {
 
                 leftSidePlayers[i].gameObject.SetActive(true);
-                leftSidePlayers[i].SetPlayer(a_room.teams[GameConstants.BLUE_TEAM_INDEX].Players[i]);
+                leftSidePlayers[i].SetPlayer(a_room.Teams[GameConstants.BLUE_TEAM_INDEX].Players[i]);
             }
 
 
@@ -63,11 +63,11 @@ namespace FF.Pong
             {
                 each.gameObject.SetActive(false);
             }
-            for (int i = 0; i < a_room.teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count; i++)
+            for (int i = 0; i < a_room.Teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count; i++)
             {
 
                 rightSidePlayers[i].gameObject.SetActive(true);
-                rightSidePlayers[i].SetPlayer(a_room.teams[GameConstants.PURPLE_TEAM_INDEX].Players[i]);
+                rightSidePlayers[i].SetPlayer(a_room.Teams[GameConstants.PURPLE_TEAM_INDEX].Players[i]);
             }
 
             successWidget.Prepare();

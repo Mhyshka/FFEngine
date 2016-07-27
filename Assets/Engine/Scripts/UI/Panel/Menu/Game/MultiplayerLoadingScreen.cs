@@ -1,0 +1,146 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+using FF.Network;
+using FF.Multiplayer;
+using FF.Logic;
+
+namespace FF.UI
+{
+    internal class MultiplayerLoadingScreen : LoadingScreen
+    {
+        #region Inspector Properties
+        public UILabel tipLabel = null;
+        public GameObject loadingSlotPrefab = null;
+        public GameObject widgetVerticalLayout = null;
+        public UIGrid playersGrid = null;
+        #endregion
+
+        #region Properties
+        protected Dictionary<int, FFLoadingSlotWidget> _slotWidgetsById = null;
+        protected List<int> _loadingCompleteForPlayer = null;
+        #endregion
+
+        protected override void Awake()
+        {
+            base.Awake();
+            _slotWidgetsById = new Dictionary<int, FFLoadingSlotWidget>();
+            _loadingCompleteForPlayer = new List<int>();
+        }
+
+        internal override void Show(bool a_isForward = true)
+        {
+            ClearLoading();
+            base.Show(a_isForward);
+        }
+
+        #region Row Management
+        internal void PrepareView()
+        {
+            foreach (FFNetworkPlayer each in Engine.Network.CurrentRoom.Players.Values)
+            {
+                GameObject newSlotGo = GameObject.Instantiate(loadingSlotPrefab);
+
+                FFLoadingSlotWidget slotWidget = newSlotGo.GetComponent<FFLoadingSlotWidget>();
+                if (slotWidget != null)
+                {
+                    if (each.isDced)
+                        slotWidget.SetDCed(each);
+                    else
+                        slotWidget.SetLoading(each);
+
+                    slotWidget.kickButton.Data = each;
+
+                    playersGrid.AddChild(newSlotGo.transform);
+                    newSlotGo.transform.localRotation = Quaternion.identity;
+                    newSlotGo.transform.localScale = Vector3.one;
+                    
+                    _slotWidgetsById.Add(each.ID, slotWidget);
+                }
+            }
+            playersGrid.Reposition();
+        }
+
+        internal void ClearLoading()
+        {
+            foreach (FFLoadingSlotWidget each in _slotWidgetsById.Values)
+            {
+                Destroy(each.gameObject);
+            }
+            _slotWidgetsById.Clear();
+        }
+
+        internal void RemovePlayer(int a_id)
+        {
+            FFLoadingSlotWidget target = SlotForId(a_id);
+            //TODO
+            _slotWidgetsById.Remove(target.Player.ID);
+            if (target != null)
+                Destroy(target.gameObject);
+            playersGrid.Reposition();
+        }
+        #endregion
+
+        internal FFLoadingSlotWidget SlotForId(int a_networkId)
+        {
+            FFLoadingSlotWidget slot = null;
+            _slotWidgetsById.TryGetValue(a_networkId, out slot);
+            return slot;
+        }
+
+        internal void UpdateWithRoom(Room a_room, PlayerDictionary<PlayerLoadingWrapper> a_playersLoadingStates)
+        {
+            foreach (KeyValuePair<int, FFNetworkPlayer> keyVal in a_room.Players)
+            {
+                FFLoadingSlotWidget slot = SlotForId(keyVal.Key);
+                if (slot != null)
+                {
+                    PlayerLoadingWrapper wrapper = null;
+                    if (a_playersLoadingStates.TryGetValue(keyVal.Key, out wrapper))
+                    {
+                        if (keyVal.Value.isDced)
+                        {
+                            slot.SetDCed(keyVal.Value);
+                        }
+                        else if (wrapper.state == ELoadingState.Ready)
+                        {
+                            slot.SetReady(keyVal.Value, wrapper.rank);
+                        }
+                        else if (wrapper.state == ELoadingState.NotReady)
+                        {
+                            slot.SetComplete(keyVal.Value, wrapper.rank);
+                        }
+                    }
+                }
+            }
+
+            List<int> toRemove = new List<int>();
+            foreach (int id in _slotWidgetsById.Keys)
+            {
+                if (!a_room.Players.ContainsKey(id))
+                {
+                    toRemove.Add(id);
+                }
+            }
+
+            foreach (int each in toRemove)
+            {
+                RemovePlayer(each);
+            }
+        }
+
+        internal void SetTip(string a_tip)
+        {
+            tipLabel.text = a_tip;
+        }
+
+        /// <summary>
+        /// Call this when you'd like to preview the game in the background
+        /// </summary>
+        internal void SetLoadingComplete()
+        {
+            animator.SetTrigger("Complete");
+        }
+	}
+}

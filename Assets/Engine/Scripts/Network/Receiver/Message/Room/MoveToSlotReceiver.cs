@@ -22,7 +22,7 @@ namespace FF.Network.Receiver
                     MessageSlotRefData data = _message.Data as MessageSlotRefData;
 
                     SentResponse answer = null;
-                    FFNetworkPlayer source = Engine.Game.CurrentRoom.GetPlayerForId(_client.NetworkID);
+                    FFNetworkPlayer source = Engine.Network.CurrentRoom.PlayerForId(_client.NetworkID);
 
                     ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
@@ -43,7 +43,7 @@ namespace FF.Network.Receiver
                                                     request.RequestId,
                                                     errorCode);
                     }
-                    else if (Engine.Game.CurrentRoom.teams[data.SlotRef.teamIndex].Slots[data.SlotRef.slotIndex].netPlayer != null)
+                    else if (Engine.Network.CurrentRoom.GetPlayerForSlot(data.SlotRef) != null)
                     {
                         errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeMoveToSlot.SlotIsUsed;
@@ -53,7 +53,7 @@ namespace FF.Network.Receiver
                     }
                     else
                     {
-                        Engine.Game.CurrentRoom.MovePlayer(source.SlotRef, data.SlotRef);
+                        Engine.Network.CurrentRoom.MovePlayer(source.SlotRef, data.SlotRef);
                         errorCode = ERequestErrorCode.Success;
                         answer = new SentResponse(new MessageEmptyData(),
                                                     request.RequestId,

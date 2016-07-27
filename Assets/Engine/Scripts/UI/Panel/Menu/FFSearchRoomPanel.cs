@@ -12,10 +12,10 @@ namespace FF.UI
 		private Dictionary<Room, FFRoomCellWidget> roomsCells = new Dictionary<Room, FFRoomCellWidget>();
 		public GameObject hostCellPrefab = null;
 		public GameObject list = null;
-		#endregion
+        public IPEndpointInput directConnectInputField = null;
+        #endregion
 
-
-		internal void ClearRoomsCells ()
+        internal void ClearRoomsCells ()
 		{
 			foreach (Room aRoom in roomsCells.Keys) 
 			{
@@ -24,7 +24,6 @@ namespace FF.UI
 			}
 			roomsCells.Clear ();
 		}
-
 
 		internal void AddRoom (Room a_room)
 		{
@@ -75,5 +74,9 @@ namespace FF.UI
                 roomsCells.Remove(a_room);
             }
 		}
+
+        
+
+      
 	}
 }

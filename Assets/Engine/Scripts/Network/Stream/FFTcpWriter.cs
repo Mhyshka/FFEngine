@@ -14,26 +14,54 @@ namespace FF.Network
 {
 	internal class FFTcpWriter : FFTcpStreamThread
 	{
-		#region Properties
-		protected Queue<SentMessage> _toSendMessages;
+
+        #region Properties
+        protected AutoResetEvent _waitHandler = null;
+        protected Queue<SentMessage> _toSendMessages;
 
         protected SentMessage _finalMessageRef = null;
-		#endregion
-		
-		internal FFTcpWriter(FFTcpClient a_ffClient) : base(a_ffClient)
+
+
+        protected SimpleCallback _onConnectionLost = null;
+
+        protected Thread _heartbeatThread = null;
+        #endregion
+
+        internal FFTcpWriter(FFNetworkClient a_ffClient, SimpleCallback a_onConnectionLost) : base(a_ffClient)
 		{
 			_toSendMessages = new Queue<SentMessage>();
+            _onConnectionLost = a_onConnectionLost;
         }
-		
-		#region Message
-		internal void QueueMessage(SentMessage a_message)
+
+        internal override void Start()
+        {
+            _waitHandler = new AutoResetEvent(false);
+            base.Start();
+            if (_heartbeatThread == null || !_heartbeatThread.IsAlive)
+            {
+                _heartbeatThread = new Thread(new ThreadStart(HeartbeatTask));
+                _heartbeatThread.IsBackground = true;
+                _heartbeatThread.Start();
+            }
+        }
+
+        internal override void Stop()
+        {
+            base.Stop();
+            if(_waitHandler != null)
+                _waitHandler.Set();
+        }
+
+        #region Message
+        internal void QueueMessage(SentMessage a_message)
 		{
 			FFLog.Log(EDbgCat.Socket,"Queue message");
 			lock(_toSendMessages)
 			{
 				_toSendMessages.Enqueue(a_message);
 			}
-		}
+            _waitHandler.Set();
+        }
 
         internal void QueueFinalMessage(SentMessage a_message)
         {
@@ -44,6 +72,7 @@ namespace FF.Network
                 _toSendMessages.Enqueue(a_message);
             }
             _finalMessageRef = a_message;
+            _waitHandler.Set();
         }
         #endregion
 
@@ -52,59 +81,87 @@ namespace FF.Network
 		{
 			try
 			{
-				//FFLog.Log(EDbgCat.Networking, "Start Writing : " + a_message.ToString() + " to " + _ffClient.Remote.ToString());
+				FFLog.Log(EDbgCat.NetworkSerialization, "Start Writing : " + a_message.ToString() + " to " + _ffClient.Remote.ToString());
 				byte[] messageData = a_message.Serialize();
 				
 				int length = messageData.Length;
 				messageData = messageData.Insert(BitConverter.GetBytes(length),0);
 
                 Client.GetStream().Write(messageData, 0, messageData.Length);
-				//FFLog.Log(EDbgCat.Networking, "End Writing : " + messageData.Length);
+				FFLog.Log(EDbgCat.NetworkSerialization, "End Writing : " + messageData.Length);
 				return true;
 			}
 			catch(IOException e)
 			{
-				FFLog.LogError(EDbgCat.Socket, "Couldn't write to stream." + e.Message);
+                FFLog.LogError("Couldn't write to stream." + e.Message);
+                FFLog.LogError(EDbgCat.Socket, "Couldn't write to stream." + e.Message);
 				return false;
 			}
 		}
-		
+
+        protected void HeartbeatTask()
+        {
+            while (_shouldRun && _ffClient != null && _ffClient.Clock != null)
+            {
+                _ffClient.Clock.UpdateHeartbeat();
+                Thread.Sleep(50);
+            }
+        }
+
 		protected override void Task()
 		{
-			while(_shouldRun && Client != null && Client.Connected && _stream != null && _stream.CanWrite)
+            while (_shouldRun && Client != null && _stream != null && _stream.CanWrite)
 			{
-				if(_shouldRun && _toSendMessages.Count > 0)
+                if (_ffClient.Clock.IsTimedout)
+                {
+                    _crashed = true;
+                    break;
+                }
+
+                _waitHandler.WaitOne();
+                if (_shouldRun && _toSendMessages.Count > 0)
 				{
                     SentMessage toSend;
-                    lock (_toSendMessages)
+                    while (_toSendMessages.Count > 0)
                     {
-                        toSend = _toSendMessages.Peek();
+                        lock (_toSendMessages)
+                        {
+                            toSend = _toSendMessages.Peek();
+                        }
+                        if (!TrySendMessage(toSend))
+                        {
+                            _shouldRun = false;
+                            break;
+                        }
                     }
-                    if (TrySendMessage(toSend))
-                        break;
                 }
-				else
-				{
-					Thread.Sleep(0);
-				}
 			}
-			FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
+            if (_crashed && _onConnectionLost != null)
+                _onConnectionLost();
+            _thread = null;
+
+            FFLog.LogError(EDbgCat.Socket, "Stoping Writer Thread");
 		}
 
         protected bool TrySendMessage(SentMessage toSend)
         {
-            if (Write(toSend) || !toSend.IsMandatory)
+            if (Write(toSend))
             {
-                _ffClient.QueueWrittenMessage(toSend);
-                if (_finalMessageRef == toSend)
-                    return true;
-
                 lock (_toSendMessages)
                 {
                     _toSendMessages.Dequeue();
                 }
+                _ffClient.QueueWrittenMessage(toSend);
+                if (_finalMessageRef == toSend)
+                    return false;//Final message
             }
-            return false;
+            else
+            {
+                _crashed = true;
+                //Couldn't send message
+                return false;
+            }
+            return true;
         }
 		#endregion
 	}

@@ -19,7 +19,7 @@ namespace FF.Network
 
         #region Network
         internal GenericMessageReceiver _receiver;
-
+/*
         void Awake()
         {
             _receiver = new GenericMessageReceiver(OnMessageReceived);
@@ -34,10 +34,10 @@ namespace FF.Network
         void OnMessageReceived(ReadMessage a_message)
         {
             MessageBallMovementData data = a_message.Data as MessageBallMovementData;
-            Vector3 ballPosition = data.position;
-            ballPosition += data.velocity * (float)a_message.Client.TimeOffset(a_message.Timestamp).TotalSeconds;
+            float timeOffset = (float)a_message.Client.Clock.TimeOffset(a_message.Timestamp).TotalSeconds;
+            Vector3 ballPosition = data.position + data.velocity * timeOffset;
             ball.RefreshMovement(ballPosition, data.velocity);
-        }
+        }*/
         #endregion
     }
 }

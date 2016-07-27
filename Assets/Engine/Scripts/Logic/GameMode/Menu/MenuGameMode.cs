@@ -24,7 +24,8 @@ namespace FF
         protected virtual void OnBackPressed()
         {
             AMenuGameState state = CurrentState as AMenuGameState;
-            state.GoBack();
+            if(state != null)
+                state.GoBack();
         }
 
 		internal void GoBack()

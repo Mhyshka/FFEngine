@@ -3,6 +3,8 @@ using System.Collections;
 
 using FF.Logic;
 using System;
+using FF.Network.Message;
+using FF.Network.Receiver;
 
 namespace FF.Pong
 {
@@ -17,6 +19,9 @@ namespace FF.Pong
         protected RacketMotor _serviceRacket;
         protected float _ratio = 0f;
         protected float _timeOffset = 0f;
+
+
+        protected GenericMessageReceiver _serviceLaunchReceiver = null;
         #endregion
 
         internal override int ID
@@ -39,9 +44,12 @@ namespace FF.Pong
         internal override void Enter()
         {
             base.Enter();
-            _serviceRacket = _pongGm.Board.RacketForId(_pongGm.serviceClientId);
-            _pongGm.CurrentRound.strikerId = ServiceRacket.clientId;
+            _serviceRacket = _pongGm.Board.RacketForId(_pongGm.serverPlayerId);
+            _pongGm.CurrentRound.strikerId = ServiceRacket.PlayerId;
             _ratio = 0f;
+
+            if (_serviceLaunchReceiver == null)
+                _serviceLaunchReceiver = new GenericMessageReceiver(OnServiceLaunchReceived);
         }
 
         internal override int Manage()
@@ -69,6 +77,7 @@ namespace FF.Pong
             {
                 ServiceRacket.onTrySmash += OnServicePlayerSmash;
             }
+            Engine.Receiver.RegisterReceiver(EMessageChannel.ServiceLaunch.ToString(), _serviceLaunchReceiver);
         }
 
         protected override void UnregisterForEvent()
@@ -78,23 +87,39 @@ namespace FF.Pong
             {
                 ServiceRacket.onTrySmash -= OnServicePlayerSmash;
             }
+            Engine.Receiver.UnregisterReceiver(EMessageChannel.ServiceLaunch.ToString(), _serviceLaunchReceiver);
         }
-        #endregion
 
-        protected abstract void OnServicePlayerSmash();
+        protected virtual void OnServiceLaunchReceived(ReadMessage a_message)
+        {
+            _pongGm.ball.NetworkLaunch(a_message);
+            RequestState((int)EPongGameState.Gameplay);
+        }
+
+        #endregion
 
         protected void UpdateBallPosition()
         {
             float offset = 0f;
             if (ServiceRacket.side == ESide.Left)
             {
-                offset = _ratio * ServiceRacket.maxOffsetX * 2f - ServiceRacket.maxOffsetX;
+                offset = _ratio * RacketMotor.Settings.serviceMaxOffsetX * 2f - RacketMotor.Settings.serviceMaxOffsetX;
             }
             else if (ServiceRacket.side == ESide.Right)
             {
-                offset = (1 - _ratio) * ServiceRacket.maxOffsetX * 2f - ServiceRacket.maxOffsetX;
+                offset = (1 - _ratio) * RacketMotor.Settings.serviceMaxOffsetX * 2f - RacketMotor.Settings.serviceMaxOffsetX;
             }
             _pongGm.ball.SetServiceOffsetX(offset);
+        }
+
+
+        protected virtual void OnServicePlayerSmash()
+        {
+            float signedRatio = _ratio * 2f - 1f;
+
+            _pongGm.ball.LocalLaunch(signedRatio,
+                                    ServiceRacket.side);
+            RequestState((int)EPongGameState.Gameplay);
         }
     }
 }

@@ -36,10 +36,13 @@ namespace FF.Pong
             foreach (RacketMotor each in blueRackets)
             {
                 _rackets.Add(each);
+                each.side = ESide.Left;
             }
             foreach (RacketMotor each in purpleRackets)
             {
                 _rackets.Add(each);
+
+                each.side = ESide.Right;
             }
 
             PongGameMode pgm = Engine.Game.CurrentGameMode as PongGameMode;
@@ -50,7 +53,7 @@ namespace FF.Pong
         {
             foreach (RacketMotor each in Rackets)
             {
-                if (each.clientId == a_id)
+                if (each.PlayerId == a_id)
                     return each;
             }
 

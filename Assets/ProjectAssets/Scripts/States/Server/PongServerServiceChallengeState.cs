@@ -2,6 +2,7 @@
 
 using FF.Multiplayer;
 
+using FF.Handler;
 using FF.Network.Message;
 using FF.Network.Receiver;
 
@@ -28,33 +29,13 @@ namespace FF.Pong
                 _readyReceiver = new GenericMessageReceiver(OnReadyReceived);
 
             _playersReady = new PlayerDictionary<bool>();
-            _bounceCount = Random.Range(minBounces, maxBounces);
+            _bounceCount = 1;//Random.Range(minBounces, maxBounces);
 
             MessageIntegerData data = new MessageIntegerData(_bounceCount);
-            SentMessage message = new SentMessage(data,
-                                                    EMessageChannel.ChallengeInfos.ToString());
-            Engine.Network.Server.BroadcastMessage(message);
-        }
-
-        internal override int Manage()
-        {
-            bool isEveryoneReady = true;
-            foreach (bool each in _playersReady.Values)
-            {
-                isEveryoneReady = isEveryoneReady && each;
-            }
-
-            if (isEveryoneReady)
-            {
-                RequestState(outState.ID);
-            }
-
-            return base.Manage();
-        }
-
-        internal override void Exit()
-        {
-            base.Exit();
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    data,
+                                                                    EMessageChannel.ChallengeInfos.ToString());
+            message.Broadcast();
         }
         #endregion
 
@@ -74,13 +55,35 @@ namespace FF.Pong
         protected void OnReadyReceived(ReadMessage a_message)
         {
             _playersReady[a_message.Client.NetworkID] = true;
+
+            bool isEveryoneReady = true;
+            foreach (bool each in _playersReady.Values)
+            {
+                isEveryoneReady = isEveryoneReady && each;
+            }
+
+            if (isEveryoneReady)
+            {
+                RequestState(outState.ID);
+            }
         }
         #endregion
 
         protected override void OnAnimationComplete()
         {
             base.OnAnimationComplete();
-            _playersReady[Engine.Network.NetworkID] = true;
+            _playersReady[Engine.Network.NetworkId] = true;
+
+            bool isEveryoneReady = true;
+            foreach (bool each in _playersReady.Values)
+            {
+                isEveryoneReady = isEveryoneReady && each;
+            }
+
+            if (isEveryoneReady)
+            {
+                RequestState(outState.ID);
+            }
         }
     }
 }

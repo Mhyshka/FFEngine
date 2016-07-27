@@ -24,7 +24,7 @@ namespace FF.Network.Receiver
                     SentResponse answer = null;
                     ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
-                    Room room = Engine.Game.CurrentRoom;
+                    Room room = Engine.Network.CurrentRoom;
 
                     if (!_client.IsConnected)
                     {
@@ -34,7 +34,7 @@ namespace FF.Network.Receiver
                                                     request.RequestId,
                                                     errorCode);
                     }
-                    else if (Engine.Network.Server == null)
+                    else if (Engine.Network.TcpServer == null)
                     {
                         errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.ToServerOnly;
@@ -42,7 +42,7 @@ namespace FF.Network.Receiver
                                                     request.RequestId,
                                                     errorCode);
                     }
-                    else if (room.IsBanned(_client.NetworkID))
+                    else if (room.IsBanned(_client.Remote.Address))
                     {
                         errorCode = ERequestErrorCode.Failed;
                         detailErrorCode = (int)EErrorCodeJoinRoom.PlayerIsBannedFromRoom;
@@ -61,8 +61,8 @@ namespace FF.Network.Receiver
                     else
                     {
                         Slot nextSlot = room.NextAvailableSlot();
-                        data.Player.IpEndPoint = _client.Remote;
-                        Engine.Game.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, data.Player);
+                        data.Player.ID = _client.NetworkID;
+                        Engine.Network.CurrentRoom.SetPlayer(nextSlot.team.teamIndex, nextSlot.slotIndex, data.Player);
                         answer = new SentResponse(new MessageEmptyData(),
                                                     request.RequestId,
                                                     ERequestErrorCode.Success);

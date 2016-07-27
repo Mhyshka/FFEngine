@@ -46,7 +46,7 @@ namespace FF.Pong
 
         protected void OnChallengeCompleteReceived(ReadMessage a_message)
         {
-            _pongGm.ServiceTimestamp = a_message.Client.ConvertToLocalTime(a_message.Timestamp);
+            _pongGm.ServiceTimestamp = a_message.Client.Clock.ConvertRemoteToLocalTime(a_message.Timestamp);
             RequestState(outState.ID);
         }
         #endregion

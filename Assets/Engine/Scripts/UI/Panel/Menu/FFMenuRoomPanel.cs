@@ -4,6 +4,8 @@ using System.Collections;
 using FF.Network;
 using FF.Multiplayer;
 
+using System.Net;
+
 namespace FF.UI
 {
 	[System.Serializable]
@@ -18,6 +20,7 @@ namespace FF.UI
         #region Inspector Properties
         public UIButton startButton = null;
 		public UILabel roomNameLabel = null;
+        public UILabel roomEndpointLabel = null;
 		public UITeamRef[] teams = null;
         #endregion
 
@@ -104,10 +107,10 @@ namespace FF.UI
 			
 			for(int i = 0 ; i < teams.Length ; i++)
 			{
-                teams[i].teamNameLabel.text = a_room.teams[i].teamName;
+                teams[i].teamNameLabel.text = a_room.Teams[i].teamName;
 				for(int j = 0 ; j < teams[i].slots.Length ; j++)
 				{
-					teams[i].slots[j].SetPlayer(a_room.teams[i].Slots[j].netPlayer);
+					teams[i].slots[j].SetPlayer(a_room.Teams[i].Slots[j].netPlayer);
 				}
 			}
 
@@ -139,6 +142,11 @@ namespace FF.UI
                     startButton.gameObject.SetActive(false);
                 }
             }
+        }
+
+        internal void SetRoomEndpoint(IPEndPoint a_endpoint)
+        {
+            roomEndpointLabel.text = a_endpoint.ToString();
         }
 	}
 }

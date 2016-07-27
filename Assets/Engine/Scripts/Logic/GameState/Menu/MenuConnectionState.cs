@@ -28,9 +28,9 @@ namespace FF
             base.Enter();
             FFLog.Log(EDbgCat.Logic, "Waiting State enter.");
 
-            FFNetworkPlayer player = Engine.Game.NetPlayer;
+            FFNetworkPlayer player = new FFNetworkPlayer(-1, Engine.Game.Player);
 
-            MessagePlayerData data = new MessagePlayerData(Engine.Game.NetPlayer);
+            MessagePlayerData data = new MessagePlayerData(player);
             SentRequest request = new SentRequest(data,
                                                   EMessageChannel.JoinRoom.ToString(),
                                                   Engine.Network.NextRequestId,
@@ -39,7 +39,7 @@ namespace FF
             request.onFail += OnFail;
             Engine.Network.MainClient.QueueRequest(request);
 
-            _popupId = FFLoadingPopup.RequestDisplay("Joining " + Engine.Game.CurrentRoom.roomName, "Cancel", null, false);
+            _popupId = FFLoadingPopup.RequestDisplay("Joining " + Engine.Network.CurrentRoom.roomName, "Cancel", null, false);
         }
 
         internal override void Exit()
@@ -53,11 +53,15 @@ namespace FF
         protected override void RegisterForEvent()
         {
             base.RegisterForEvent();
+            if(Engine.Network.MainClient != null)
+                Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
         }
 
         protected override void UnregisterForEvent()
         {
             base.UnregisterForEvent();
+            if (Engine.Network.MainClient != null)
+                Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
         }
         #endregion
 
@@ -83,13 +87,12 @@ namespace FF
             }
 
             FFMessageToast.RequestDisplay("Couldn't join room : " + message);
-            Engine.Network.SetNoMainClient();
+            Engine.Network.LeaveCurrentRoom();
             GoBack();
         }
 
         protected void OnSuccess(ReadResponse a_response)
         {
-            Engine.Network.StopLookingForGames();
             RequestState(outState.ID);
         }
 
@@ -102,5 +105,11 @@ namespace FF
             GoBack();*/
         }
         #endregion
+
+        protected void OnConnectionEnded(FFNetworkClient a_client)
+        {
+            Engine.Network.LeaveCurrentRoom();
+            GoBack();
+        }
     }
 }

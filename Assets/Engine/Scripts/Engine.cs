@@ -30,8 +30,8 @@ namespace FF
 		private UIManager _uiManager;
 		internal static UIManager UI{get{return s_instance._uiManager;}}
 		
-		private ServerInputManager _inputManager;
-		internal static ServerInputManager Inputs {get{return s_instance._inputManager;}}
+		private InputManager _inputManager;
+		internal static InputManager Inputs {get{return s_instance._inputManager;}}
 		
 		private NetworkStatusManager _networkStatusManager;
 		internal static NetworkStatusManager NetworkStatus{get{return s_instance._networkStatusManager;}}
@@ -72,7 +72,7 @@ namespace FF
             _networkManager = new NetworkManager();
             _managers.Add(_networkManager);
 
-            _inputManager = new ServerInputManager(true);
+            _inputManager = new InputManager(true);
             _managers.Add(_inputManager);
 
             _multiscreenManager = new MultiscreenManager();

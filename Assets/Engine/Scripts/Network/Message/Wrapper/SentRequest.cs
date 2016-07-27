@@ -70,7 +70,8 @@ namespace FF.Network.Message
         internal bool CheckForTimeout(float a_delta)
         {
             _timeElapsed += a_delta;
-            return _timeElapsed >= TimeoutDuration;
+            return TimeoutDuration > 0f &&
+                    _timeElapsed >= TimeoutDuration;
         }
         #endregion
 
@@ -101,8 +102,12 @@ namespace FF.Network.Message
         internal ReadResponseCallback onSucces = null;
         internal void OnSuccess(ReadResponse a_response)
         {
-            if (onSucces != null)
-                onSucces(a_response);
+            ReadResponseCallback copy = onSucces;
+            onSucces = null;
+
+            if (copy != null)
+                copy(a_response);
+
             OnComplete();
         }
         #endregion
@@ -111,8 +116,11 @@ namespace FF.Network.Message
         internal RequestFailCallback onFail = null;
         internal void OnFail(ERequestErrorCode a_errorCode, ReadResponse a_response)
         {
-            if (onFail != null)
-                onFail(a_errorCode, a_response);
+            RequestFailCallback copy = onFail;
+            onFail = null;
+
+            if (copy != null)
+                copy(a_errorCode, a_response);
 
             OnComplete();
         }
@@ -125,7 +133,7 @@ namespace FF.Network.Message
             base.PostWrite();
         }
 
-        protected virtual void OnConnectionLost(FFTcpClient a_client)
+        protected virtual void OnConnectionLost(FFNetworkClient a_client)
         {
             OnFail(ERequestErrorCode.Canceled, null);
         }

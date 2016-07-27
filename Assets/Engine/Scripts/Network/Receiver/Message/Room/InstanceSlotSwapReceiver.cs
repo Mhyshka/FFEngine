@@ -10,7 +10,7 @@ namespace FF.Network.Receiver
     internal class InstanceSlotSwapReceiver : BaseMessageReceiver
     {
         #region Properties
-        protected FFTcpClient _targetClient = null;
+        protected FFNetworkClient _targetClient = null;
 
         protected ReadRequest _request;
         protected MessageSlotRefData _slotRefData;
@@ -36,12 +36,12 @@ namespace FF.Network.Receiver
                     ERequestErrorCode errorCode = ERequestErrorCode.Canceled;
                     int detailErrorCode = -1;
 
-                    FFNetworkPlayer source = Engine.Game.CurrentRoom.GetPlayerForId(_client.NetworkID);
-                    Slot ffSlot = Engine.Game.CurrentRoom.GetSlotForRef(_slotRefData.SlotRef);
+                    FFNetworkPlayer source = Engine.Network.CurrentRoom.PlayerForId(_client.NetworkID);
+                    Slot ffSlot = Engine.Network.CurrentRoom.GetSlotForRef(_slotRefData.SlotRef);
                     FFNetworkPlayer target = ffSlot.netPlayer;
                     _targetClient = null;
                     if (target != null)
-                        _targetClient = Engine.Network.Server.ClientForEP(target.IpEndPoint);
+                        _targetClient = Engine.Network.GameServer.ClientForId(target.ID);
 
                     if (!_client.IsConnected)
                     {
@@ -62,7 +62,7 @@ namespace FF.Network.Receiver
                     else if (target == null)
                     {
                         //No player in the targeted slot -> Move the requesting player to the slot.
-                        Engine.Game.CurrentRoom.MovePlayer(source.SlotRef, _slotRefData.SlotRef);
+                        Engine.Network.CurrentRoom.MovePlayer(source.SlotRef, _slotRefData.SlotRef);
                         errorCode = ERequestErrorCode.Success;
                         answer = new SentResponse(new MessageEmptyData(),
                                                     _request.RequestId,
@@ -79,8 +79,8 @@ namespace FF.Network.Receiver
                     else
                     {
                         _request.onCanceled += OnCancelReceived;
-                        _client.onConnectionLost += ServerOnConnectionLost;
-                        _targetClient.onConnectionLost += ServerOnConnectionLost;
+                        _client.onConnectionEnded += ServerOnConnectionLost;
+                        _targetClient.onConnectionEnded += ServerOnConnectionLost;
                         _confirmRequest = new SentRequest(new MessageStringData(source.player.username),
                                                                     EMessageChannel.SwapConfirm.ToString(),
                                                                     Engine.Network.NextRequestId,
@@ -101,7 +101,7 @@ namespace FF.Network.Receiver
             }
         }
 
-        protected void ServerOnConnectionLost(FFTcpClient a_client)
+        protected void ServerOnConnectionLost(FFNetworkClient a_client)
         {
             _client.onConnectionLost -= ServerOnConnectionLost;
             _targetClient.onConnectionLost -= ServerOnConnectionLost;
@@ -124,8 +124,8 @@ namespace FF.Network.Receiver
         #region Callbacks
         protected void OnSuccess(ReadResponse a_response)
         {
-            FFNetworkPlayer source = Engine.Game.CurrentRoom.GetPlayerForId(_client.NetworkID);
-            Engine.Game.CurrentRoom.SwapPlayers(source.SlotRef, _slotRefData.SlotRef);
+            FFNetworkPlayer source = Engine.Network.CurrentRoom.PlayerForId(_client.NetworkID);
+            Engine.Network.CurrentRoom.SwapPlayers(source.SlotRef, _slotRefData.SlotRef);
 
             SentResponse response = new SentResponse(a_response.Data,
                                                      _request.RequestId,

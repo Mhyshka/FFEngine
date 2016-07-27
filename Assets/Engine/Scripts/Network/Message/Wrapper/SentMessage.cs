@@ -59,10 +59,11 @@ namespace FF.Network.Message
 
         internal virtual void PostWrite()
         {
-            if (onMessageSent != null)
-                onMessageSent();
-
+            SimpleCallback copy = onMessageSent;
             onMessageSent = null;
+
+            if (copy != null)
+                copy();
 
             if (IsCompleteOnSent)
                 OnComplete();
@@ -87,7 +88,7 @@ namespace FF.Network.Message
             Data.SerializeData(stream);
 
             stream.Close();
-            FFLog.Log(EDbgCat.Serialization, "Serializing Request type : " + Data.Type.ToString());
+            FFLog.Log(EDbgCat.NetworkSerialization, "Serializing Request type : " + Data.Type.ToString());
             return stream.Data;
         }
         #endregion

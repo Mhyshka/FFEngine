@@ -63,7 +63,7 @@ namespace FF.Pong
             ESide side = _pongGm.Score.WinningSide;
 
             _resultpanel.SetResult(_pongGm.Score.WinningSide,
-                                    Engine.Game.CurrentRoom);
+                                    Engine.Network.CurrentRoom);
 
             Queue<SuccessContent> successQueue = new Queue<SuccessContent>();
 

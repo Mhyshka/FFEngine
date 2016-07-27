@@ -11,7 +11,7 @@ namespace FF.Network
 	internal abstract class FFTcpStreamThread
 	{
 		#region Properties
-		protected FFTcpClient _ffClient = null;
+		protected FFNetworkClient _ffClient = null;
 		protected TcpClient Client
 		{
 			get
@@ -25,15 +25,17 @@ namespace FF.Network
         protected Thread _thread = null;
 		
 		protected bool _shouldRun = false;
-		#endregion
-		
-		internal FFTcpStreamThread(FFTcpClient a_ffClient)
+
+        protected bool _crashed = false;
+        #endregion
+
+        internal FFTcpStreamThread(FFNetworkClient a_ffClient)
 		{
 			_ffClient = a_ffClient;
 		}
-		
-		#region Start & Stop
-		internal virtual void Start()
+
+        #region Start & Stop
+        internal virtual void Start()
 		{
 			if(_thread == null || !_thread.IsAlive)
 			{
@@ -42,7 +44,8 @@ namespace FF.Network
 				_shouldRun = true;
                 _stream = Client.GetStream();
                 _thread.Start();
-			}
+                _crashed = false;
+            }
 			else
 			{
 				FFLog.LogError(EDbgCat.Networking, "Reader thread is already running.");
@@ -56,6 +59,7 @@ namespace FF.Network
 
         internal virtual void Close()
         {
+            
         }
 		#endregion
 		

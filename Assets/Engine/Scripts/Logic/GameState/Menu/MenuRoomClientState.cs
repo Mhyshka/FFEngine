@@ -46,8 +46,9 @@ namespace FF
 
             _roomPanel = Engine.UI.GetPanel("MenuRoomPanel") as FFMenuRoomPanel;
             _roomPanel.TrySelectWidget();
-			_roomPanel.UpdateWithRoom(Engine.Game.CurrentRoom);
-			_navigationPanel.SetTitle ("Game Lobby");
+			_roomPanel.UpdateWithRoom(Engine.Network.CurrentRoom);
+            _roomPanel.SetRoomEndpoint(Engine.Network.CurrentRoom.serverEndPoint);
+            _navigationPanel.SetTitle ("Game Lobby");
 
             OnLanStatusChanged(Engine.NetworkStatus.IsConnectedToLan);
 
@@ -79,7 +80,6 @@ namespace FF
         internal override void GoBack()
         {
             base.GoBack();
-            Engine.Inputs.DisableClientMode();
         }
         #endregion
 
@@ -91,10 +91,11 @@ namespace FF
 
             Engine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
 
-            Engine.Game.CurrentRoom.onRoomUpdated += OnRoomUpdate;
-            Engine.Network.MainClient.onConnectionSuccess += OnReconnection;
+            Engine.Network.CurrentRoom.onRoomUpdated += OnRoomUpdate;
+            Engine.Network.MainClient.onReconnection += OnReconnection;
             Engine.Network.MainClient.onConnectionLost += OnConnectionLost;
             Engine.Network.MainClient.onConnectionEnded += OnConnectionEnded;
+            Engine.Network.MainClient.Clock.onLatencyUpdate += OnLatencyUpdate;
 
             Engine.Receiver.RegisterReceiver(EMessageChannel.RemovedFromRoom.ToString(), _removedFromRoomReceiver);
             Engine.Receiver.RegisterReceiver(EMessageChannel.SwapConfirm.ToString(), _confirmSwapReceiver);
@@ -102,7 +103,12 @@ namespace FF
 
             Engine.Inputs.PushOnBackCallback(QuitRoom);
         }
-		
+
+        protected void OnLatencyUpdate(FFNetworkClient a_client, float a_latency)
+        {
+            EntryPoint.s_latency = a_latency;
+        }
+
 		protected override void UnregisterForEvent ()
 		{
 			base.UnregisterForEvent ();
@@ -110,10 +116,14 @@ namespace FF
 
             Engine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
 
+            if (Engine.Network.CurrentRoom != null)
+            {
+                Engine.Network.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
+            }
+
             if (Engine.Network.MainClient != null)
             {
-                Engine.Game.CurrentRoom.onRoomUpdated -= OnRoomUpdate;
-                Engine.Network.MainClient.onConnectionSuccess -= OnReconnection;
+                Engine.Network.MainClient.onReconnection -= OnReconnection;
                 Engine.Network.MainClient.onConnectionLost -= OnConnectionLost;
                 Engine.Network.MainClient.onConnectionEnded -= OnConnectionEnded;
             }
@@ -146,29 +156,32 @@ namespace FF
         #endregion
 
         #region Client Callbacks
-        protected void OnConnectionLost(FFTcpClient a_client)
+        protected void OnConnectionLost(FFNetworkClient a_client)
         {
-            _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel, UIManager.POPUP_PRIO_HIGH);
+            if (_connectionLostPopupId == -1)
+            {
+                _connectionLostPopupId = FFConnectionLostPopup.RequestDisplay(OnConnectionLostPopupCancel, UIManager.POPUP_PRIO_HIGH);
+            }
         }
 
-        protected void OnReconnection(FFTcpClient a_client)
+        protected void OnReconnection()
         {
             Engine.UI.DismissPopup(_connectionLostPopupId);
             _connectionLostPopupId = -1;
             Engine.UI.HideSpecificPanel("WifiWarningPanel");
         }
 
-        protected void OnConnectionEnded(FFTcpClient a_client, string a_reason)
+        protected void OnConnectionEnded(FFNetworkClient a_client)
         {
-            Engine.Network.SetNoMainClient();
-            FFMessagePopup.RequestDisplay("Connection ended : " + a_reason, "Ok", null);
+            Engine.Network.LeaveCurrentRoom();
+            FFMessagePopup.RequestDisplay("Connection ended.", "Ok", null);
             GoBack();
         }
 
         protected void OnConnectionLostPopupCancel()
         {
-            KillClient();
             Engine.UI.DismissPopup(_connectionLostPopupId);
+            Engine.Network.LeaveCurrentRoom();
             _connectionLostPopupId = -1;
             GoBack();
         }
@@ -178,10 +191,10 @@ namespace FF
         internal void OnSlotSelected(FFEventParameter a_args)
 		{
 			SlotRef selectedSlot = (SlotRef)a_args.data;
-            FFNetworkPlayer player = Engine.Game.CurrentRoom.GetPlayerForSlot(selectedSlot);
+            FFNetworkPlayer player = Engine.Network.CurrentRoom.GetPlayerForSlot(selectedSlot);
             if (player != null)
             {
-                if(player.ID != Engine.Game.NetPlayer.ID)
+                if(player.ID != Engine.Network.NetworkId)
                     _slotOptionPopupId = FFClientSlotOptionPopup.RequestDisplay(player, OnPlayerOptionSwap, null);
             }
             else
@@ -242,14 +255,14 @@ namespace FF
 
         internal void OnKickReceived()
         {
-            KillClient();
+            Engine.Network.LeaveCurrentRoom();
             FFMessagePopup.RequestDisplay("Kicked by server.", "Sorry", null);
             GoBack();
         }
 
         internal void OnBanReceived()
         {
-            KillClient();
+            Engine.Network.LeaveCurrentRoom();
             FFMessagePopup.RequestDisplay("Banned by server.", "Sorry", null);
             GoBack();
         }
@@ -317,24 +330,21 @@ namespace FF
         SentMessage _leavingMessage = null;
         protected void QuitRoom()
         {
-            _leavingMessage = new SentMessage(new MessageEmptyData(),
+            if (Engine.Network.MainClient != null)
+            {
+                _leavingMessage = new SentMessage(new MessageEmptyData(),
                                                 EMessageChannel.LeavingRoom.ToString());
-            _leavingMessage.onMessageSent += OnLeavingRoomSent;
-            Engine.Network.MainClient.QueueFinalMessage(_leavingMessage);
+                _leavingMessage.onMessageSent += OnLeavingRoomSent;
+
+                Engine.Network.MainClient.QueueFinalMessage(_leavingMessage);
+            }
         }
 
         protected void OnLeavingRoomSent()
         {
-            KillClient();
+            Engine.Network.LeaveCurrentRoom();
             _leavingMessage.onMessageSent -= OnLeavingRoomSent;
             GoBack();
-        }
-        #endregion
-
-        #region Stop
-        protected void KillClient()
-        {
-            Engine.Network.CloseMainClient();
         }
         #endregion
 

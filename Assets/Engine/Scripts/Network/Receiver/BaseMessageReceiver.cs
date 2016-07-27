@@ -9,7 +9,7 @@ namespace FF.Network.Receiver
     internal abstract class BaseMessageReceiver : BaseReceiver
     {
         #region Properties
-        protected FFTcpClient _client;
+        protected FFNetworkClient _client;
         protected ReadMessage _message;
         #endregion
 

@@ -65,14 +65,14 @@ namespace FF.Pong
                 _currentBounceValue++;
                 if (i % 2 == 0)//Left Side
                 {
-                    _blueTeamIndex = (_blueTeamIndex + 1) % Engine.Game.CurrentRoom.teams[GameConstants.BLUE_TEAM_INDEX].Players.Count;
-                    _currentRacketId = _pongGm.Board.blueRackets[_blueTeamIndex].clientId;
+                    _blueTeamIndex = (_blueTeamIndex + 1) % Engine.Network.CurrentRoom.Teams[GameConstants.BLUE_TEAM_INDEX].Players.Count;
+                    _currentRacketId = _pongGm.Board.blueRackets[_blueTeamIndex].PlayerId;
                     _pongGm.ball.SnapToLocator(_pongGm.Board.blueRackets[_blueTeamIndex].ballSnapLocator);
                 }
                 else//Right Side
                 {
-                    _purpleTeamIndex = (_purpleTeamIndex + 1) % Engine.Game.CurrentRoom.teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count;
-                    _currentRacketId = _pongGm.Board.purpleRackets[_purpleTeamIndex].clientId;
+                    _purpleTeamIndex = (_purpleTeamIndex + 1) % Engine.Network.CurrentRoom.Teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count;
+                    _currentRacketId = _pongGm.Board.purpleRackets[_purpleTeamIndex].PlayerId;
                     _pongGm.ball.SnapToLocator(_pongGm.Board.purpleRackets[_purpleTeamIndex].ballSnapLocator);
                 }
             }
@@ -88,14 +88,16 @@ namespace FF.Pong
             _currentBounceValue++;
             if (_currentBounceValue % 2 == 0)//Left Side
             {
-                _blueTeamIndex = (_blueTeamIndex + 1) % Engine.Game.CurrentRoom.teams[GameConstants.BLUE_TEAM_INDEX].Players.Count;
-                _currentRacketId = _pongGm.Board.blueRackets[_blueTeamIndex].clientId;
+                int bluePlayerCount = Mathf.Max(1, Engine.Network.CurrentRoom.Teams[GameConstants.BLUE_TEAM_INDEX].Players.Count);
+                _blueTeamIndex = (_blueTeamIndex + 1) % bluePlayerCount;
+                _currentRacketId = _pongGm.Board.blueRackets[_blueTeamIndex].PlayerId;
                 _pongGm.ball.SnapToLocator(_pongGm.Board.blueRackets[_blueTeamIndex].ballSnapLocator);
             }
             else//Right Side
             {
-                _purpleTeamIndex = (_purpleTeamIndex + 1) % Engine.Game.CurrentRoom.teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count;
-                _currentRacketId = _pongGm.Board.purpleRackets[_purpleTeamIndex].clientId;
+                int bluePlayerCount = Mathf.Max(1, Engine.Network.CurrentRoom.Teams[GameConstants.PURPLE_TEAM_INDEX].Players.Count);
+                _purpleTeamIndex = (_purpleTeamIndex + 1) % bluePlayerCount;
+                _currentRacketId = _pongGm.Board.purpleRackets[_purpleTeamIndex].PlayerId;
                 _pongGm.ball.SnapToLocator(_pongGm.Board.purpleRackets[_purpleTeamIndex].ballSnapLocator);
             }
 
@@ -104,7 +106,7 @@ namespace FF.Pong
 
         protected virtual void OnAnimationComplete()
         {
-            _pongGm.serviceClientId = _currentRacketId;
+            _pongGm.serverPlayerId = _currentRacketId;
         }
     }
 }

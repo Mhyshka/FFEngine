@@ -12,7 +12,7 @@ namespace FF.Network.Receiver
         {
             ReadRequest request = _message as ReadRequest;
             SentResponse response;
-            if (!Engine.Game.NetPlayer.IsBusy)
+            if (!Engine.Network.NetPlayer.IsBusy)
             {
                 response = new SentResponse(new MessageEmptyData(),
                                             request.RequestId,

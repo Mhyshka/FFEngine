@@ -32,7 +32,8 @@ namespace FF.Logic
         {
             if (_networkCheck == null && AllPlayersReady)
             {
-                _networkCheck = new SentBroadcastRequest(new MessageEmptyData(),
+                _networkCheck = new SentBroadcastRequest(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                        new MessageEmptyData(),
                                                         EMessageChannel.IsAlive.ToString(),
                                                         Engine.Network.NextRequestId,
                                                         true,
@@ -80,8 +81,7 @@ namespace FF.Logic
 
         protected void OnKickConfirm()
         {
-            Engine.Network.Server.RemoveLostClient(_kickTarget.ID);
-            Engine.Game.CurrentRoom.RemovePlayer(_kickTarget.ID);
+            Engine.Network.CurrentRoom.RemovePlayer(_kickTarget.ID);
             Engine.UI.DismissPopup(_kickConfirmPopup);
         }
 
@@ -93,7 +93,7 @@ namespace FF.Logic
 
         protected void OnLoadingCompleteReceived()
         {
-            OnRoomUpdate(Engine.Game.CurrentRoom);
+            OnRoomUpdate(Engine.Network.CurrentRoom);
         }
 
         protected override void OnLoadingComplete()
@@ -103,11 +103,11 @@ namespace FF.Logic
                                                  EMessageChannel.LoadingComplete.ToString(),
                                                  true,
                                                  true);
-            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(message);
+            Engine.Network.TcpServer.LoopbackClient.Mirror.QueueMessage(message);
         }
         #endregion
 
-        protected void OnNetworkCheckResult(Dictionary<FFTcpClient, ReadResponse> a_success, Dictionary<FFTcpClient, ReadResponse> a_failures)
+        protected void OnNetworkCheckResult(Dictionary<FFNetworkClient, ReadResponse> a_success, Dictionary<FFNetworkClient, ReadResponse> a_failures)
         {
             if (a_failures.Count > 0)
             {
@@ -122,11 +122,12 @@ namespace FF.Logic
         protected void OnNetworkCheckSuccess()
         {
             _allPlayerReadyStep.SetComplete();
-            SentMessage message = new SentMessage(new MessageEmptyData(),
-                                                    EMessageChannel.LoadingComplete.ToString(),
-                                                    true,
-                                                    false);
-            Engine.Network.Server.BroadcastMessage(message);
+            SentBroadcastMessage broadcast = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(), 
+                                                                    new MessageEmptyData(),
+                                                                    EMessageChannel.LoadingComplete.ToString(),
+                                                                    true,
+                                                                    false);
+            broadcast.Broadcast();
             RequestState(outState.ID);
         }
 
@@ -153,7 +154,7 @@ namespace FF.Logic
                 foreach (KeyValuePair<int, PlayerLoadingWrapper> each in loadingWrappers)
                 {
                     isReady = isReady && each.Value.state == UI.ELoadingState.Ready;//Ready
-                    isReady = isReady && !Engine.Game.CurrentRoom.GetPlayerForId(each.Key).isDced;//Dced
+                    isReady = isReady && !Engine.Network.CurrentRoom.PlayerForId(each.Key).isDced;//Dced
                 }
 
                 return isReady;

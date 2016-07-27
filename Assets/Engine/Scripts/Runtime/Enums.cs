@@ -19,6 +19,7 @@ namespace FF
 		GameRoomHost,
 		GameRoomClient,
 		WifiCheck,
+        DirectConnect,
         Connecting,
 		Settings
 	}

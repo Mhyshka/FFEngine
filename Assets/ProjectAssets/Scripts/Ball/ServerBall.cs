@@ -2,21 +2,19 @@
 using System.Collections;
 using FF.Network;
 
+using FF.Handler;
 using FF.Network.Message;
+using System;
 
 namespace FF.Pong
 {
     internal class ServerBall : ABall
     {
-        #region Inspector Properties
-        public SynchronizedServerBallMovement synchronizedMovement = null;
-        #endregion
-
         #region Properties
 
         #endregion
 
-        protected void OnTriggerEnter(Collider a_other)
+        internal override void OnTriggerEnter(Collider a_other)
         {
             IBallContact contact = a_other.GetComponent<IBallContact>();
             if (contact != null)
@@ -26,58 +24,84 @@ namespace FF.Pong
                             transform.position,
                             a_other.transform.forward);
                 lightManager.OnHit();
+                
+                RacketCollider racket = contact as RacketCollider;
 
-                Vector3 velocity = contact.BounceOff(transform.position, ballRigidbody.velocity);
-                SetVelocity(velocity);
+                //FFLog.LogError("Contact GO : " + contact.ToString());
+                if (racket == null ||
+                    _lastLocalHitInfo.playerId != racket.motor.PlayerId)
+                {
+                    Vector3 velocity = contact.BounceOff(transform.position, ballRigidbody.velocity);
+                    SetVelocity(velocity);
 
-                SentMessage message = new SentMessage(new MessageBallCollisionData(transform.position, a_other.transform.forward),
-                                                        EMessageChannel.BallCollision.ToString(),
-                                                        false);
-                Engine.Network.Server.BroadcastMessage(message);
+                    if (racket != null)
+                    {
+                        _lastLocalHitInfo.playerId = racket.motor.PlayerId;
+                        _lastLocalHitInfo.position = transform.position;
+                        _lastLocalHitInfo.velocity = velocity;
+                        _lastLocalHitInfo.timestamp = DateTime.Now.Ticks;
+                    }
+
+                    //Is Local Racket
+                    if (racket != null &&
+                        racket.motor.PlayerId == Engine.Network.NetPlayer.ID)
+                    {
+                        BroadcastNetworkMovementMessage();
+                    }
+                }
 
                 contact.OnCollision(this);
             }
         }
 
-
-        internal override void SetVelocity(Vector3 a_velocity)
+        internal override void ForceNetworkMovementSync()
         {
-            base.SetVelocity(a_velocity);
-            synchronizedMovement.UpdateNow(transform.position, a_velocity);
+            BroadcastNetworkMovementMessage();
         }
 
-        internal override void OnRacketHit(RacketMotor a_motor)
+        protected void BroadcastNetworkMovementMessage()
         {
-            base.OnRacketHit(a_motor);
-            MessageIntegerData data = new MessageIntegerData(a_motor.clientId);
-            SentMessage message = new SentMessage(data,
-                                                  EMessageChannel.RacketHit.ToString(),
-                                                  false);
-            Engine.Network.Server.BroadcastMessage(message);
+            MessageBallMovementData collisionData = new MessageBallMovementData(Engine.Network.NetPlayer.ID,
+                                                                                transform.position,
+                                                                                ballRigidbody.velocity);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    collisionData,
+                                                                    EMessageChannel.BallMovement.ToString(),
+                                                                    true);
+            message.Broadcast();
         }
 
-        internal override void OnGoal(ESide a_side)
+        internal void OnGoal(ESide a_side)
         {
-            base.OnGoal(a_side);
+            if (onGoal != null)
+                onGoal(a_side);
+
             MessageIntegerData data = new MessageIntegerData((int)a_side);
-            SentMessage message = new SentMessage(data,
-                                                  EMessageChannel.GoalHit.ToString(),
-                                                  false);
-            Engine.Network.Server.BroadcastMessage(message);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    data,
+                                                                    EMessageChannel.GoalHit.ToString(),
+                                                                    true);
+            message.Broadcast();
         }
 
-        internal override void Smash()
+        internal override void PostSmash()
         {
-            base.Smash();
+            base.PostSmash();
 
-            _smashCount++;
+            /*_smashCount++;
             SetVelocity(ballRigidbody.velocity * (1 + _smashCount * smashSpeedMultiplier));
 
             MessageIntegerData data = new MessageIntegerData(_smashCount);
-            SentMessage message = new SentMessage(data,
-                                                  EMessageChannel.Smash.ToString(),
-                                                  false);
-            Engine.Network.Server.BroadcastMessage(message);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                    data,
+                                                    EMessageChannel.Smash.ToString(),
+                                                    true);
+            message.Broadcast();*/
         }
+
+        /*protected override void OnRacketHitReceived(ReadMessage a_message)
+        {
+            throw new NotImplementedException();
+        }*/
     }
 }

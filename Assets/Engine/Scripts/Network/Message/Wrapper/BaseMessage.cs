@@ -20,6 +20,7 @@ internal enum EMessageChannel
     LoadingProgress,
 
     Farewell,
+    VersionCompatibility,
     NetworkId,
     Heartbeat,
     IsAlive,
@@ -34,11 +35,10 @@ internal enum EMessageChannel
     SwapConfirm,
 
     ChallengeInfos,
-    ServiceRatio,
+    ServiceLaunch,
 
     RacketPosition,
     BallMovement,
-    BallCollision,
     RacketHit,
     GoalHit,
     TrySmash,
@@ -63,8 +63,8 @@ namespace FF.Network.Message
             }
         }
 
-        protected FFTcpClient _client;
-        internal FFTcpClient Client
+        protected FFNetworkClient _client;
+        internal FFNetworkClient Client
         {
             get
             {

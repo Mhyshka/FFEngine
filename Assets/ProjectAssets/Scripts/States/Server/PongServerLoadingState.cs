@@ -20,7 +20,7 @@ namespace FF.Pong
                                                     EMessageChannel.LoadingReady.ToString(),
                                                     true,
                                                     true);
-            Engine.Network.Server.LoopbackClient.Mirror.QueueMessage(message);
+            Engine.Network.TcpServer.LoopbackClient.Mirror.QueueMessage(message);
         }
         #endregion
     }

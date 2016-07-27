@@ -6,7 +6,7 @@ using FF.Network;
 using FF.Network.Message;
 using FF.Network.Receiver;
 using FF.Multiplayer;
-using System;
+using FF.Handler;
 
 namespace FF.Logic
 {
@@ -70,29 +70,31 @@ namespace FF.Logic
             _loadingCompleteReceiver = null;
         }
 
-        internal void OnLoadingCompleteReceived(FFTcpClient a_client)
+        internal void OnLoadingCompleteReceived(FFNetworkClient a_client)
         {
             _finishedCount++;
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.NotReady;
             _playersLoadingState[a_client.NetworkID].rank = _finishedCount;
 
             MessageLoadingProgressData loadingProgressData = new MessageLoadingProgressData(_playersLoadingState);
-            SentMessage message = new SentMessage(loadingProgressData,
-                                                    EMessageChannel.LoadingProgress.ToString());
-            Engine.Network.Server.BroadcastMessage(message);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    loadingProgressData,
+                                                                    EMessageChannel.LoadingProgress.ToString());
+            message.Broadcast();
 
             if (onLoadingCompleteReceived != null)
                 onLoadingCompleteReceived();
         }
 
-        internal void OnPlayerReadyReceived(FFTcpClient a_client)
+        internal void OnPlayerReadyReceived(FFNetworkClient a_client)
         {
             _playersLoadingState[a_client.NetworkID].state = UI.ELoadingState.Ready;
 
             MessageLoadingProgressData loadingProgressData = new MessageLoadingProgressData(_playersLoadingState);
-            SentMessage message = new SentMessage(loadingProgressData,
-                                                    EMessageChannel.LoadingProgress.ToString());
-            Engine.Network.Server.BroadcastMessage(message);
+            SentBroadcastMessage message = new SentBroadcastMessage(Engine.Network.CurrentRoom.GetPlayersIds(),
+                                                                    loadingProgressData,
+                                                                    EMessageChannel.LoadingProgress.ToString());
+            message.Broadcast();
 
             if (onLoadingCompleteReceived != null)
                 onLoadingCompleteReceived();

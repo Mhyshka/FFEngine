@@ -6,7 +6,7 @@ namespace FF.Network.Message
 {
     internal class MessageBoolData : MessageData
     {
-        internal bool _value = false;
+        protected bool _value = false;
         internal bool Data
         {
             get

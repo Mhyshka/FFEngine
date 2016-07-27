@@ -6,7 +6,7 @@ using FF.Network;
 
 namespace FF
 {
-	internal class NetworkGameMode : MenuGameMode
+	internal class NetworkGameMode : AGameMode
 	{
         #region Properties
         internal override int ID

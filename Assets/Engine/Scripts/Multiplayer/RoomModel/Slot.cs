@@ -14,6 +14,14 @@ namespace FF.Multiplayer
 		
 		internal Team team;
         internal bool isPlayableSlot = true;
+
+        internal bool IsSpectator
+        {
+            get
+            {
+                return !isPlayableSlot;
+            }
+        }
 		#endregion
 		
 		public Slot()

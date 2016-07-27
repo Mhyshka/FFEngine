@@ -263,6 +263,26 @@ namespace FF
 
             return list;
         }
+
+        internal int[] TryReadIntArray()
+        {
+            int length = TryReadInt();
+            int[] array = new int[length];
+            try
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    int val = TryReadInt();
+                    array[i] = val;
+                }
+            }
+            catch
+            {
+                FFLog.LogError("Couldn't read int[] from stream");
+            }
+
+            return array;
+        }
         #endregion
 
         #region Unity

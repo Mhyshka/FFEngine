@@ -63,15 +63,13 @@ namespace FF
 			{
 				_navigationPanel.SetTitle ("Looking for games");
 
-                if (!Engine.Network.IsLookingForRoom)// Not yet looking for room.
+                if (!Engine.Network.ClientRoomManager.IsLookingForRoom)// Not yet looking for room.
                 {
-                    _searchRoomPanel.ClearRoomsCells();
                     Engine.Network.StartLookingForGames();
-
-                    Engine.Network.onNewRoomReceived += OnRoomAdded;
-                    Engine.Network.onRoomLost += OnRoomLost;
+                    _searchRoomPanel.ClearRoomsCells();
+                    Engine.Network.ClientRoomManager.onRoomAdded += OnRoomAdded;
+                    Engine.Network.ClientRoomManager.onRoomRemoved += OnRoomLost;
                 }
-
 
                 LoadingIndicatorPanel loadingIndicator = Engine.UI.GetPanel("LoadingIndicatorPanel") as LoadingIndicatorPanel;
                 loadingIndicator.SetDescription("Searching");
@@ -86,22 +84,19 @@ namespace FF
             }
 		}
 
-        internal override void GoBack()
-        {
-            Engine.Network.StopLookingForGames();
-            base.GoBack();
-        }
-
         protected void TearDown()
 		{
             Engine.UI.HideSpecificPanel("LoadingIndicatorPanel");
 
-            if (!Engine.Network.IsLookingForRoom)// Not looking for room anymore.
+            if (Engine.Network.ClientRoomManager.IsLookingForRoom)
             {
+                Engine.Network.StopLookingForGames();
+
                 _searchRoomPanel.ClearRoomsCells();
-                Engine.Network.onNewRoomReceived -= OnRoomAdded;
-                Engine.Network.onRoomLost -= OnRoomLost;
+                Engine.Network.ClientRoomManager.onRoomAdded -= OnRoomAdded;
+                Engine.Network.ClientRoomManager.onRoomRemoved -= OnRoomLost;
             }
+
         }
 		#endregion
 
@@ -110,6 +105,7 @@ namespace FF
 		{
 			base.RegisterForEvent ();
 			Engine.Events.RegisterForEvent(FFEventType.Connect, OnConnectButtonPressed);
+            Engine.Events.RegisterForEvent("DirectConnect", OnDirectConnectPressed);
 
             Engine.NetworkStatus.onLanStatusChanged += OnLanStatusChanged;
         }
@@ -118,11 +114,12 @@ namespace FF
 		{
 			base.UnregisterForEvent ();
 			Engine.Events.UnregisterForEvent(FFEventType.Connect, OnConnectButtonPressed);
+            Engine.Events.UnregisterForEvent("DirectConnect", OnDirectConnectPressed);
 
             Engine.NetworkStatus.onLanStatusChanged -= OnLanStatusChanged;
         }
 		
-		internal void OnConnectButtonPressed(FFEventParameter a_args)
+		void OnConnectButtonPressed(FFEventParameter a_args)
 		{
             if (a_args.data == null)
             {
@@ -130,25 +127,43 @@ namespace FF
                 return;
             }
 
-            _searchRoomPanel.ClearRoomsCells();
-
 			Room selectedRoom = a_args.data as Room;
-            Engine.Network.SetMainClient(selectedRoom);
+            Engine.Network.JoinRoom(selectedRoom.serverEndPoint);
 
             RequestState(outState.ID);
 		}
-		#endregion
-		
-		#region List Management
-		internal void OnRoomAdded (Room aRoom)
+
+        void OnDirectConnectPressed(FFEventParameter a_args)
+        {
+            if (_searchRoomPanel.directConnectInputField.IsValid)
+            {
+                string input = _searchRoomPanel.directConnectInputField.Value;
+                string ipString = input.Substring(0, input.Length - 6);
+                string portString = input.Substring(input.Length - 5, 5);
+
+                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(ipString), int.Parse(portString));
+                MenuDirectConnectState directCoState = _gameMode.StateForId((int)EMenuStateID.DirectConnect) as MenuDirectConnectState;
+                directCoState.targetEndpoint = endpoint;
+
+                RequestState((int)EMenuStateID.DirectConnect);
+            }
+            else
+            {
+                FFMessageToast.RequestDisplay("IP Endpoint is invalid.");
+            }
+        }
+        #endregion
+
+        #region List Management
+        internal void OnRoomAdded (Room aRoom)
 		{
             FFLog.LogError(EDbgCat.Logic,"Room added");
 			_searchRoomPanel.AddRoom (aRoom);
 
-            FFTcpClient serverClient = null;
-            if (Engine.Network.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
+            FFClientWrapper serverClient = null;
+            if (Engine.Network.ClientRoomManager.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
             {
-                serverClient.onLatencyUpdate += OnLatencyUpdate;
+                serverClient.Clock.onLatencyUpdate += OnLatencyUpdate;
             }
         }
 		
@@ -157,14 +172,14 @@ namespace FF
 			_searchRoomPanel.RemoveRoom (aRoom);
             _navigationPanel.FocusBackButton();
 
-            FFTcpClient serverClient = null;
-            if (Engine.Network.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
+            FFClientWrapper serverClient = null;
+            if (Engine.Network.ClientRoomManager.Clients.TryGetValue(aRoom.serverEndPoint, out serverClient))
             {
-                serverClient.onLatencyUpdate -= OnLatencyUpdate;
+                serverClient.Clock.onLatencyUpdate -= OnLatencyUpdate;
             }
         }
 
-        protected void OnLatencyUpdate(FFTcpClient a_client, double a_latency)
+        protected void OnLatencyUpdate(FFNetworkClient a_client, float a_latency)
         {
             FFRoomCellWidget widget = _searchRoomPanel.RoomWidgetForEP(a_client.Remote);
             if(widget != null)
@@ -179,7 +194,6 @@ namespace FF
             }
             else
             {
-                Engine.Network.StopLookingForGames();
                 TearDown();
                 Engine.UI.RequestDisplay("WifiWarningPanel");
             }
@@ -190,14 +204,12 @@ namespace FF
 		internal override void OnPause ()
 		{
 			base.OnPause ();
-            Engine.Network.StopLookingForGames();
             TearDown();
 		}
 		
 		internal override void OnResume ()
 		{
 			base.OnResume ();
-
             ResetState();
 		}
 		#endregion
